@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Generator, List
 
 import requests
 from iamcore.irn import IRN
@@ -7,7 +7,8 @@ from requests import Response
 from iamcore.client.common import to_snake_case, to_dict, SortOrder, generic_search_all, IamEntityResponse, \
     IamEntitiesResponse
 from iamcore.client.conf import IAMCORE_URL
-from iamcore.client.exceptions import err_chain, IAMException, unwrap_post, unwrap_get
+from iamcore.client.exceptions import err_chain, IAMException, unwrap_post, unwrap_get, IAMUnauthorizedException, \
+    unwrap_put
 
 
 class IAMEntityBase(object):
@@ -67,6 +68,28 @@ def get_application(headers: dict[str, str], irn: str) -> Application:
     url = IAMCORE_URL + "/api/v1/applications/" + str(irn)
     response: Response = requests.request("GET", url, data="", headers=headers)
     return IamEntityResponse(Application, **unwrap_get(response)).data
+
+
+@err_chain(IAMException)
+def application_attach_policies(auth_headers: dict[str, str], application_id: str, policies_ids: List[str]):
+    if not auth_headers:
+        raise IAMUnauthorizedException(f"Missing authorization headers")
+    if not application_id:
+        raise IAMException(f"Missing user_id")
+    if not policies_ids or not isinstance(policies_ids, list):
+        raise IAMException(f"Missing policies_ids or it's not a list")
+
+    url = IAMCORE_URL + "/api/v1/applications/" + application_id + "/policies/attach"
+    headers = {
+        "Content-Type": "application/json",
+        **auth_headers
+    }
+    payload = {
+        "policyIDs": policies_ids
+    }
+
+    response = requests.request("PUT", url, json=payload, headers=headers)
+    return unwrap_put(response)
 
 
 @err_chain(IAMException)
