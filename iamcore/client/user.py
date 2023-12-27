@@ -119,6 +119,18 @@ def get_user_me(auth_headers: dict[str, str]) -> User:
 
 
 @err_chain(IAMUserException)
+def get_irn(auth_headers: dict[str, str]) -> IRN:
+    url = IAMCORE_URL + "/api/v1/users/me/irn"
+    headers = {
+        "Content-Type": "application/json",
+        **auth_headers
+    }
+    response: Response = requests.request("GET", url, data="", headers=headers)
+    irn_str = IamEntityResponse(str, **unwrap_get(response)).data
+    return IRN.of(irn_str)
+
+
+@err_chain(IAMUserException)
 def update_user(auth_headers: dict[str, str],
                 user_id: str,
                 payload: Dict[str, str] = None,
