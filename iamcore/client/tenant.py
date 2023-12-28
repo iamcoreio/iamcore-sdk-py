@@ -43,6 +43,39 @@ class Tenant(object):
         return delete_tenant(auth_headers, self.resource_id)
 
 
+class TenantIssuer(object):
+    id: str
+    irn: IRN
+    name: str
+    type: str
+    url: str
+    client_id: str
+    login_url: str
+
+    def __init__(self, irn: str, **kwargs):
+        self.irn = IRN.from_irn_str(irn)
+        for k, v in kwargs.items():
+            attr = to_snake_case(k)
+            setattr(self, attr, v)
+
+    @staticmethod
+    def of(item):
+        if isinstance(item, TenantIssuer):
+            return item
+        elif isinstance(item, dict):
+            return TenantIssuer(**item)
+        raise IAMTenantException(f"Unexpected response format")
+
+    def to_dict(self):
+        return to_dict(self)
+
+    def update(self, auth_headers: dict[str, str]) -> None:
+        return update_tenant(auth_headers, self.resource_id, self.display_name)
+
+    def delete(self, auth_headers: dict[str, str]):
+        return delete_tenant(auth_headers, self.resource_id)
+
+
 @err_chain(IAMTenantException)
 def create_tenant(auth_headers: dict[str, str], payload: dict[str, str] = None,
                   name: str = None, display_name: str = None) -> Tenant:
@@ -93,6 +126,23 @@ def delete_tenant(auth_headers: dict[str, str], resource_id: str) -> None:
     }
     response: Response = requests.request("DELETE", url, data="", headers=headers)
     return unwrap_delete(response)
+
+
+@err_chain(IAMTenantException)
+def get_issuer(
+        headers: dict[str, str],
+        account: str = None,
+        tenant_id: str = None,
+) -> TenantIssuer:
+    url = IAMCORE_URL + "/api/v1/tenants/issuers"
+
+    querystring = {
+        "account": account,
+        "tenant": tenant_id,
+    }
+
+    response: Response = requests.request("GET", url, data="", headers=headers, params=querystring)
+    return IamEntitiesResponse(TenantIssuer, **unwrap_get(response)).data.pop()
 
 
 @err_chain(IAMTenantException)

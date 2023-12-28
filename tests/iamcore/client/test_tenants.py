@@ -1,9 +1,10 @@
 import unittest
 import pytest
+from iamcore.irn import IRN
 
 from iamcore.client.auth import get_token_with_password, TokenResponse
-from iamcore.client.tenant import search_tenant, create_tenant
-from iamcore.client.conf import SYSTEM_BACKEND_CLIENT_ID
+from iamcore.client.tenant import search_tenant, create_tenant, get_issuer
+from iamcore.client.conf import SYSTEM_BACKEND_CLIENT_ID, IAMCORE_ISSUER_URL
 
 from tests.conf import IAMCORE_ROOT_USER, IAMCORE_ROOT_PASSWORD
 
@@ -81,6 +82,18 @@ class CrudTenantsTestCase(unittest.TestCase):
             self.assertTrue(tenants[0].resource_id, tenant.resource_id)
             self.assertTrue(tenants[0].created, tenant.created)
             self.assertTrue(tenants[0].updated, tenant.updated)
+
+    def test_20_issuer_ok(self):
+        tenants = search_tenant(self.root.access_headers, name=self.tenant_name).data
+        self.assertLessEqual(len(tenants), 1)
+        tenant = tenants[0]
+        issuer = get_issuer(self.root.access_headers, "root", tenant.tenant_id)
+        self.assertTrue(issuer)
+        self.assertEqual(str(issuer.irn), str(IRN.of(f'irn:root:iamcore:{tenant.tenant_id}::issuer/iamcore')))
+        self.assertEqual(issuer.url, f"{IAMCORE_ISSUER_URL.strip()}/realms/{tenant.tenant_id}")
+        self.assertEqual(issuer.login_url,
+                         f"{IAMCORE_ISSUER_URL.strip()}/realms/{tenant.tenant_id}/protocol/openid-connect/auth")
+        self.assertTrue(issuer.client_id)
 
     def test_90_cleanup_ok(self):
         tenants = search_tenant(self.root.access_headers, name=self.tenant_name).data
