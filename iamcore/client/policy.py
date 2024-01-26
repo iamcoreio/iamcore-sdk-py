@@ -1,3 +1,4 @@
+import logging
 from typing import List, Generator
 
 import requests
@@ -8,6 +9,9 @@ from iamcore.client.conf import IAMCORE_URL
 from .common import SortOrder, to_dict, generic_search_all, IamEntitiesResponse, IamEntityResponse
 from .exceptions import IAMPolicyException, IAMUnauthorizedException, err_chain, unwrap_post, \
     unwrap_delete, unwrap_get, unwrap_put, IAMException
+
+
+logger = logging.getLogger(__name__)
 
 
 class PolicyStatement(object):
@@ -86,14 +90,19 @@ class Policy(object):
 class CreatePolicyRequest(object):
     name: str
     level: str
+    tenant_id: str
     description: str
     statements: List[PolicyStatement]
 
-    def __init__(self, name: str, level: str, description: str):
+    def __init__(self, name: str, level: str, description: str, tenant_id: str = None):
         self.name = name
         self.level = level
+        self.tenant_id = tenant_id
         self.description = description
         self.statements = []
+        if level == 'tenant' and not tenant_id:
+            logger.warning("Missing tenant_id for tenant level policy")
+
 
     def with_statement(self, effect: str, description: str, resources: List[str], actions: List[str]):
         self.statements.append(PolicyStatement(
@@ -104,11 +113,20 @@ class CreatePolicyRequest(object):
     def create(self, auth_headers: dict[str, str]) -> Policy:
         return create_policy(auth_headers, self)
 
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'level': self.level,
+            'description': self.description,
+            'tenantID': self.tenant_id,
+            'statements': to_dict(self.statements),
+        }
+
 
 @err_chain(IAMPolicyException)
 def create_policy(auth_headers: dict[str, str], payload: CreatePolicyRequest) -> Policy:
     url = IAMCORE_URL + "/api/v1/policies"
-    payload = to_dict(payload)
+    payload = payload.to_dict()
 
     headers = {
         "Content-Type": "application/json",

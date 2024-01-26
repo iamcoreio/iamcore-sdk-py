@@ -1,5 +1,6 @@
 import unittest
 import pytest
+from iamcore.irn import IRN
 
 from iamcore.client.auth import get_token_with_password, TokenResponse
 from iamcore.client.tenant import search_tenant, create_tenant
@@ -19,7 +20,7 @@ def root_token(request):
 def test_user(request):
     request.cls.tenant_name = "iamcore-py-test-policy-tenant"
     request.cls.tenant_display_name = "iamcore_ Python Sdk test policy tenant"
-    request.cls.policy_name = "allow-all-iamcore-py-test-policy-tenant"
+    request.cls.policy_name = "allow-all-iamcore-py-test-policy-CrudUserPoliciesTestCase"
     request.cls.policy_description = "Allow all for iamcore-py-test-policy-tenant tenant"
     request.cls.user_email = "py-test-user@iamcore.io"
     request.cls.user_name = "py-test-user"
@@ -59,10 +60,11 @@ class CrudUserPoliciesTestCase(unittest.TestCase):
             create_tenant(self.root.access_headers, name=self.tenant_name, display_name=self.tenant_display_name)
         self.assertTrue(tenant)
         policies = search_policy(self.root.access_headers, name=self.policy_name).data
+        account = IRN.of(tenant.irn).account_id
         policy = policies[0] if len(policies) > 0 else \
-            CreatePolicyRequest(self.policy_name, 'tenant', self.policy_description) \
+            CreatePolicyRequest(self.policy_name, 'tenant', self.policy_description, tenant_id=tenant.tenant_id) \
                 .with_statement('allow', self.policy_description,
-                                [f"irn:root:iamcore:{tenant.tenant_id}:*"], ['*']) \
+                                [f"irn:{account}:unittest:{tenant.tenant_id}:*"], ['*']) \
                 .create(self.root.access_headers)
         self.assertTrue(policy)
         user = CreateUser(tenant_id=tenant.tenant_id,

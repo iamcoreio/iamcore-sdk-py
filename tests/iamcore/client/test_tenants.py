@@ -87,9 +87,10 @@ class CrudTenantsTestCase(unittest.TestCase):
         tenants = search_tenant(self.root.access_headers, name=self.tenant_name).data
         self.assertLessEqual(len(tenants), 1)
         tenant = tenants[0]
-        issuer = get_issuer(self.root.access_headers, "root", tenant.tenant_id)
+        account = IRN.of(tenant.irn).account_id
+        issuer = get_issuer(self.root.access_headers, account, tenant.tenant_id)
         self.assertTrue(issuer)
-        self.assertEqual(str(issuer.irn), str(IRN.of(f'irn:root:iamcore:{tenant.tenant_id}::issuer/iamcore')))
+        self.assertEqual(str(issuer.irn), str(IRN.of(f'irn:{account}:iamcore:{tenant.tenant_id}::issuer/iamcore')))
         self.assertEqual(issuer.url, f"{IAMCORE_ISSUER_URL.strip()}/realms/{tenant.tenant_id}")
         self.assertEqual(issuer.login_url,
                          f"{IAMCORE_ISSUER_URL.strip()}/realms/{tenant.tenant_id}/protocol/openid-connect/auth")
