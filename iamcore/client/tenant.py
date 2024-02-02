@@ -16,6 +16,7 @@ class Tenant(object):
     tenant_id: str
     name: str
     display_name: str
+    login_theme: str
     created: str
     updated: str
 
@@ -78,12 +79,13 @@ class TenantIssuer(object):
 
 @err_chain(IAMTenantException)
 def create_tenant(auth_headers: dict[str, str], payload: dict[str, str] = None,
-                  name: str = None, display_name: str = None) -> Tenant:
+                  name: str = None, display_name: str = None, login_theme: str = None) -> Tenant:
     url = IAMCORE_URL + "/api/v1/tenants/issuer-types/iamcore"
     if not payload:
         payload = {
             "name": name,
-            "displayName": display_name
+            "displayName": display_name,
+            "loginTheme": login_theme,
         }
     headers = {
         "Content-Type": "application/json",
