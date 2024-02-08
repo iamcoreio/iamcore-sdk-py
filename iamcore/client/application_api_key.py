@@ -5,7 +5,7 @@ from iamcore.irn import IRN
 from requests import Response
 
 from iamcore.client.common import to_snake_case, to_dict, generic_search_all, IamEntitiesResponse
-from iamcore.client.conf import IAMCORE_URL
+from iamcore.client.config import config
 from iamcore.client.exceptions import err_chain, IAMException, unwrap_get
 
 
@@ -43,7 +43,7 @@ def get_application_api_keys(headers: dict[str, str], irn: Union[str, IRN],
     if isinstance(irn, str):
         irn = IRN.of(irn).to_base64()
 
-    url = f"{IAMCORE_URL}/api/v1/applications/{irn}/api-keys?page={page}"
+    url = f"{config.IAMCORE_URL}/api/v1/applications/{irn}/api-keys?page={page}"
     response: Response = requests.request("GET", url, data="", headers=headers)
     return IamEntitiesResponse(ApplicationApiKey, **unwrap_get(response))
 

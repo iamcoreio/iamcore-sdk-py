@@ -4,7 +4,7 @@ from iamcore.irn import IRN
 
 from iamcore.client.auth import get_token_with_password, TokenResponse
 from iamcore.client.tenant import search_tenant, create_tenant
-from iamcore.client.conf import SYSTEM_BACKEND_CLIENT_ID
+from iamcore.client.config import config
 from iamcore.client.policy import search_policy, CreatePolicyRequest
 from iamcore.client.user import CreateUser, user_attach_policies, search_all_users
 from tests.conf import IAMCORE_ROOT_USER, IAMCORE_ROOT_PASSWORD
@@ -12,7 +12,7 @@ from tests.conf import IAMCORE_ROOT_USER, IAMCORE_ROOT_PASSWORD
 
 @pytest.fixture(scope="class")
 def root_token(request):
-    request.cls.root = get_token_with_password("root", SYSTEM_BACKEND_CLIENT_ID,
+    request.cls.root = get_token_with_password("root", config.SYSTEM_BACKEND_CLIENT_ID,
                                                IAMCORE_ROOT_USER, IAMCORE_ROOT_PASSWORD)
 
 

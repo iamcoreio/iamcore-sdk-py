@@ -6,7 +6,7 @@ from requests import Response
 
 from iamcore.client.common import to_snake_case, to_dict, SortOrder, generic_search_all, IamEntityResponse, \
     IamEntitiesResponse
-from iamcore.client.conf import IAMCORE_URL
+from iamcore.client.config import config
 from iamcore.client.exceptions import err_chain, IAMException, unwrap_post, unwrap_get, IAMUnauthorizedException, \
     unwrap_put
 
@@ -49,7 +49,7 @@ class Application(IAMEntityBase):
 @err_chain(IAMException)
 def create_application(auth_headers: dict[str, str], payload: dict[str, str] = None,
                        name: str = None, display_name: str = None) -> Application:
-    url = IAMCORE_URL + "/api/v1/applications"
+    url = config.IAMCORE_URL + "/api/v1/applications"
     if not payload:
         payload = {
             "name": name,
@@ -65,7 +65,7 @@ def create_application(auth_headers: dict[str, str], payload: dict[str, str] = N
 
 @err_chain(IAMException)
 def get_application(headers: dict[str, str], irn: str) -> Application:
-    url = IAMCORE_URL + "/api/v1/applications/" + str(irn)
+    url = config.IAMCORE_URL + "/api/v1/applications/" + str(irn)
     response: Response = requests.request("GET", url, data="", headers=headers)
     return IamEntityResponse(Application, **unwrap_get(response)).data
 
@@ -79,7 +79,7 @@ def application_attach_policies(auth_headers: dict[str, str], application_id: st
     if not policies_ids or not isinstance(policies_ids, list):
         raise IAMException(f"Missing policies_ids or it's not a list")
 
-    url = IAMCORE_URL + "/api/v1/applications/" + application_id + "/policies/attach"
+    url = config.IAMCORE_URL + "/api/v1/applications/" + application_id + "/policies/attach"
     headers = {
         "Content-Type": "application/json",
         **auth_headers
@@ -103,7 +103,7 @@ def search_application(
         sort: str = None,
         sort_order: SortOrder = None
 ) -> IamEntitiesResponse[Application]:
-    url = IAMCORE_URL + "/api/v1/applications"
+    url = config.IAMCORE_URL + "/api/v1/applications"
 
     querystring = {
         "irn": str(irn) if irn else None,

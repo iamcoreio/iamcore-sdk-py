@@ -6,7 +6,7 @@ from iamcore.irn import IRN
 from requests import Response
 
 from iamcore.client.common import to_snake_case, SortOrder, generic_search_all, IamEntityResponse, IamEntitiesResponse
-from iamcore.client.conf import IAMCORE_URL
+from iamcore.client.config import config
 from iamcore.client.exceptions import IAMUnauthorizedException, err_chain, IAMGroupException, IAMException, unwrap_post, \
     unwrap_delete, unwrap_put, unwrap_get
 
@@ -40,7 +40,7 @@ class Group(object):
 def create_group(auth_headers: dict[str, str], payload: dict[str, object] = None,
                  name: str = None, display_name: str = None,
                  tenant_id: str = None, parent_id: str = None) -> Group:
-    url = IAMCORE_URL + "/api/v1/groups"
+    url = config.IAMCORE_URL + "/api/v1/groups"
     if not payload:
         payload = {
             "name": name,
@@ -63,7 +63,7 @@ def delete_group(auth_headers: dict[str, str], group_id: str) -> None:
     if not group_id:
         raise IAMGroupException(f"Missing group_id")
 
-    url = IAMCORE_URL + "/api/v1/groups/" + IRN.of(group_id).to_base64()
+    url = config.IAMCORE_URL + "/api/v1/groups/" + IRN.of(group_id).to_base64()
     headers = {
         "Content-Type": "application/json",
         **auth_headers
@@ -81,7 +81,7 @@ def group_attach_policies(auth_headers: dict[str, str], group_id: str, policies_
     if not policies_ids or not isinstance(policies_ids, list):
         raise IAMGroupException(f"Missing policies_ids or it's not a list")
 
-    url = IAMCORE_URL + "/api/v1/groups/" + group_id + "/policies/attach"
+    url = config.IAMCORE_URL + "/api/v1/groups/" + group_id + "/policies/attach"
     headers = {
         "Content-Type": "application/json",
         **auth_headers
@@ -103,7 +103,7 @@ def group_add_members(auth_headers: dict[str, str], group_id: str, members_ids: 
     if not members_ids or not isinstance(members_ids, list):
         raise IAMGroupException(f"Missing policies_ids or it's not a list")
 
-    url = IAMCORE_URL + "/api/v1/groups/" + group_id + "/members/add"
+    url = config.IAMCORE_URL + "/api/v1/groups/" + group_id + "/members/add"
     headers = {
         "Content-Type": "application/json",
         **auth_headers
@@ -129,7 +129,7 @@ def search_group(
         sort: str = None,
         sort_order: SortOrder = None
 ) -> IamEntitiesResponse[Group]:
-    url = IAMCORE_URL + "/api/v1/groups"
+    url = config.IAMCORE_URL + "/api/v1/groups"
 
     querystring = {
         "irn": str(irn) if irn else None,

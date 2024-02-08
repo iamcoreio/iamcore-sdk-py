@@ -4,7 +4,7 @@ import requests
 from iamcore.irn import IRN
 from requests import Response
 
-from iamcore.client.conf import IAMCORE_URL
+from iamcore.client.config import config
 from .common import SortOrder, to_snake_case, to_dict, generic_search_all, IamEntityResponse, IamEntitiesResponse
 from .exceptions import IAMTenantException, err_chain, unwrap_post, unwrap_put, unwrap_delete, \
     unwrap_get, IAMException
@@ -80,7 +80,7 @@ class TenantIssuer(object):
 @err_chain(IAMTenantException)
 def create_tenant(auth_headers: dict[str, str], payload: dict[str, str] = None,
                   name: str = None, display_name: str = None, login_theme: str = None) -> Tenant:
-    url = IAMCORE_URL + "/api/v1/tenants/issuer-types/iamcore"
+    url = config.IAMCORE_URL + "/api/v1/tenants/issuer-types/iamcore"
     if not payload:
         payload = {
             "name": name,
@@ -102,7 +102,7 @@ def update_tenant(auth_headers: dict[str, str], resource_id: str, display_name: 
     if not resource_id or not display_name:
         raise IAMTenantException(f"Missing resource_id or display_name")
 
-    url = IAMCORE_URL + "/api/v1/tenants/" + IRN.of(resource_id).to_base64()
+    url = config.IAMCORE_URL + "/api/v1/tenants/" + IRN.of(resource_id).to_base64()
     payload = {
         "displayName": display_name
     }
@@ -121,7 +121,7 @@ def delete_tenant(auth_headers: dict[str, str], resource_id: str) -> None:
     if not resource_id:
         raise IAMTenantException(f"Missing resource_id")
 
-    url = IAMCORE_URL + "/api/v1/tenants/" + IRN.of(resource_id).to_base64()
+    url = config.IAMCORE_URL + "/api/v1/tenants/" + IRN.of(resource_id).to_base64()
     headers = {
         "Content-Type": "application/json",
         **auth_headers
@@ -136,7 +136,7 @@ def get_issuer(
         account: str = None,
         tenant_id: str = None,
 ) -> TenantIssuer:
-    url = IAMCORE_URL + "/api/v1/tenants/issuers"
+    url = config.IAMCORE_URL + "/api/v1/tenants/issuers"
 
     querystring = {
         "account": account,
@@ -160,7 +160,7 @@ def search_tenant(
         sort: str = None,
         sort_order: SortOrder = None
 ) -> IamEntitiesResponse[Tenant]:
-    url = IAMCORE_URL + "/api/v1/tenants"
+    url = config.IAMCORE_URL + "/api/v1/tenants"
 
     querystring = {
         "irn": str(irn) if irn else None,

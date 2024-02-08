@@ -7,7 +7,7 @@ from requests import Response
 
 from iamcore.client.common import to_snake_case, SortOrder, to_dict, generic_search_all, IamEntitiesResponse, \
     IamEntityResponse
-from iamcore.client.conf import IAMCORE_URL
+from iamcore.client.config import config
 from iamcore.client.exceptions import IAMUserException, IAMUnauthorizedException, unwrap_patch, IAMException
 from .exceptions import err_chain, unwrap_post, unwrap_put, unwrap_delete, \
     unwrap_get
@@ -86,7 +86,7 @@ def create_user(auth_headers: dict[str, str],
                 password: str = None, confirm_password: str = None,
                 path: str = None
                 ) -> User:
-    url = IAMCORE_URL + "/api/v1/users"
+    url = config.IAMCORE_URL + "/api/v1/users"
     if not payload:
         payload = {
             "tenantId": tenant_id,
@@ -109,7 +109,7 @@ def create_user(auth_headers: dict[str, str],
 
 @err_chain(IAMUserException)
 def get_user_me(auth_headers: dict[str, str]) -> User:
-    url = IAMCORE_URL + "/api/v1/users/me"
+    url = config.IAMCORE_URL + "/api/v1/users/me"
     headers = {
         "Content-Type": "application/json",
         **auth_headers
@@ -120,7 +120,7 @@ def get_user_me(auth_headers: dict[str, str]) -> User:
 
 @err_chain(IAMUserException)
 def get_irn(auth_headers: dict[str, str]) -> IRN:
-    url = IAMCORE_URL + "/api/v1/users/me/irn"
+    url = config.IAMCORE_URL + "/api/v1/users/me/irn"
     headers = {
         "Content-Type": "application/json",
         **auth_headers
@@ -142,7 +142,7 @@ def update_user(auth_headers: dict[str, str],
         raise IAMUnauthorizedException(f"Missing authorization headers")
     if not user_id:
         raise IAMUserException(f"Missing user_id")
-    url = IAMCORE_URL + "/api/v1/users/" + IRN.of(user_id).to_base64()
+    url = config.IAMCORE_URL + "/api/v1/users/" + IRN.of(user_id).to_base64()
     if not payload:
         payload = {
             "firstName": first_name,
@@ -165,7 +165,7 @@ def delete_user(auth_headers: dict[str, str], user_id: str) -> None:
     if not user_id:
         raise IAMUserException(f"Missing user_id")
 
-    url = IAMCORE_URL + "/api/v1/users/" + IRN.of(user_id).to_base64()
+    url = config.IAMCORE_URL + "/api/v1/users/" + IRN.of(user_id).to_base64()
     headers = {
         "Content-Type": "application/json",
         **auth_headers
@@ -183,7 +183,7 @@ def user_attach_policies(auth_headers: dict[str, str], user_id: str, policies_id
     if not policies_ids or not isinstance(policies_ids, list):
         raise IAMUserException(f"Missing policies_ids or it's not a list")
 
-    url = IAMCORE_URL + "/api/v1/users/" + user_id + "/policies/attach"
+    url = config.IAMCORE_URL + "/api/v1/users/" + user_id + "/policies/attach"
     headers = {
         "Content-Type": "application/json",
         **auth_headers
@@ -205,7 +205,7 @@ def user_add_groups(auth_headers: dict[str, str], user_id: str, group_ids: List[
     if not group_ids or not isinstance(group_ids, list):
         raise IAMUserException(f"Missing policies_ids or it's not a list")
 
-    url = IAMCORE_URL + "/api/v1/users/" + user_id + "/groups/add"
+    url = config.IAMCORE_URL + "/api/v1/users/" + user_id + "/groups/add"
     headers = {
         "Content-Type": "application/json",
         **auth_headers
@@ -233,7 +233,7 @@ def search_users(
         sort: str = None,
         sort_order: SortOrder = None
 ) -> IamEntitiesResponse[User]:
-    url = IAMCORE_URL + "/api/v1/users"
+    url = config.IAMCORE_URL + "/api/v1/users"
 
     querystring = {
         "email": email,

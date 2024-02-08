@@ -5,7 +5,7 @@ import requests
 from iamcore.irn import IRN
 from requests import Response
 
-from iamcore.client.conf import IAMCORE_URL
+from iamcore.client.config import config
 from .common import SortOrder, to_dict, generic_search_all, IamEntitiesResponse, IamEntityResponse
 from .exceptions import IAMPolicyException, IAMUnauthorizedException, err_chain, unwrap_post, \
     unwrap_delete, unwrap_get, unwrap_put, IAMException
@@ -71,7 +71,7 @@ class Policy(object):
         if not self.id:
             raise IAMPolicyException(f"Missing resource_id or display_name")
 
-        url = IAMCORE_URL + "/api/v1/policies/" + self.id
+        url = config.IAMCORE_URL + "/api/v1/policies/" + self.id
         payload = to_dict(self)
         headers = {
             "Content-Type": "application/json",
@@ -125,7 +125,7 @@ class CreatePolicyRequest(object):
 
 @err_chain(IAMPolicyException)
 def create_policy(auth_headers: dict[str, str], payload: CreatePolicyRequest) -> Policy:
-    url = IAMCORE_URL + "/api/v1/policies"
+    url = config.IAMCORE_URL + "/api/v1/policies"
     payload = payload.to_dict()
 
     headers = {
@@ -143,7 +143,7 @@ def delete_policy(auth_headers: dict[str, str], policy_id: str) -> None:
     if not policy_id:
         raise IAMPolicyException(f"Missing resource_id")
 
-    url = IAMCORE_URL + "/api/v1/policies/" + IRN.of(policy_id).to_base64()
+    url = config.IAMCORE_URL + "/api/v1/policies/" + IRN.of(policy_id).to_base64()
     headers = {
         "Content-Type": "application/json",
         **auth_headers
@@ -163,7 +163,7 @@ def search_policy(
         sort: str = None,
         sort_order: SortOrder = None
 ) -> IamEntitiesResponse[Policy]:
-    url = IAMCORE_URL + "/api/v1/policies"
+    url = config.IAMCORE_URL + "/api/v1/policies"
 
     querystring = {
         "irn": irn,
