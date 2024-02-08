@@ -37,8 +37,10 @@ def get_api_key_auth_headers(api_key: str):
     }
 
 
-def get_token_with_password(realm: str, client_id, username: str, password: str) -> TokenResponse:
-    url = f"{IAMCORE_ISSUER_URL.strip()}/realms/{realm}/protocol/openid-connect/token"
+def get_token_with_password(realm: str, client_id, username: str, password: str, issuer_url=None) -> TokenResponse:
+    if not issuer_url:
+        issuer_url = IAMCORE_ISSUER_URL.strip()
+    url = f"{issuer_url}/realms/{realm}/protocol/openid-connect/token"
     payload = f"grant_type=password&client_id={client_id}&username={username}&password={password}"
     headers = {
         "Content-Type": "application/x-www-form-urlencoded"
