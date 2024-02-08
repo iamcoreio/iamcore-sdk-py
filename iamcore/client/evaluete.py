@@ -6,7 +6,7 @@ from iamcore.irn import IRN
 from requests import Response
 
 from iamcore.client.common import IamEntitiesResponse, generic_search_all
-from iamcore.client.conf import IAMCORE_URL
+from iamcore.client.config import config
 from iamcore.client.exceptions import EVALUATE_MAPPING, unwrap_return_empty, IAMException, unwrap_return_json
 
 logger = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ def authorize(
 
 
 def evaluate(auth_headers: dict[str, str], action: str, resources: List[IRN]) -> None:
-    url = IAMCORE_URL + "/api/v1/evaluate"
+    url = config.IAMCORE_URL + "/api/v1/evaluate"
     payload = {
         "action": action,
         "resources": [str(r) for r in resources if r]
@@ -66,7 +66,7 @@ def evaluate_resources(
         resource_type: str,
         page: int = 1,
         page_size: int = 100) -> IamEntitiesResponse[IRN]:
-    url = IAMCORE_URL + "/api/v1/evaluate/resources"
+    url = config.IAMCORE_URL + "/api/v1/evaluate/resources"
     payload = {
         "application": application,
         "action": action,

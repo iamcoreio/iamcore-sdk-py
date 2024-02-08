@@ -7,7 +7,7 @@ from requests import Response
 
 from iamcore.client.common import to_snake_case, SortOrder, to_dict, generic_search_all, IamEntityResponse, \
     IamEntitiesResponse
-from iamcore.client.conf import IAMCORE_URL
+from iamcore.client.config import config
 from iamcore.client.exceptions import IAMUnauthorizedException, err_chain, IAMResourceException, unwrap_post, \
     unwrap_put, unwrap_delete, unwrap_get, IAMException
 
@@ -72,7 +72,7 @@ def create_resource(
         description: str = None,
         metadata: Dict[str, object] = None
 ) -> Resource:
-    url = IAMCORE_URL + "/api/v1/resources"
+    url = config.IAMCORE_URL + "/api/v1/resources"
     if not payload:
         payload = {
             "name": name,
@@ -107,7 +107,7 @@ def update_resource(
         raise IAMUnauthorizedException(f"Missing authorization headers")
     if not resource_id:
         raise IAMResourceException(f"Missing resource_id")
-    url = IAMCORE_URL + "/api/v1/resources/" + IRN.of(resource_id).to_base64()
+    url = config.IAMCORE_URL + "/api/v1/resources/" + IRN.of(resource_id).to_base64()
     if not payload:
         payload = {
             "displayName": display_name,
@@ -130,7 +130,7 @@ def delete_resource(auth_headers: dict[str, str], resource_id: str) -> None:
     if not resource_id:
         raise IAMResourceException(f"Missing resource_id")
 
-    url = IAMCORE_URL + "/api/v1/resources/" + IRN.of(resource_id).to_base64()
+    url = config.IAMCORE_URL + "/api/v1/resources/" + IRN.of(resource_id).to_base64()
     headers = {
         "Content-Type": "application/json",
         **auth_headers
@@ -146,7 +146,7 @@ def delete_resources(auth_headers: dict[str, str], resources_ids: List[IRN]) -> 
     if not resources_ids:
         raise IAMResourceException(f"Missing resource_id")
 
-    url = IAMCORE_URL + "/api/v1/resources/delete"
+    url = config.IAMCORE_URL + "/api/v1/resources/delete"
     headers = {
         "Content-Type": "application/json",
         **auth_headers
@@ -177,7 +177,7 @@ def search_resource(
         sort: str = None,
         sort_order: SortOrder = None
 ) -> IamEntitiesResponse[Resource]:
-    url = IAMCORE_URL + "/api/v1/resources"
+    url = config.IAMCORE_URL + "/api/v1/resources"
 
     querystring = {
         "irn": str(irn) if irn else None,

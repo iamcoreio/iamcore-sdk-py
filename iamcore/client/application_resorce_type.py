@@ -6,7 +6,7 @@ from requests import Response
 
 from iamcore.client.common import to_snake_case, to_dict, SortOrder, generic_search_all, IamEntityResponse, \
     IamEntitiesResponse
-from iamcore.client.conf import IAMCORE_URL
+from iamcore.client.config import config
 from iamcore.client.exceptions import err_chain, IAMException, unwrap_post, unwrap_get
 
 
@@ -48,7 +48,7 @@ def create_resource_type(
         action_prefix: str = None,
         operations: List[str] = None
 ) -> ApplicationResourceType:
-    url = IAMCORE_URL + "/api/v1/applications/" + IRN.of(application_irn).to_base64() + "/resource-types"
+    url = config.IAMCORE_URL + "/api/v1/applications/" + IRN.of(application_irn).to_base64() + "/resource-types"
     if not payload:
         payload = {
             "type": type,
@@ -70,7 +70,7 @@ def get_resource_type(
         application_irn: IRN,
         irn: IRN,
 ) -> ApplicationResourceType:
-    url = (IAMCORE_URL + "/api/v1/applications/" + IRN.of(application_irn).to_base64() +
+    url = (config.IAMCORE_URL + "/api/v1/applications/" + IRN.of(application_irn).to_base64() +
            "/resource-types/" + IRN.of(irn).to_base64())
     headers = {
         "Content-Type": "application/json",
@@ -89,7 +89,7 @@ def search_application_resource_types(
         sort: str = None,
         sort_order: SortOrder = None
 ) -> IamEntitiesResponse[ApplicationResourceType]:
-    url = IAMCORE_URL + "/api/v1/applications/" + IRN.of(application_irn).to_base64() + "/resource-types"
+    url = config.IAMCORE_URL + "/api/v1/applications/" + IRN.of(application_irn).to_base64() + "/resource-types"
 
     querystring = {
         "page": page,

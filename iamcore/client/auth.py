@@ -4,7 +4,7 @@ from uuid import UUID
 import requests
 
 from .exceptions import IAMException, IAMUnauthorizedException
-from iamcore.client.conf import IAMCORE_ISSUER_URL
+from iamcore.client.config import config
 
 
 class TokenResponse:
@@ -39,7 +39,7 @@ def get_api_key_auth_headers(api_key: str):
 
 def get_token_with_password(realm: str, client_id, username: str, password: str, issuer_url=None) -> TokenResponse:
     if not issuer_url:
-        issuer_url = IAMCORE_ISSUER_URL.strip()
+        issuer_url = config.IAMCORE_ISSUER_URL.strip()
     url = f"{issuer_url}/realms/{realm}/protocol/openid-connect/token"
     payload = f"grant_type=password&client_id={client_id}&username={username}&password={password}"
     headers = {

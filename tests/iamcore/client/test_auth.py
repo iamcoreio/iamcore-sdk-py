@@ -4,13 +4,13 @@ from iamcore.client.application import search_all_applications
 from iamcore.client.application_api_key import get_application_api_keys, get_all_applications_api_keys
 from iamcore.client.auth import get_token_with_password
 from iamcore.client.exceptions import IAMUnauthorizedException, IAMException
-from iamcore.client.conf import SYSTEM_BACKEND_CLIENT_ID
+from iamcore.client.config import config
 from tests.conf import IAMCORE_ROOT_USER, IAMCORE_ROOT_PASSWORD
 
 
 class GetTokenTestCase(unittest.TestCase):
     def test_token_with_password_ok(self) -> None:
-        credentials = get_token_with_password("root", SYSTEM_BACKEND_CLIENT_ID,
+        credentials = get_token_with_password("root", config.SYSTEM_BACKEND_CLIENT_ID,
                                               IAMCORE_ROOT_USER, IAMCORE_ROOT_PASSWORD)
         self.assertTrue(bool(credentials.access_token))
         self.assertTrue(bool(credentials.refresh_token))
@@ -20,13 +20,13 @@ class GetTokenTestCase(unittest.TestCase):
 
     def test_token_with_password_fail(self) -> None:
         with self.assertRaises(IAMUnauthorizedException) as context:
-            get_token_with_password("root", SYSTEM_BACKEND_CLIENT_ID, IAMCORE_ROOT_USER, 'nopassword')
+            get_token_with_password("root", config.SYSTEM_BACKEND_CLIENT_ID, IAMCORE_ROOT_USER, 'nopassword')
         self.assertTrue('Unauthorized:' in context.exception.msg)
 
     def test_get_api_key(self) -> None:
         application_name = 'kaa'
 
-        token = get_token_with_password("root", SYSTEM_BACKEND_CLIENT_ID, IAMCORE_ROOT_USER, IAMCORE_ROOT_PASSWORD)
+        token = get_token_with_password("root", config.SYSTEM_BACKEND_CLIENT_ID, IAMCORE_ROOT_USER, IAMCORE_ROOT_PASSWORD)
         applications = [
             a for a in search_all_applications(token.access_headers, name=application_name)
             if application_name == a.name
