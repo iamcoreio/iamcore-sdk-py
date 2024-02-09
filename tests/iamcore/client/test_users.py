@@ -3,6 +3,7 @@ import pytest
 from iamcore.irn import IRN
 
 from iamcore.client.auth import get_token_with_password, TokenResponse
+from iamcore.client.evaluete import evaluate_actions
 from iamcore.client.tenant import search_tenant, create_tenant
 from iamcore.client.config import config
 from iamcore.client.policy import search_policy, CreatePolicyRequest
@@ -79,6 +80,22 @@ class CrudUserPoliciesTestCase(unittest.TestCase):
         self.assertTrue(user)
         user_attach_policies(self.root.access_headers, user.id, [policy.id])
         # todo
+
+    def test_20_evaluate_actions_ok(self):
+        tenants = search_tenant(self.root.access_headers, name=self.tenant_name).data
+        tenant = tenants[0] if len(tenants) > 0 else \
+            create_tenant(self.root.access_headers, name=self.tenant_name, display_name=self.tenant_display_name)
+        account = IRN.of(tenant.irn).account_id
+        irn = f"irn:{account}:unittest:{tenant.tenant_id}::analytics/*"
+        read_action = "unittest:analytics:read"
+        write_action = "unittest:analytics:write"
+        resp = evaluate_actions(self.root.access_headers, [read_action, write_action], [irn])
+        self.assertIsNotNone(resp, "evaluate actions return not none")
+        self.assertIsInstance(resp, dict, "evaluate actions return dict")
+        self.assertIsNotNone(resp.get(irn), "evaluate actions return dict with irn keys")
+        self.assertIsInstance(resp.get(irn), list, "evaluate actions return dict with list values keys")
+        self.assertEqual(len(resp.get(irn)), 2)
+        self.assertEqual(resp.get(irn), [read_action, write_action])
 
     def test_90_cleanup_ok(self):
         users = list(search_all_users(self.root.access_headers, username=self.user_name))
