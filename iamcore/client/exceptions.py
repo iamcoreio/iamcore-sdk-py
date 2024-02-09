@@ -1,5 +1,5 @@
 import http
-from typing import Any
+from typing import Any, Dict
 
 from requests import Response
 
@@ -125,7 +125,7 @@ EVALUATE_MAPPING = {
 }
 
 
-def unwrap_return_empty(resp: Response, mapping: dict[int, Any]) -> None:
+def unwrap_return_empty(resp: Response, mapping: Dict[int, Any]) -> None:
     if resp.status_code not in mapping:
         raise IAMTenantException(f"Unexpected error code: {resp.status_code}")
     mapped_exception = mapping.get(resp.status_code)
@@ -134,7 +134,7 @@ def unwrap_return_empty(resp: Response, mapping: dict[int, Any]) -> None:
     raise mapped_exception(resp.json()['message'])
 
 
-def unwrap_return_json(resp: Response, mapping: dict[int, Any]) -> dict[int, Any]:
+def unwrap_return_json(resp: Response, mapping: Dict[int, Any]) -> Dict[int, Any]:
     if resp.status_code not in mapping:
         raise IAMTenantException(f"Unexpected error code: {resp.status_code}")
     mapped_exception = mapping.get(resp.status_code)
@@ -143,31 +143,31 @@ def unwrap_return_json(resp: Response, mapping: dict[int, Any]) -> dict[int, Any
     raise mapped_exception(resp.json()['message'])
 
 
-def unwrap_get(resp: Response, mapping: dict[int, Any] = None) -> dict[int, Any]:
+def unwrap_get(resp: Response, mapping: Dict[int, Any] = None) -> Dict[int, Any]:
     if mapping is None:
         mapping = GET_MAPPING
     return unwrap_return_json(resp, mapping)
 
 
-def unwrap_post(resp: Response, mapping: dict[int, Any] = None) -> dict[int, Any]:
+def unwrap_post(resp: Response, mapping: Dict[int, Any] = None) -> Dict[int, Any]:
     if mapping is None:
         mapping = POST_MAPPING
     return unwrap_return_json(resp, mapping)
 
 
-def unwrap_put(resp: Response, mapping: dict[int, Any] = None) -> None:
+def unwrap_put(resp: Response, mapping: Dict[int, Any] = None) -> None:
     if mapping is None:
         mapping = PUT_MAPPING
     return unwrap_return_empty(resp, mapping)
 
 
-def unwrap_patch(resp: Response, mapping: dict[int, Any] = None) -> None:
+def unwrap_patch(resp: Response, mapping: Dict[int, Any] = None) -> None:
     if mapping is None:
         mapping = PUT_MAPPING
     return unwrap_return_empty(resp, mapping)
 
 
-def unwrap_delete(resp: Response, mapping: dict[int, Any] = None) -> None:
+def unwrap_delete(resp: Response, mapping: Dict[int, Any] = None) -> None:
     if mapping is None:
         mapping = DELETE_MAPPING
     return unwrap_return_empty(resp, mapping)

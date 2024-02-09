@@ -1,5 +1,5 @@
 import logging
-from typing import List, Generator, Union, Any
+from typing import List, Generator, Union, Any, Dict
 
 import requests
 from iamcore.irn import IRN
@@ -57,6 +57,21 @@ def evaluate(auth_headers: dict[str, str], action: str, resources: List[IRN]) ->
     logger.debug(f"Going to evaluate resources: POST {url}, json={payload}")
     response: Response = requests.request("POST", url, json=payload, headers=headers)
     return unwrap_return_empty(response, EVALUATE_MAPPING)
+
+
+def evaluate_actions(auth_headers: dict[str, str], actions: List[str], irns: List[IRN]) -> Dict[int, List[str]]:
+    url = config.IAMCORE_URL + "/api/v1/evaluate/actions"
+    payload = {
+        "actions": actions,
+        "irns": [str(r) for r in irns if r]
+    }
+    headers = {
+        "Content-Type": "application/json",
+        **auth_headers
+    }
+    logger.debug(f"Going to evaluate resources: POST {url}, json={payload}")
+    response: Response = requests.request("POST", url, json=payload, headers=headers)
+    return unwrap_return_json(response, EVALUATE_MAPPING)
 
 
 def evaluate_resources(
