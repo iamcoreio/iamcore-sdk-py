@@ -158,13 +158,18 @@ def search_policy(
         irn: str = None,
         name: str = None,
         description: str = None,
+        account_id: str = None,
+        application: str = None,
+        tenant_id: str = None,
         page: int = None,
         page_size: int = None,
         sort: str = None,
         sort_order: SortOrder = None
 ) -> IamEntitiesResponse[Policy]:
     url = config.IAMCORE_URL + "/api/v1/policies"
-
+    if not irn and account_id and tenant_id:
+        application = application if application else 'iamcore'
+        irn = f"irn:{account_id}:{application}:{tenant_id}"
     querystring = {
         "irn": irn,
         "name": name,
