@@ -5,7 +5,7 @@ from iamcore.irn import IRN
 from iamcore.client.auth import get_token_with_password, TokenResponse
 from iamcore.client.tenant import search_tenant, create_tenant
 from iamcore.client.config import config
-from iamcore.client.policy import search_policy, CreatePolicyRequest
+from iamcore.client.policy import search_policy, CreatePolicyRequest, search_all_policies
 from tests.conf import IAMCORE_ROOT_USER, IAMCORE_ROOT_PASSWORD
 
 
@@ -70,7 +70,7 @@ class CrudPoliciesTestCase(unittest.TestCase):
             self.assertTrue(created_policy.id)
             self.assertTrue(created_policy.irn)
             # assert that we create an account policy
-            self.assertEqual(IRN.of(created_policy.irn).tenant_id,'')
+            self.assertEqual(IRN.of(created_policy.irn).tenant_id, '')
             self.assertTrue(created_policy.statements)
 
     def test_10_tenant_policy_ok(self):
@@ -85,7 +85,12 @@ class CrudPoliciesTestCase(unittest.TestCase):
             .with_statement('allow', self.policy_description, [f"irn:{account}:unittest:{tenant.tenant_id}:*"], ['*']) \
             .create(self.root.access_headers)
 
-        policies = search_policy(self.root.access_headers, name=self.policy_name_tenant).data
+        policies = list(search_all_policies(self.root.access_headers, name=self.policy_name_tenant, account_id=account,
+                                            tenant_id="wrongId"))
+        self.assertEqual(len(policies), 0)
+
+        policies = search_policy(self.root.access_headers, name=self.policy_name_tenant, account_id=account,
+                                 tenant_id=tenant.tenant_id).data
         if policies:
             self.assertEqual(len(policies), 1)
             created_policy = policies[0]
