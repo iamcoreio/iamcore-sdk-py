@@ -43,7 +43,7 @@ def get_application_api_keys(headers: dict[str, str], irn: Union[str, IRN],
     if isinstance(irn, str):
         irn = IRN.of(irn).to_base64()
 
-    url = f"{config.IAMCORE_URL}/api/v1/applications/{irn}/api-keys?page={page}"
+    url = f"{config.IAMCORE_URL}/api/v1/principals/{irn}/api-keys?page={page}"
     response: Response = requests.request("GET", url, data="", headers=headers)
     return IamEntitiesResponse(ApplicationApiKey, **unwrap_get(response))
 
