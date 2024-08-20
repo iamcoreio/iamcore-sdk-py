@@ -34,6 +34,19 @@ class ApplicationApiKey:
     def to_dict(self):
         return to_dict(self)
 
+@err_chain(IAMException)
+def create_application_api_key(
+        auth_headers: dict[str, str],
+        application_irn: IRN
+) -> IamEntitiesResponse[ApplicationApiKey]:
+    url = config.IAMCORE_URL + "/api/v1/principals/" + IRN.of(application_irn).to_base64() + "/api-keys"
+    headers = {
+        "Content-Type": "application/json",
+        **auth_headers
+    }
+    response: Response = requests.request("POST", url, headers=headers)
+    return IamEntitiesResponse(ApplicationApiKey, **unwrap_get(response))
+
 
 @err_chain(IAMException)
 def get_application_api_keys(headers: dict[str, str], irn: Union[str, IRN],

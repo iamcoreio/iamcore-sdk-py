@@ -59,6 +59,8 @@ def create_application(auth_headers: dict[str, str], payload: dict[str, str] = N
         "Content-Type": "application/json",
         **auth_headers
     }
+    print(payload)
+    print(url)
     response: Response = requests.request("POST", url, json=payload, headers=headers)
     return IamEntityResponse(Application, **unwrap_post(response)).data
 

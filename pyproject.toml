@@ -1,8 +1,9 @@
 [project]
 name = "iamcore-sdk-py"
-version = "0.0.12"
+version = "0.0.13"
 authors = [
-    {name = "Oleksandr Burdeinyi",  email="aburdeinyi@kaaiot.io"}
+    {name = "Oleksandr Burdeinyi",  email="aburdeinyi@kaaiot.io"},
+    {name = "Nikolay Borisenko",  email="nborisenko@kaaiot.io"}
 ]
 
 [tool.distutils.bdist_wheel]
