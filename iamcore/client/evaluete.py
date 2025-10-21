@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import logging
-from collections.abc import Generator
-from typing import Dict, List, Union
+from typing import TYPE_CHECKING, Any
 
 import requests
 from iamcore.irn import IRN
@@ -15,21 +16,27 @@ from iamcore.client.exceptions import (
     unwrap_return_json,
 )
 
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
 logger = logging.getLogger(__name__)
 
 
 def authorize(
-        authorization_headers: dict[str, str],
-        principal_irn: IRN,
-        account_id: str,
-        application: str,
-        tenant_id: str,
-        resource_type: str,
-        resource_path: str,
-        action: str,
-        resource_ids: Union[List[str], None] = None) -> List[IRN]:
+    authorization_headers: dict[str, str],
+    principal_irn: IRN,
+    account_id: str,
+    application: str,
+    tenant_id: str,
+    resource_type: str,
+    resource_path: str,
+    action: str,
+    resource_ids: list[str] | None = None,
+) -> list[IRN]:
     if not action:
-        raise IAMException("Action must be defined")
+        msg = "Action must be defined"
+        raise IAMException(msg)
+
     tenant_id = tenant_id or principal_irn.tenant_id
     account_id = account_id or principal_irn.account_id
     if resource_ids:
@@ -40,71 +47,78 @@ def authorize(
                 tenant_id=tenant_id,
                 resource_type=resource_type,
                 resource_path=resource_path,
-                resource_id=resource_id)
+                resource_id=resource_id,
+            )
             for resource_id in resource_ids
         ]
-        logger.debug(f"Going to evaluate {authorization_headers} {action} {resources_irn_list}")
+        logger.debug(
+            "Going to evaluate %s %s %s",
+            authorization_headers,
+            action,
+            resources_irn_list,
+        )
         evaluate(authorization_headers, action, resources_irn_list)
         return resources_irn_list
     logger.debug("Going to evaluate by type")
     return list(evaluate_all_resources(authorization_headers, application, action, resource_type))
 
 
-def evaluate(auth_headers: dict[str, str], action: str, resources: List[IRN]) -> None:
+def evaluate(auth_headers: dict[str, str], action: str, resources: list[IRN]) -> None:
     url = config.IAMCORE_URL + "/api/v1/evaluate"
-    payload = {
-        "action": action,
-        "resources": [str(r) for r in resources if r]
-    }
-    headers = {
-        "Content-Type": "application/json",
-        **auth_headers
-    }
-    logger.debug(f"Going to evaluate resources: POST {url}, json={payload}")
+    payload = {"action": action, "resources": [str(r) for r in resources if r]}
+    headers = {"Content-Type": "application/json", **auth_headers}
+    logger.debug("Going to evaluate resources: POST %s, json=%s", url, payload)
     response: Response = requests.request("POST", url, json=payload, headers=headers)
     return unwrap_return_empty(response, EVALUATE_MAPPING)
 
 
-def evaluate_actions(auth_headers: dict[str, str], actions: List[str], irns: List[IRN]) -> Dict[int, List[str]]:
+def evaluate_actions(
+    auth_headers: dict[str, str],
+    actions: list[str],
+    irns: list[IRN],
+) -> dict[int, list[str]]:
     url = config.IAMCORE_URL + "/api/v1/evaluate/actions"
-    payload = {
-        "actions": actions,
-        "irns": [str(r) for r in irns if r]
-    }
-    headers = {
-        "Content-Type": "application/json",
-        **auth_headers
-    }
-    logger.debug(f"Going to evaluate resources: POST {url}, json={payload}")
+    payload = {"actions": actions, "irns": [str(r) for r in irns if r]}
+    headers = {"Content-Type": "application/json", **auth_headers}
+    logger.debug("Going to evaluate resources: POST %s, json=%s", url, payload)
     response: Response = requests.request("POST", url, json=payload, headers=headers)
     return unwrap_return_json(response, EVALUATE_MAPPING)
 
 
 def evaluate_resources(
-        auth_headers: dict[str, str],
-        application: str,
-        action: str,
-        resource_type: str,
-        page: int = 1,
-        page_size: int = 100) -> IamEntitiesResponse[IRN]:
+    auth_headers: dict[str, str],
+    application: str,
+    action: str,
+    resource_type: str,
+    page: int = 1,
+    page_size: int = 100,
+) -> IamEntitiesResponse[IRN]:
     url = config.IAMCORE_URL + "/api/v1/evaluate/resources"
-    payload = {
-        "application": application,
-        "action": action,
-        "resourceType": resource_type
-    }
+    payload = {"application": application, "action": action, "resourceType": resource_type}
     querystring = {
         "page": page,
         "pageSize": page_size,
     }
-    headers = {
-        "Content-Type": "application/json",
-        **auth_headers
-    }
-    logger.debug(f"Going to evaluate resource type: POST {url}, json={payload}, params={querystring}")
-    response: Response = requests.request("POST", url, json=payload, headers=headers, params=querystring)
+    headers = {"Content-Type": "application/json", **auth_headers}
+    logger.debug(
+        "Going to evaluate resource type: POST %s, json=%s, params=%s",
+        url,
+        payload,
+        querystring,
+    )
+    response: Response = requests.request(
+        "POST",
+        url,
+        json=payload,
+        headers=headers,
+        params=querystring,
+    )
     return IamEntitiesResponse(IRN, **unwrap_return_json(response, EVALUATE_MAPPING))
 
 
-def evaluate_all_resources(auth_headers: dict[str, str], *vargs, **kwargs) -> Generator[IRN, None, None]:
-    return generic_search_all(auth_headers, evaluate_resources, *vargs, **kwargs)
+def evaluate_all_resources(
+    auth_headers: dict[str, str],
+    *args: Any,
+    **kwargs: Any,
+) -> Generator[IRN, None, None]:
+    return generic_search_all(auth_headers, evaluate_resources, *args, **kwargs)

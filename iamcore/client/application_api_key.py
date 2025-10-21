@@ -1,5 +1,6 @@
-from collections.abc import Generator
-from typing import Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
 
 import requests
 from iamcore.irn import IRN
@@ -9,6 +10,9 @@ from iamcore.client.common import IamEntitiesResponse, generic_search_all, to_di
 from iamcore.client.config import config
 from iamcore.client.exceptions import IAMException, err_chain, unwrap_get
 
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
 
 class ApplicationApiKey:
     api_key: str
@@ -17,13 +21,13 @@ class ApplicationApiKey:
     created: str
     updated: str
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         for k, v in kwargs.items():
             attr = to_snake_case(k)
             setattr(self, attr, v)
 
     @staticmethod
-    def of(item):
+    def of(item: dict[str, Any] | list[Any] | ApplicationApiKey) -> ApplicationApiKey:
         if isinstance(item, ApplicationApiKey):
             return item
         if isinstance(item, list):
@@ -32,26 +36,32 @@ class ApplicationApiKey:
             return ApplicationApiKey(**item)
         raise IAMException("Unexpected response format")
 
-    def to_dict(self):
+    def to_dict(self) -> dict[str, Any]:
         return to_dict(self)
+
 
 @err_chain(IAMException)
 def create_application_api_key(
-        auth_headers: dict[str, str],
-        application_irn: IRN
+    auth_headers: dict[str, str],
+    application_irn: IRN,
 ) -> IamEntitiesResponse[ApplicationApiKey]:
-    url = config.IAMCORE_URL + "/api/v1/principals/" + IRN.of(application_irn).to_base64() + "/api-keys"
-    headers = {
-        "Content-Type": "application/json",
-        **auth_headers
-    }
+    url = (
+        config.IAMCORE_URL
+        + "/api/v1/principals/"
+        + IRN.of(application_irn).to_base64()
+        + "/api-keys"
+    )
+    headers = {"Content-Type": "application/json", **auth_headers}
     response: Response = requests.request("POST", url, headers=headers)
     return IamEntitiesResponse(ApplicationApiKey, **unwrap_get(response))
 
 
 @err_chain(IAMException)
-def get_application_api_keys(headers: dict[str, str], irn: Union[str, IRN],
-                             page: int = 1) -> IamEntitiesResponse[ApplicationApiKey]:
+def get_application_api_keys(
+    headers: dict[str, str],
+    irn: str | IRN,
+    page: int = 1,
+) -> IamEntitiesResponse[ApplicationApiKey]:
     if isinstance(irn, IRN):
         irn = irn.to_base64()
     if isinstance(irn, str):
@@ -63,5 +73,9 @@ def get_application_api_keys(headers: dict[str, str], irn: Union[str, IRN],
 
 
 @err_chain(IAMException)
-def get_all_applications_api_keys(auth_headers: dict[str, str], *vargs, **kwargs) -> Generator[ApplicationApiKey, None, None]:
-    return generic_search_all(auth_headers, get_application_api_keys, *vargs, **kwargs)
+def get_all_applications_api_keys(
+    auth_headers: dict[str, str],
+    *args: Any,
+    **kwargs: Any,
+) -> Generator[ApplicationApiKey, None, None]:
+    return generic_search_all(auth_headers, get_application_api_keys, *args, **kwargs)
