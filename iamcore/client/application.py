@@ -1,17 +1,30 @@
-from typing import Generator, List
+from collections.abc import Generator
+from typing import List
 
 import requests
 from iamcore.irn import IRN
 from requests import Response
 
-from iamcore.client.common import to_snake_case, to_dict, SortOrder, generic_search_all, IamEntityResponse, \
-    IamEntitiesResponse
+from iamcore.client.common import (
+    IamEntitiesResponse,
+    IamEntityResponse,
+    SortOrder,
+    generic_search_all,
+    to_dict,
+    to_snake_case,
+)
 from iamcore.client.config import config
-from iamcore.client.exceptions import err_chain, IAMException, unwrap_post, unwrap_get, IAMUnauthorizedException, \
-    unwrap_put
+from iamcore.client.exceptions import (
+    IAMException,
+    IAMUnauthorizedException,
+    err_chain,
+    unwrap_get,
+    unwrap_post,
+    unwrap_put,
+)
 
 
-class IAMEntityBase(object):
+class IAMEntityBase:
     def __int__(self, *vargs, **kwargs):
         pass
 
@@ -38,9 +51,9 @@ class Application(IAMEntityBase):
     def of(item):
         if isinstance(item, Application):
             return item
-        elif isinstance(item, dict):
+        if isinstance(item, dict):
             return Application(**item)
-        raise IAMException(f"Unexpected response format")
+        raise IAMException("Unexpected response format")
 
     def to_dict(self):
         return to_dict(self)
@@ -75,11 +88,11 @@ def get_application(headers: dict[str, str], irn: str) -> Application:
 @err_chain(IAMException)
 def application_attach_policies(auth_headers: dict[str, str], application_id: str, policies_ids: List[str]):
     if not auth_headers:
-        raise IAMUnauthorizedException(f"Missing authorization headers")
+        raise IAMUnauthorizedException("Missing authorization headers")
     if not application_id:
-        raise IAMException(f"Missing user_id")
+        raise IAMException("Missing user_id")
     if not policies_ids or not isinstance(policies_ids, list):
-        raise IAMException(f"Missing policies_ids or it's not a list")
+        raise IAMException("Missing policies_ids or it's not a list")
 
     url = config.IAMCORE_URL + "/api/v1/applications/" + application_id + "/policies/attach"
     headers = {

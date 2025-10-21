@@ -1,12 +1,12 @@
 import unittest
+
 import pytest
 from iamcore.irn import IRN
 
-from iamcore.client.auth import get_token_with_password, TokenResponse
-from iamcore.client.tenant import search_tenant, create_tenant, get_issuer
+from iamcore.client.auth import TokenResponse, get_token_with_password
 from iamcore.client.config import config
-
-from tests.conf import IAMCORE_ROOT_USER, IAMCORE_ROOT_PASSWORD
+from iamcore.client.tenant import create_tenant, get_issuer, search_tenant
+from tests.conf import IAMCORE_ROOT_PASSWORD, IAMCORE_ROOT_USER
 
 
 @pytest.fixture(scope="class")
@@ -19,7 +19,7 @@ def root_token(request):
 def test_tenant(request):
     request.cls.tenant_name = "iamcore-py-test-tenant"
     request.cls.tenant_display_name = "iamcore_ Python Sdk test tenant"
-    request.cls.login_theme = 'kaa'
+    request.cls.login_theme = "kaa"
 
 
 @pytest.mark.usefixtures("root_token")
@@ -47,8 +47,8 @@ class CrudTenantsTestCase(unittest.TestCase):
         self.assertFalse(tenants)
 
     def test_10_crud_ok(self):
-        name = self.tenant_name + '_10'
-        tenant_display_name = self.tenant_display_name + '_10'
+        name = self.tenant_name + "_10"
+        tenant_display_name = self.tenant_display_name + "_10"
         tenant = create_tenant(self.root.access_headers, name=name, display_name=tenant_display_name,
                                login_theme=self.login_theme)
 
@@ -62,8 +62,8 @@ class CrudTenantsTestCase(unittest.TestCase):
         self.assertEqual(self.login_theme, tenant.login_theme)
 
     def test_12_default_login_theme_ok(self):
-        name = self.tenant_name + '_12'
-        tenant_display_name = self.tenant_display_name + '_12'
+        name = self.tenant_name + "_12"
+        tenant_display_name = self.tenant_display_name + "_12"
         tenant = create_tenant(self.root.access_headers, name=name, display_name=tenant_display_name)
 
         self.assertEqual(tenant.name, name)
@@ -73,11 +73,11 @@ class CrudTenantsTestCase(unittest.TestCase):
         self.assertTrue(tenant.resource_id)
         self.assertTrue(tenant.created)
         self.assertTrue(tenant.updated)
-        self.assertEqual('iamcore', tenant.login_theme)
+        self.assertEqual("iamcore", tenant.login_theme)
 
     def test_14_update_ok(self):
-        name = self.tenant_name + '_12'
-        tenant_display_name = self.tenant_display_name + '_12'
+        name = self.tenant_name + "_12"
+        tenant_display_name = self.tenant_display_name + "_12"
         tenants = search_tenant(self.root.access_headers, name=name).data
         self.assertEqual(len(tenants), 1)
         tenant = tenants[0]
@@ -94,30 +94,30 @@ class CrudTenantsTestCase(unittest.TestCase):
         self.assertTrue(tenant.updated)
 
     def test_20_issuer_ok(self):
-        tenants = search_tenant(self.root.access_headers, name=self.tenant_name+'_10').data
+        tenants = search_tenant(self.root.access_headers, name=self.tenant_name+"_10").data
         self.assertLessEqual(len(tenants), 1)
         tenant = tenants[0]
         account = IRN.of(tenant.irn).account_id
         issuer = get_issuer(self.root.access_headers, account, tenant.tenant_id)
         self.assertTrue(issuer)
-        self.assertEqual(str(issuer.irn), str(IRN.of(f'irn:{account}:iamcore:{tenant.tenant_id}::issuer/iamcore')))
+        self.assertEqual(str(issuer.irn), str(IRN.of(f"irn:{account}:iamcore:{tenant.tenant_id}::issuer/iamcore")))
         self.assertEqual(issuer.url, f"{config.IAMCORE_ISSUER_URL.strip()}/realms/{tenant.tenant_id}")
         self.assertEqual(issuer.login_url,
                          f"{config.IAMCORE_ISSUER_URL.strip()}/realms/{tenant.tenant_id}/protocol/openid-connect/auth")
         self.assertTrue(issuer.client_id)
 
     def test_20_search_ok(self):
-        name = self.tenant_name + '_10'
-        tenant_display_name = self.tenant_display_name + '_10'
+        name = self.tenant_name + "_10"
+        tenant_display_name = self.tenant_display_name + "_10"
         tenants = search_tenant(self.root.access_headers, name=name).data
         self.assertEqual(len(tenants), 1)
         tenant = tenants[0]
 
         search_plan = [
-            ('name', tenant.name),
-            ('display_name', tenant.display_name),
-            ('irn', tenant.irn),
-            ('tenant_id', tenant.tenant_id)
+            ("name", tenant.name),
+            ("display_name", tenant.display_name),
+            ("irn", tenant.irn),
+            ("tenant_id", tenant.tenant_id)
         ]
 
         for param, value in search_plan:

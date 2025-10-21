@@ -1,16 +1,31 @@
-from typing import Generator
+from collections.abc import Generator
 
 import requests
 from iamcore.irn import IRN
 from requests import Response
 
 from iamcore.client.config import config
-from .common import SortOrder, to_snake_case, to_dict, generic_search_all, IamEntityResponse, IamEntitiesResponse
-from .exceptions import IAMTenantException, err_chain, unwrap_post, unwrap_put, unwrap_delete, \
-    unwrap_get, IAMException
+
+from .common import (
+    IamEntitiesResponse,
+    IamEntityResponse,
+    SortOrder,
+    generic_search_all,
+    to_dict,
+    to_snake_case,
+)
+from .exceptions import (
+    IAMException,
+    IAMTenantException,
+    err_chain,
+    unwrap_delete,
+    unwrap_get,
+    unwrap_post,
+    unwrap_put,
+)
 
 
-class Tenant(object):
+class Tenant:
     resource_id: str
     irn: IRN
     tenant_id: str
@@ -30,9 +45,9 @@ class Tenant(object):
     def of(item):
         if isinstance(item, Tenant):
             return item
-        elif isinstance(item, dict):
+        if isinstance(item, dict):
             return Tenant(**item)
-        raise IAMTenantException(f"Unexpected response format")
+        raise IAMTenantException("Unexpected response format")
 
     def to_dict(self):
         return to_dict(self)
@@ -44,7 +59,7 @@ class Tenant(object):
         return delete_tenant(auth_headers, self.resource_id)
 
 
-class TenantIssuer(object):
+class TenantIssuer:
     id: str
     irn: IRN
     name: str
@@ -63,9 +78,9 @@ class TenantIssuer(object):
     def of(item):
         if isinstance(item, TenantIssuer):
             return item
-        elif isinstance(item, dict):
+        if isinstance(item, dict):
             return TenantIssuer(**item)
-        raise IAMTenantException(f"Unexpected response format")
+        raise IAMTenantException("Unexpected response format")
 
     def to_dict(self):
         return to_dict(self)
@@ -98,9 +113,9 @@ def create_tenant(auth_headers: dict[str, str], payload: dict[str, str] = None,
 @err_chain(IAMTenantException)
 def update_tenant(auth_headers: dict[str, str], resource_id: str, display_name: str) -> None:
     if not auth_headers:
-        raise IAMTenantException(f"Missing authorization headers")
+        raise IAMTenantException("Missing authorization headers")
     if not resource_id or not display_name:
-        raise IAMTenantException(f"Missing resource_id or display_name")
+        raise IAMTenantException("Missing resource_id or display_name")
 
     url = config.IAMCORE_URL + "/api/v1/tenants/" + IRN.of(resource_id).to_base64()
     payload = {
@@ -117,9 +132,9 @@ def update_tenant(auth_headers: dict[str, str], resource_id: str, display_name: 
 @err_chain(IAMTenantException)
 def delete_tenant(auth_headers: dict[str, str], resource_id: str) -> None:
     if not auth_headers:
-        raise IAMTenantException(f"Missing authorization headers")
+        raise IAMTenantException("Missing authorization headers")
     if not resource_id:
-        raise IAMTenantException(f"Missing resource_id")
+        raise IAMTenantException("Missing resource_id")
 
     url = config.IAMCORE_URL + "/api/v1/tenants/" + IRN.of(resource_id).to_base64()
     headers = {

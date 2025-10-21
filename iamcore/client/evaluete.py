@@ -1,5 +1,6 @@
 import logging
-from typing import List, Generator, Union, Any, Dict
+from collections.abc import Generator
+from typing import Dict, List, Union
 
 import requests
 from iamcore.irn import IRN
@@ -7,7 +8,12 @@ from requests import Response
 
 from iamcore.client.common import IamEntitiesResponse, generic_search_all
 from iamcore.client.config import config
-from iamcore.client.exceptions import EVALUATE_MAPPING, unwrap_return_empty, IAMException, unwrap_return_json
+from iamcore.client.exceptions import (
+    EVALUATE_MAPPING,
+    IAMException,
+    unwrap_return_empty,
+    unwrap_return_json,
+)
 
 logger = logging.getLogger(__name__)
 

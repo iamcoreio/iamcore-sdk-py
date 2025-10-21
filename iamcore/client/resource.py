@@ -1,18 +1,32 @@
-import http.client
-from typing import List, Dict, Generator
+from collections.abc import Generator
+from typing import Dict, List
 
 import requests
 from iamcore.irn import IRN
 from requests import Response
 
-from iamcore.client.common import to_snake_case, SortOrder, to_dict, generic_search_all, IamEntityResponse, \
-    IamEntitiesResponse
+from iamcore.client.common import (
+    IamEntitiesResponse,
+    IamEntityResponse,
+    SortOrder,
+    generic_search_all,
+    to_dict,
+    to_snake_case,
+)
 from iamcore.client.config import config
-from iamcore.client.exceptions import IAMUnauthorizedException, err_chain, IAMResourceException, unwrap_post, \
-    unwrap_put, unwrap_delete, unwrap_get, IAMException
+from iamcore.client.exceptions import (
+    IAMException,
+    IAMResourceException,
+    IAMUnauthorizedException,
+    err_chain,
+    unwrap_delete,
+    unwrap_get,
+    unwrap_post,
+    unwrap_put,
+)
 
 
-class Resource(object):
+class Resource:
     id: str
     irn: IRN
     name: str
@@ -31,9 +45,9 @@ class Resource(object):
     def of(item):
         if isinstance(item, Resource):
             return item
-        elif isinstance(item, dict):
+        if isinstance(item, dict):
             return Resource(**item)
-        raise IAMResourceException(f"Unexpected response format")
+        raise IAMResourceException("Unexpected response format")
 
     def __init__(self, irn: str, **kwargs):
         self._irn = IRN.from_irn_str(irn)
@@ -104,9 +118,9 @@ def update_resource(
         metadata: Dict[str, object] = None
 ) -> None:
     if not auth_headers:
-        raise IAMUnauthorizedException(f"Missing authorization headers")
+        raise IAMUnauthorizedException("Missing authorization headers")
     if not resource_id:
-        raise IAMResourceException(f"Missing resource_id")
+        raise IAMResourceException("Missing resource_id")
     url = config.IAMCORE_URL + "/api/v1/resources/" + IRN.of(resource_id).to_base64()
     if not payload:
         payload = {
@@ -126,9 +140,9 @@ def update_resource(
 @err_chain(IAMResourceException)
 def delete_resource(auth_headers: dict[str, str], resource_id: str) -> None:
     if not auth_headers:
-        raise IAMUnauthorizedException(f"Missing authorization headers")
+        raise IAMUnauthorizedException("Missing authorization headers")
     if not resource_id:
-        raise IAMResourceException(f"Missing resource_id")
+        raise IAMResourceException("Missing resource_id")
 
     url = config.IAMCORE_URL + "/api/v1/resources/" + IRN.of(resource_id).to_base64()
     headers = {
@@ -142,9 +156,9 @@ def delete_resource(auth_headers: dict[str, str], resource_id: str) -> None:
 @err_chain(IAMResourceException)
 def delete_resources(auth_headers: dict[str, str], resources_ids: List[IRN]) -> None:
     if not auth_headers:
-        raise IAMUnauthorizedException(f"Missing authorization headers")
+        raise IAMUnauthorizedException("Missing authorization headers")
     if not resources_ids:
-        raise IAMResourceException(f"Missing resource_id")
+        raise IAMResourceException("Missing resource_id")
 
     url = config.IAMCORE_URL + "/api/v1/resources/delete"
     headers = {

@@ -1,19 +1,31 @@
-from typing import List, Generator, Dict
+from collections.abc import Generator
+from typing import Dict, List
 from uuid import UUID
 
 import requests
 from iamcore.irn import IRN
 from requests import Response
 
-from iamcore.client.common import to_snake_case, SortOrder, to_dict, generic_search_all, IamEntitiesResponse, \
-    IamEntityResponse
+from iamcore.client.common import (
+    IamEntitiesResponse,
+    IamEntityResponse,
+    SortOrder,
+    generic_search_all,
+    to_dict,
+    to_snake_case,
+)
 from iamcore.client.config import config
-from iamcore.client.exceptions import IAMUserException, IAMUnauthorizedException, unwrap_patch, IAMException
-from .exceptions import err_chain, unwrap_post, unwrap_put, unwrap_delete, \
-    unwrap_get
+from iamcore.client.exceptions import (
+    IAMException,
+    IAMUnauthorizedException,
+    IAMUserException,
+    unwrap_patch,
+)
+
+from .exceptions import err_chain, unwrap_delete, unwrap_get, unwrap_post, unwrap_put
 
 
-class User(object):
+class User:
     id: str
     irn: IRN
     created: str
@@ -31,9 +43,9 @@ class User(object):
     def of(item):
         if isinstance(item, User):
             return item
-        elif isinstance(item, dict):
+        if isinstance(item, dict):
             return User(**item)
-        raise IAMUserException(f"Unexpected response format")
+        raise IAMUserException("Unexpected response format")
 
     def __init__(self, irn: str, **kwargs):
         self.irn = IRN.from_irn_str(irn)
@@ -48,7 +60,7 @@ class User(object):
         return to_dict(self)
 
 
-class CreateUser(object):
+class CreateUser:
     tenant_id: str
     email: str
     enabled: bool
@@ -139,9 +151,9 @@ def update_user(auth_headers: dict[str, str],
                 email: str = None,
                 ) -> None:
     if not auth_headers:
-        raise IAMUnauthorizedException(f"Missing authorization headers")
+        raise IAMUnauthorizedException("Missing authorization headers")
     if not user_id:
-        raise IAMUserException(f"Missing user_id")
+        raise IAMUserException("Missing user_id")
     url = config.IAMCORE_URL + "/api/v1/users/" + IRN.of(user_id).to_base64()
     if not payload:
         payload = {
@@ -161,9 +173,9 @@ def update_user(auth_headers: dict[str, str],
 @err_chain(IAMUserException)
 def delete_user(auth_headers: dict[str, str], user_id: str) -> None:
     if not auth_headers:
-        raise IAMUnauthorizedException(f"Missing authorization headers")
+        raise IAMUnauthorizedException("Missing authorization headers")
     if not user_id:
-        raise IAMUserException(f"Missing user_id")
+        raise IAMUserException("Missing user_id")
 
     url = config.IAMCORE_URL + "/api/v1/users/" + IRN.of(user_id).to_base64()
     headers = {
@@ -177,11 +189,11 @@ def delete_user(auth_headers: dict[str, str], user_id: str) -> None:
 @err_chain(IAMUserException)
 def user_attach_policies(auth_headers: dict[str, str], user_id: str, policies_ids: List[str]):
     if not auth_headers:
-        raise IAMUnauthorizedException(f"Missing authorization headers")
+        raise IAMUnauthorizedException("Missing authorization headers")
     if not user_id:
-        raise IAMUserException(f"Missing user_id")
+        raise IAMUserException("Missing user_id")
     if not policies_ids or not isinstance(policies_ids, list):
-        raise IAMUserException(f"Missing policies_ids or it's not a list")
+        raise IAMUserException("Missing policies_ids or it's not a list")
 
     url = config.IAMCORE_URL + "/api/v1/users/" + user_id + "/policies/attach"
     headers = {
@@ -199,11 +211,11 @@ def user_attach_policies(auth_headers: dict[str, str], user_id: str, policies_id
 @err_chain(IAMUserException)
 def user_add_groups(auth_headers: dict[str, str], user_id: str, group_ids: List[str]):
     if not auth_headers:
-        raise IAMUnauthorizedException(f"Missing authorization headers")
+        raise IAMUnauthorizedException("Missing authorization headers")
     if not user_id:
-        raise IAMUserException(f"Missing user_id")
+        raise IAMUserException("Missing user_id")
     if not group_ids or not isinstance(group_ids, list):
-        raise IAMUserException(f"Missing policies_ids or it's not a list")
+        raise IAMUserException("Missing policies_ids or it's not a list")
 
     url = config.IAMCORE_URL + "/api/v1/users/" + user_id + "/groups/add"
     headers = {

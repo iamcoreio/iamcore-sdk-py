@@ -3,8 +3,9 @@ from uuid import UUID
 
 import requests
 
-from .exceptions import IAMException, IAMUnauthorizedException
 from iamcore.client.config import config
+
+from .exceptions import IAMException, IAMUnauthorizedException
 
 
 class TokenResponse:
@@ -19,7 +20,7 @@ class TokenResponse:
 
     def __init__(self, **kwargs):
         for k, v in kwargs.items():
-            if '-' in k:
+            if "-" in k:
                 setattr(self, k.replace("-", "_"), v)
             else:
                 setattr(self, k, v)
@@ -33,7 +34,7 @@ class TokenResponse:
 
 def get_api_key_auth_headers(api_key: str):
     return {
-        'X-iamcore-API-Key': api_key
+        "X-iamcore-API-Key": api_key
     }
 
 
@@ -49,7 +50,7 @@ def get_token_with_password(realm: str, client_id, username: str, password: str,
         response = requests.request("POST", url, data=payload, headers=headers)
         if response.status_code == http.client.OK:
             return TokenResponse(**response.json())
-        elif response.status_code == http.client.UNAUTHORIZED:
+        if response.status_code == http.client.UNAUTHORIZED:
             raise IAMUnauthorizedException(f"Unauthorized: {response.json()}")
         raise IAMUnauthorizedException(f"Unexpected error code: {response.status_code}")
     except IAMException as e:

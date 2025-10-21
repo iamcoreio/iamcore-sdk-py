@@ -1,20 +1,29 @@
 import logging
-from typing import List, Generator
+from collections.abc import Generator
+from typing import List
 
 import requests
 from iamcore.irn import IRN
 from requests import Response
 
 from iamcore.client.config import config
-from .common import SortOrder, to_dict, generic_search_all, IamEntitiesResponse, IamEntityResponse
-from .exceptions import IAMPolicyException, IAMUnauthorizedException, err_chain, unwrap_post, \
-    unwrap_delete, unwrap_get, unwrap_put, IAMException
 
+from .common import IamEntitiesResponse, IamEntityResponse, SortOrder, generic_search_all, to_dict
+from .exceptions import (
+    IAMException,
+    IAMPolicyException,
+    IAMUnauthorizedException,
+    err_chain,
+    unwrap_delete,
+    unwrap_get,
+    unwrap_post,
+    unwrap_put,
+)
 
 logger = logging.getLogger(__name__)
 
 
-class PolicyStatement(object):
+class PolicyStatement:
     effect: str
     description: str
     resources: List[IRN]
@@ -24,9 +33,9 @@ class PolicyStatement(object):
     def of(item):
         if isinstance(item, PolicyStatement):
             return item
-        elif isinstance(item, dict):
+        if isinstance(item, dict):
             return PolicyStatement(**item)
-        raise IAMPolicyException(f"Unexpected response format")
+        raise IAMPolicyException("Unexpected response format")
 
     def __init__(self, effect: str = None, description: str = None,
                  resources: List[str] = None, actions: List[str] = None):
@@ -36,7 +45,7 @@ class PolicyStatement(object):
         self.actions = actions
 
 
-class Policy(object):
+class Policy:
     id: str
     irn: IRN
     name: str
@@ -60,16 +69,16 @@ class Policy(object):
     def of(item):
         if isinstance(item, Policy):
             return item
-        elif isinstance(item, dict):
+        if isinstance(item, dict):
             return Policy(**item)
-        raise IAMPolicyException(f"Unexpected response format")
+        raise IAMPolicyException("Unexpected response format")
 
     @err_chain(IAMPolicyException)
     def update(self, auth_headers: dict[str, str]) -> None:
         if not auth_headers:
-            raise IAMUnauthorizedException(f"Missing authorization headers")
+            raise IAMUnauthorizedException("Missing authorization headers")
         if not self.id:
-            raise IAMPolicyException(f"Missing resource_id or display_name")
+            raise IAMPolicyException("Missing resource_id or display_name")
 
         url = config.IAMCORE_URL + "/api/v1/policies/" + self.id
         payload = to_dict(self)
@@ -87,7 +96,7 @@ class Policy(object):
         return to_dict(self)
 
 
-class CreatePolicyRequest(object):
+class CreatePolicyRequest:
     name: str
     level: str
     tenant_id: str
@@ -100,7 +109,7 @@ class CreatePolicyRequest(object):
         self.tenant_id = tenant_id
         self.description = description
         self.statements = []
-        if level == 'tenant' and not tenant_id:
+        if level == "tenant" and not tenant_id:
             logger.warning("Missing tenant_id for tenant level policy")
 
 
@@ -115,11 +124,11 @@ class CreatePolicyRequest(object):
 
     def to_dict(self):
         return {
-            'name': self.name,
-            'level': self.level,
-            'description': self.description,
-            'tenantID': self.tenant_id,
-            'statements': to_dict(self.statements),
+            "name": self.name,
+            "level": self.level,
+            "description": self.description,
+            "tenantID": self.tenant_id,
+            "statements": to_dict(self.statements),
         }
 
 
@@ -139,9 +148,9 @@ def create_policy(auth_headers: dict[str, str], payload: CreatePolicyRequest) ->
 @err_chain(IAMPolicyException)
 def delete_policy(auth_headers: dict[str, str], policy_id: str) -> None:
     if not auth_headers:
-        raise IAMUnauthorizedException(f"Missing authorization headers")
+        raise IAMUnauthorizedException("Missing authorization headers")
     if not policy_id:
-        raise IAMPolicyException(f"Missing resource_id")
+        raise IAMPolicyException("Missing resource_id")
 
     url = config.IAMCORE_URL + "/api/v1/policies/" + IRN.of(policy_id).to_base64()
     headers = {
@@ -168,7 +177,7 @@ def search_policy(
 ) -> IamEntitiesResponse[Policy]:
     url = config.IAMCORE_URL + "/api/v1/policies"
     if not irn and account_id and tenant_id:
-        application = application if application else 'iamcore'
+        application = application if application else "iamcore"
         irn = f"irn:{account_id}:{application}:{tenant_id}"
     querystring = {
         "irn": irn,

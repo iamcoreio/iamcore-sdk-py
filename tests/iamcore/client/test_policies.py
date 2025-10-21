@@ -1,12 +1,13 @@
 import unittest
+
 import pytest
 from iamcore.irn import IRN
 
-from iamcore.client.auth import get_token_with_password, TokenResponse
-from iamcore.client.tenant import search_tenant, create_tenant
+from iamcore.client.auth import TokenResponse, get_token_with_password
 from iamcore.client.config import config
-from iamcore.client.policy import search_policy, CreatePolicyRequest, search_all_policies
-from tests.conf import IAMCORE_ROOT_USER, IAMCORE_ROOT_PASSWORD
+from iamcore.client.policy import CreatePolicyRequest, search_all_policies, search_policy
+from iamcore.client.tenant import create_tenant, search_tenant
+from tests.conf import IAMCORE_ROOT_PASSWORD, IAMCORE_ROOT_USER
 
 
 @pytest.fixture(scope="class")
@@ -54,10 +55,10 @@ class CrudPoliciesTestCase(unittest.TestCase):
         tenant = tenants[0] if len(tenants) > 0 else \
             create_tenant(self.root.access_headers, name=self.tenant_name, display_name=self.tenant_display_name)
 
-        policy_req = CreatePolicyRequest(self.policy_name_account, 'account', self.policy_description)
+        policy_req = CreatePolicyRequest(self.policy_name_account, "account", self.policy_description)
         account = IRN.of(tenant.irn).account_id
         policy_req \
-            .with_statement('allow', self.policy_description, [f"irn:{account}:unittest:{tenant.tenant_id}:*"], ['*']) \
+            .with_statement("allow", self.policy_description, [f"irn:{account}:unittest:{tenant.tenant_id}:*"], ["*"]) \
             .create(self.root.access_headers)
 
         policies = search_policy(self.root.access_headers, name=self.policy_name_account).data
@@ -70,7 +71,7 @@ class CrudPoliciesTestCase(unittest.TestCase):
             self.assertTrue(created_policy.id)
             self.assertTrue(created_policy.irn)
             # assert that we create an account policy
-            self.assertEqual(IRN.of(created_policy.irn).tenant_id, '')
+            self.assertEqual(IRN.of(created_policy.irn).tenant_id, "")
             self.assertTrue(created_policy.statements)
 
     def test_10_tenant_policy_ok(self):
@@ -78,11 +79,11 @@ class CrudPoliciesTestCase(unittest.TestCase):
         tenant = tenants[0] if len(tenants) > 0 else \
             create_tenant(self.root.access_headers, name=self.tenant_name, display_name=self.tenant_display_name)
 
-        policy_req = CreatePolicyRequest(self.policy_name_tenant, 'tenant', self.policy_description,
+        policy_req = CreatePolicyRequest(self.policy_name_tenant, "tenant", self.policy_description,
                                          tenant_id=tenant.tenant_id)
         account = IRN.of(tenant.irn).account_id
         policy_req \
-            .with_statement('allow', self.policy_description, [f"irn:{account}:unittest:{tenant.tenant_id}:*"], ['*']) \
+            .with_statement("allow", self.policy_description, [f"irn:{account}:unittest:{tenant.tenant_id}:*"], ["*"]) \
             .create(self.root.access_headers)
 
         policies = list(search_all_policies(self.root.access_headers, name=self.policy_name_tenant, account_id=account,

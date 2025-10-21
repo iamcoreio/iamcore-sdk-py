@@ -1,16 +1,23 @@
-from typing import List, Generator
+from collections.abc import Generator
+from typing import List
 
 import requests
 from iamcore.irn import IRN
 from requests import Response
 
-from iamcore.client.common import to_snake_case, to_dict, SortOrder, generic_search_all, IamEntityResponse, \
-    IamEntitiesResponse
+from iamcore.client.common import (
+    IamEntitiesResponse,
+    IamEntityResponse,
+    SortOrder,
+    generic_search_all,
+    to_dict,
+    to_snake_case,
+)
 from iamcore.client.config import config
-from iamcore.client.exceptions import err_chain, IAMException, unwrap_post, unwrap_get
+from iamcore.client.exceptions import IAMException, err_chain, unwrap_get, unwrap_post
 
 
-class ApplicationResourceType(object):
+class ApplicationResourceType:
     id: str
     irn: IRN
     type: str
@@ -30,9 +37,9 @@ class ApplicationResourceType(object):
     def of(item):
         if isinstance(item, ApplicationResourceType):
             return item
-        elif isinstance(item, dict):
+        if isinstance(item, dict):
             return ApplicationResourceType(**item)
-        raise IAMException(f"Unexpected response format")
+        raise IAMException("Unexpected response format")
 
     def to_dict(self):
         return to_dict(self)

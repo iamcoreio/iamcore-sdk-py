@@ -1,12 +1,13 @@
-from typing import Generator, Union
+from collections.abc import Generator
+from typing import Union
 
 import requests
 from iamcore.irn import IRN
 from requests import Response
 
-from iamcore.client.common import to_snake_case, to_dict, generic_search_all, IamEntitiesResponse
+from iamcore.client.common import IamEntitiesResponse, generic_search_all, to_dict, to_snake_case
 from iamcore.client.config import config
-from iamcore.client.exceptions import err_chain, IAMException, unwrap_get
+from iamcore.client.exceptions import IAMException, err_chain, unwrap_get
 
 
 class ApplicationApiKey:
@@ -25,11 +26,11 @@ class ApplicationApiKey:
     def of(item):
         if isinstance(item, ApplicationApiKey):
             return item
-        elif isinstance(item, list):
+        if isinstance(item, list):
             return [ApplicationApiKey.of(i) for i in item]
-        elif isinstance(item, dict):
+        if isinstance(item, dict):
             return ApplicationApiKey(**item)
-        raise IAMException(f"Unexpected response format")
+        raise IAMException("Unexpected response format")
 
     def to_dict(self):
         return to_dict(self)

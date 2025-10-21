@@ -1,17 +1,31 @@
-import http.client
-from typing import List, Generator
+from collections.abc import Generator
+from typing import List
 
 import requests
 from iamcore.irn import IRN
 from requests import Response
 
-from iamcore.client.common import to_snake_case, SortOrder, generic_search_all, IamEntityResponse, IamEntitiesResponse
+from iamcore.client.common import (
+    IamEntitiesResponse,
+    IamEntityResponse,
+    SortOrder,
+    generic_search_all,
+    to_snake_case,
+)
 from iamcore.client.config import config
-from iamcore.client.exceptions import IAMUnauthorizedException, err_chain, IAMGroupException, IAMException, unwrap_post, \
-    unwrap_delete, unwrap_put, unwrap_get
+from iamcore.client.exceptions import (
+    IAMException,
+    IAMGroupException,
+    IAMUnauthorizedException,
+    err_chain,
+    unwrap_delete,
+    unwrap_get,
+    unwrap_post,
+    unwrap_put,
+)
 
 
-class Group(object):
+class Group:
     id: str
     irn: IRN
     tenant_id: str
@@ -25,9 +39,9 @@ class Group(object):
     def of(item):
         if isinstance(item, Group):
             return item
-        elif isinstance(item, dict):
+        if isinstance(item, dict):
             return Group(**item)
-        raise IAMGroupException(f"Unexpected response format")
+        raise IAMGroupException("Unexpected response format")
 
     def __init__(self, irn: str, **kwargs):
         self._irn = IRN.from_irn_str(irn)
@@ -59,9 +73,9 @@ def create_group(auth_headers: dict[str, str], payload: dict[str, object] = None
 @err_chain(IAMGroupException)
 def delete_group(auth_headers: dict[str, str], group_id: str) -> None:
     if not auth_headers:
-        raise IAMUnauthorizedException(f"Missing authorization headers")
+        raise IAMUnauthorizedException("Missing authorization headers")
     if not group_id:
-        raise IAMGroupException(f"Missing group_id")
+        raise IAMGroupException("Missing group_id")
 
     url = config.IAMCORE_URL + "/api/v1/groups/" + IRN.of(group_id).to_base64()
     headers = {
@@ -75,11 +89,11 @@ def delete_group(auth_headers: dict[str, str], group_id: str) -> None:
 @err_chain(IAMGroupException)
 def group_attach_policies(auth_headers: dict[str, str], group_id: str, policies_ids: List[str]):
     if not auth_headers:
-        raise IAMUnauthorizedException(f"Missing authorization headers")
+        raise IAMUnauthorizedException("Missing authorization headers")
     if not group_id:
-        raise IAMGroupException(f"Missing group_id")
+        raise IAMGroupException("Missing group_id")
     if not policies_ids or not isinstance(policies_ids, list):
-        raise IAMGroupException(f"Missing policies_ids or it's not a list")
+        raise IAMGroupException("Missing policies_ids or it's not a list")
 
     url = config.IAMCORE_URL + "/api/v1/groups/" + group_id + "/policies/attach"
     headers = {
@@ -97,11 +111,11 @@ def group_attach_policies(auth_headers: dict[str, str], group_id: str, policies_
 @err_chain(IAMGroupException)
 def group_add_members(auth_headers: dict[str, str], group_id: str, members_ids: List[str]):
     if not auth_headers:
-        raise IAMUnauthorizedException(f"Missing authorization headers")
+        raise IAMUnauthorizedException("Missing authorization headers")
     if not group_id:
-        raise IAMGroupException(f"Missing group_id")
+        raise IAMGroupException("Missing group_id")
     if not members_ids or not isinstance(members_ids, list):
-        raise IAMGroupException(f"Missing policies_ids or it's not a list")
+        raise IAMGroupException("Missing policies_ids or it's not a list")
 
     url = config.IAMCORE_URL + "/api/v1/groups/" + group_id + "/members/add"
     headers = {

@@ -1,9 +1,7 @@
-import http
+from http.client import BAD_REQUEST, CONFLICT, CREATED, FORBIDDEN, NO_CONTENT, OK, UNAUTHORIZED
 from typing import Any, Dict
 
 from requests import Response
-
-from http.client import OK, NO_CONTENT, UNAUTHORIZED, BAD_REQUEST, FORBIDDEN, CREATED, CONFLICT
 
 
 class IAMException(Exception):
@@ -130,8 +128,8 @@ def unwrap_return_empty(resp: Response, mapping: Dict[int, Any]) -> None:
         raise IAMTenantException(f"Unexpected error code: {resp.status_code}")
     mapped_exception = mapping.get(resp.status_code)
     if mapped_exception is None:
-        return None
-    raise mapped_exception(resp.json()['message'])
+        return
+    raise mapped_exception(resp.json()["message"])
 
 
 def unwrap_return_json(resp: Response, mapping: Dict[int, Any]) -> Dict[int, Any]:
@@ -140,7 +138,7 @@ def unwrap_return_json(resp: Response, mapping: Dict[int, Any]) -> Dict[int, Any
     mapped_exception = mapping.get(resp.status_code)
     if mapped_exception is None:
         return resp.json()
-    raise mapped_exception(resp.json()['message'])
+    raise mapped_exception(resp.json()["message"])
 
 
 def unwrap_get(resp: Response, mapping: Dict[int, Any] = None) -> Dict[int, Any]:

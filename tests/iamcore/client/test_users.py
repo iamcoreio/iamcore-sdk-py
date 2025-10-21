@@ -1,14 +1,15 @@
 import unittest
+
 import pytest
 from iamcore.irn import IRN
 
-from iamcore.client.auth import get_token_with_password, TokenResponse
-from iamcore.client.evaluete import evaluate_actions
-from iamcore.client.tenant import search_tenant, create_tenant
+from iamcore.client.auth import TokenResponse, get_token_with_password
 from iamcore.client.config import config
-from iamcore.client.policy import search_policy, CreatePolicyRequest
-from iamcore.client.user import CreateUser, user_attach_policies, search_all_users
-from tests.conf import IAMCORE_ROOT_USER, IAMCORE_ROOT_PASSWORD
+from iamcore.client.evaluete import evaluate_actions
+from iamcore.client.policy import CreatePolicyRequest, search_policy
+from iamcore.client.tenant import create_tenant, search_tenant
+from iamcore.client.user import CreateUser, search_all_users, user_attach_policies
+from tests.conf import IAMCORE_ROOT_PASSWORD, IAMCORE_ROOT_USER
 
 
 @pytest.fixture(scope="class")
@@ -63,9 +64,9 @@ class CrudUserPoliciesTestCase(unittest.TestCase):
         policies = search_policy(self.root.access_headers, name=self.policy_name).data
         account = IRN.of(tenant.irn).account_id
         policy = policies[0] if len(policies) > 0 else \
-            CreatePolicyRequest(self.policy_name, 'tenant', self.policy_description, tenant_id=tenant.tenant_id) \
-                .with_statement('allow', self.policy_description,
-                                [f"irn:{account}:unittest:{tenant.tenant_id}:*"], ['*']) \
+            CreatePolicyRequest(self.policy_name, "tenant", self.policy_description, tenant_id=tenant.tenant_id) \
+                .with_statement("allow", self.policy_description,
+                                [f"irn:{account}:unittest:{tenant.tenant_id}:*"], ["*"]) \
                 .create(self.root.access_headers)
         self.assertTrue(policy)
         user = CreateUser(tenant_id=tenant.tenant_id,
@@ -79,7 +80,7 @@ class CrudUserPoliciesTestCase(unittest.TestCase):
             .create(auth_headers=self.root.access_headers)
         self.assertTrue(user)
         user_attach_policies(self.root.access_headers, user.id, [policy.id])
-        # todo
+        # TODO
 
     def test_20_evaluate_actions_ok(self):
         tenants = search_tenant(self.root.access_headers, name=self.tenant_name).data
