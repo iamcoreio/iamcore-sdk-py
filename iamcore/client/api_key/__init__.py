@@ -3,10 +3,10 @@ from .client import (
     get_all_applications_api_keys,
     get_application_api_keys,
 )
-from .dto import ApplicationApiKey
+from .dto import ApiKey
 
 __all__ = [
-    "ApplicationApiKey",
+    "ApiKey",
     "create_application_api_key",
     "get_all_applications_api_keys",
     "get_application_api_keys",

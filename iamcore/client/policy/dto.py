@@ -3,22 +3,17 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import requests
 from iamcore.irn import IRN
 from pydantic import Field
-from requests import Response
 from typing_extensions import override
 
-from iamcore.client.common import JSON, IamEntitiesResponse, IamEntityResponse, JSON_List
-from iamcore.client.config import config
-from iamcore.client.exceptions import (
-    IAMPolicyException,
-    IAMUnauthorizedException,
-    err_chain,
-    unwrap_put,
+from iamcore.client.models.base import (
+    IAMCoreBaseModel,
+    IamEntitiesResponse,
+    IamEntityResponse,
+    JSON_List,
+    JSON_obj,
 )
-from iamcore.client.models.base import IAMCoreBaseModel
-from iamcore.client.policy.client import create_policy, delete_policy
 
 logger = logging.getLogger(__name__)
 
@@ -54,30 +49,6 @@ class Policy(IAMCoreBaseModel):
         """Create Policy instance from Policy object or dict."""
         return Policy.model_validate(item) if isinstance(item, dict) else item
 
-    @err_chain(IAMPolicyException)
-    def update(self, auth_headers: dict[str, str]) -> None:
-        if not auth_headers:
-            msg = "Missing authorization headers"
-            raise IAMUnauthorizedException(msg)
-        if not self.id:
-            msg = "Missing resource_id or display_name"
-            raise IAMPolicyException(msg)
-
-        url = config.IAMCORE_URL + "/api/v1/policies/" + self.id
-        payload = self.model_dump(by_alias=True)
-        headers = {"Content-Type": "application/json", **auth_headers}
-        response: Response = requests.request(
-            "PUT",
-            url,
-            json=payload,
-            headers=headers,
-            timeout=config.TIMEOUT,
-        )
-        unwrap_put(response)
-
-    def delete(self, auth_headers: dict[str, str]) -> None:
-        delete_policy(auth_headers, policy_id=self.id)
-
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return self.model_dump(by_alias=True)
@@ -109,10 +80,6 @@ class CreatePolicyRequest(IAMCoreBaseModel):
         )
         return self
 
-    @err_chain(IAMPolicyException)
-    def create(self, auth_headers: dict[str, str]) -> Policy:
-        return create_policy(auth_headers, self)
-
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for API requests."""
         return self.model_dump(by_alias=True, exclude_none=True)
@@ -122,7 +89,7 @@ class IamPolicyResponse(IamEntityResponse[Policy]):
     data: Policy
 
     @override
-    def converter(self, item: JSON) -> Policy:
+    def converter(self, item: JSON_obj) -> Policy:
         return Policy.model_validate(item)
 
 

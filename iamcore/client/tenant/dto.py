@@ -5,10 +5,13 @@ from typing import TYPE_CHECKING, Any
 from pydantic import Field
 from typing_extensions import override
 
-from iamcore.client.common import JSON, IamEntitiesResponse, IamEntityResponse, JSON_List
-from iamcore.client.models.base import IAMCoreBaseModel
-
-from .client import delete_tenant, update_tenant
+from iamcore.client.models.base import (
+    IAMCoreBaseModel,
+    IamEntitiesResponse,
+    IamEntityResponse,
+    JSON_List,
+    JSON_obj,
+)
 
 if TYPE_CHECKING:
     from iamcore.irn import IRN
@@ -34,12 +37,6 @@ class Tenant(IAMCoreBaseModel):
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return self.model_dump(by_alias=True)
-
-    def update(self, auth_headers: dict[str, str]) -> None:
-        return update_tenant(auth_headers, self.resource_id, self.display_name)
-
-    def delete(self, auth_headers: dict[str, str]) -> None:
-        return delete_tenant(auth_headers, self.resource_id)
 
 
 class TenantIssuer(IAMCoreBaseModel):
@@ -67,7 +64,7 @@ class IamTenantResponse(IamEntityResponse[Tenant]):
     data: Tenant
 
     @override
-    def converter(self, item: JSON) -> Tenant:
+    def converter(self, item: JSON_obj) -> Tenant:
         return Tenant.model_validate(item)
 
 

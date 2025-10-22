@@ -151,7 +151,7 @@ def unwrap_delete(resp: Response, mapping: dict[int, Any] | None = None) -> None
     return unwrap_return_empty(resp, mapping)
 
 
-def err_chain(error=IAMException) -> Callable[..., Any]:
+def err_chain(error: type[IAMException] = IAMException) -> Callable[..., Any]:
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         def new_func(*args: Any, **kwargs: Any) -> Any:
             try:
@@ -159,7 +159,7 @@ def err_chain(error=IAMException) -> Callable[..., Any]:
             except IAMException:
                 raise
             except Exception as e:
-                raise error(str(e))
+                raise error(str(e)) from e
 
         return new_func
 

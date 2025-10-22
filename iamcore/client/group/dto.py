@@ -5,8 +5,13 @@ from typing import TYPE_CHECKING, Any
 from pydantic import Field
 from typing_extensions import override
 
-from iamcore.client.common import JSON, IamEntitiesResponse, IamEntityResponse, JSON_List
-from iamcore.client.models.base import IAMCoreBaseModel
+from iamcore.client.models.base import (
+    IAMCoreBaseModel,
+    IamEntitiesResponse,
+    IamEntityResponse,
+    JSON_List,
+    JSON_obj,
+)
 
 if TYPE_CHECKING:
     from iamcore.irn import IRN
@@ -34,7 +39,7 @@ class IamGroupResponse(IamEntityResponse[Group]):
     data: Group
 
     @override
-    def converter(self, item: JSON) -> Group:
+    def converter(self, item: JSON_obj) -> Group:
         return Group.model_validate(item)
 
 

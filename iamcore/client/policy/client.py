@@ -7,10 +7,6 @@ import requests
 from iamcore.irn import IRN
 from requests import Response
 
-from iamcore.client.common import (
-    SortOrder,
-    generic_search_all,
-)
 from iamcore.client.config import config
 from iamcore.client.exceptions import (
     IAMException,
@@ -20,6 +16,11 @@ from iamcore.client.exceptions import (
     unwrap_delete,
     unwrap_get,
     unwrap_post,
+    unwrap_put,
+)
+from iamcore.client.models.base import (
+    SortOrder,
+    generic_search_all,
 )
 
 from .dto import CreatePolicyRequest, IamPoliciesResponse, IamPolicyResponse, Policy
@@ -65,6 +66,31 @@ def delete_policy(auth_headers: dict[str, str], policy_id: str) -> None:
         timeout=config.TIMEOUT,
     )
     unwrap_delete(response)
+
+
+@err_chain(IAMPolicyException)
+def update_policy(
+    auth_headers: dict[str, str],
+    policy_id: str,
+    payload: CreatePolicyRequest,
+) -> None:
+    if not auth_headers:
+        msg = "Missing authorization headers"
+        raise IAMUnauthorizedException(msg)
+    if not policy_id:
+        msg = "Missing resource_id or display_name"
+        raise IAMPolicyException(msg)
+
+    url = config.IAMCORE_URL + "/api/v1/policies/" + policy_id
+    headers = {"Content-Type": "application/json", **auth_headers}
+    response: Response = requests.request(
+        "PUT",
+        url,
+        json=payload.model_dump_json(by_alias=True, exclude_none=True),
+        headers=headers,
+        timeout=config.TIMEOUT,
+    )
+    unwrap_put(response)
 
 
 @err_chain(IAMPolicyException)

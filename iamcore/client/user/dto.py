@@ -5,16 +5,12 @@ from typing import TYPE_CHECKING, Any, Optional
 from pydantic import Field
 from typing_extensions import override
 
-from iamcore.client.common import IamEntityResponse
-from iamcore.client.group.client import IamEntitiesResponse
-from iamcore.client.models.base import IAMCoreBaseModel
-
-from .client import create_user, delete_user
+from iamcore.client.models.base import IAMCoreBaseModel, IamEntitiesResponse, IamEntityResponse
 
 if TYPE_CHECKING:
     from iamcore.irn import IRN
 
-    from iamcore.client.common import JSON, JSON_List
+    from iamcore.client.models.base import JSON_List, JSON_obj
 
 
 class User(IAMCoreBaseModel):
@@ -38,10 +34,6 @@ class User(IAMCoreBaseModel):
         """Create User instance from User object or dict."""
         return User.model_validate(item) if isinstance(item, dict) else item
 
-    def delete(self, auth_headers: dict[str, str]) -> None:
-        """Delete this user."""
-        delete_user(auth_headers, self.id)
-
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return self.model_dump(by_alias=True)
@@ -59,10 +51,6 @@ class CreateUser(IAMCoreBaseModel):
     last_name: Optional[str] = Field(None, alias="lastName")
     path: Optional[str] = None
 
-    def create(self, auth_headers: dict[str, str]) -> User:
-        """Create the user via API call."""
-        return create_user(auth_headers, self)
-
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for API requests."""
         return self.model_dump(by_alias=True, exclude_none=True)
@@ -72,7 +60,7 @@ class IamUserResponse(IamEntityResponse[User]):
     data: User
 
     @override
-    def converter(self, item: JSON) -> User:
+    def converter(self, item: JSON_obj) -> User:
         return User.model_validate(item)
 
 

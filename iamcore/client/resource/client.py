@@ -6,10 +6,6 @@ import requests
 from iamcore.irn import IRN
 from requests import Response
 
-from iamcore.client.common import (
-    SortOrder,
-    generic_search_all,
-)
 from iamcore.client.config import config
 from iamcore.client.exceptions import (
     IAMException,
@@ -19,6 +15,10 @@ from iamcore.client.exceptions import (
     unwrap_get,
     unwrap_post,
     unwrap_put,
+)
+from iamcore.client.models.base import (
+    SortOrder,
+    generic_search_all,
 )
 
 from .dto import IamResourceResponse, IamResourcesResponse, Resource

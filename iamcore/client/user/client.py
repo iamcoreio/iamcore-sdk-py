@@ -1,16 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, NoReturn
+from typing import TYPE_CHECKING
 
 import requests
 from iamcore.irn import IRN
 from requests import Response
 
-from iamcore.client.common import (
-    IamIRNResponse,
-    SortOrder,
-    generic_search_all,
-)
 from iamcore.client.config import config
 from iamcore.client.exceptions import (
     IAMException,
@@ -22,6 +17,11 @@ from iamcore.client.exceptions import (
     unwrap_patch,
     unwrap_post,
     unwrap_put,
+)
+from iamcore.client.models.base import (
+    IamIRNResponse,
+    SortOrder,
+    generic_search_all,
 )
 
 from .dto import CreateUser, IamUserResponse, IamUsersResponse, User
@@ -102,7 +102,7 @@ def update_user(
         headers=headers,
         timeout=config.TIMEOUT,
     )
-    return unwrap_patch(response)
+    unwrap_patch(response)
 
 
 @err_chain(IAMUserException)
@@ -123,7 +123,7 @@ def delete_user(auth_headers: dict[str, str], user_id: str) -> None:
         headers=headers,
         timeout=config.TIMEOUT,
     )
-    return unwrap_delete(response)
+    unwrap_delete(response)
 
 
 @err_chain(IAMUserException)
@@ -153,11 +153,11 @@ def user_attach_policies(
         headers=headers,
         timeout=config.TIMEOUT,
     )
-    return unwrap_put(response)
+    unwrap_put(response)
 
 
 @err_chain(IAMUserException)
-def user_add_groups(auth_headers: dict[str, str], user_id: str, group_ids: list[str]) -> NoReturn:
+def user_add_groups(auth_headers: dict[str, str], user_id: str, group_ids: list[str]) -> None:
     if not auth_headers:
         msg = "Missing authorization headers"
         raise IAMUnauthorizedException(msg)
@@ -179,7 +179,7 @@ def user_add_groups(auth_headers: dict[str, str], user_id: str, group_ids: list[
         headers=headers,
         timeout=config.TIMEOUT,
     )
-    raise unwrap_put(response)
+    unwrap_put(response)
 
 
 @err_chain(IAMUserException)

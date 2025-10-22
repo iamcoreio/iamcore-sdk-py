@@ -7,7 +7,6 @@ import requests
 from iamcore.irn import IRN
 from requests import Response
 
-from iamcore.client.common import IamIRNsResponse, generic_search_all
 from iamcore.client.config import config
 from iamcore.client.exceptions import (
     EVALUATE_MAPPING,
@@ -15,6 +14,7 @@ from iamcore.client.exceptions import (
     unwrap_return_empty,
     unwrap_return_json,
 )
+from iamcore.client.models.base import IamIRNsResponse, generic_search_all
 
 if TYPE_CHECKING:
     from collections.abc import Generator

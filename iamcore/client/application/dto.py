@@ -5,8 +5,12 @@ from typing import TYPE_CHECKING, Any
 from pydantic import Field
 from typing_extensions import override
 
-from iamcore.client.common import IamEntitiesResponse, IamEntityResponse, JSON_List
-from iamcore.client.models.base import IAMCoreBaseModel
+from iamcore.client.models.base import (
+    IAMCoreBaseModel,
+    IamEntitiesResponse,
+    IamEntityResponse,
+    JSON_List,
+)
 
 if TYPE_CHECKING:
     from iamcore.irn import IRN
