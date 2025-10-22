@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, NoReturn
+from typing import TYPE_CHECKING, NoReturn
 
 import requests
 from iamcore.irn import IRN
-from pydantic import Field
 from requests import Response
 
 from iamcore.client.common import (
@@ -18,79 +17,32 @@ from iamcore.client.exceptions import (
     IAMException,
     IAMUnauthorizedException,
     IAMUserException,
+    err_chain,
+    unwrap_delete,
+    unwrap_get,
     unwrap_patch,
+    unwrap_post,
+    unwrap_put,
 )
-from iamcore.client.models.base import IAMCoreBaseModel
 
-from .exceptions import err_chain, unwrap_delete, unwrap_get, unwrap_post, unwrap_put
+from .dto import CreateUser, User
 
 if TYPE_CHECKING:
     from collections.abc import Generator
 
 
-class User(IAMCoreBaseModel):
-    """User model representing an IAM Core user."""
-
-    id: str
-    irn: IRN
-    created: str
-    updated: str
-    tenant_id: str = Field(alias="tenantId")
-    auth_id: str  # UUID stored as string
-    email: str
-    enabled: bool  # API returns boolean, not string
-    first_name: str = Field(alias="firstName")
-    last_name: str = Field(alias="lastName")
-    username: str
-    path: str
-
-    @staticmethod
-    def of(item: User | dict[str, Any]) -> User:
-        """Create User instance from User object or dict."""
-        if isinstance(item, User):
-            return item
-        if isinstance(item, dict):
-            return User.model_validate(item)
-        raise IAMUserException("Unexpected response format")
-
-    def delete(self, auth_headers: dict[str, str]) -> None:
-        """Delete this user."""
-        delete_user(auth_headers, self.id)
-
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
-        return self.model_dump(by_alias=True)
-
-
-class CreateUser(IAMCoreBaseModel):
-    """Request model for creating a new user."""
-
-    tenant_id: str | None = Field(None, alias="tenantId")
-    email: str | None = None
-    enabled: bool = True
-    first_name: str | None = Field(None, alias="firstName")
-    last_name: str | None = Field(None, alias="lastName")
-    username: str | None = None
-    password: str | None = None
-    confirm_password: str | None = Field(None, alias="confirmPassword")
-    path: str | None = None
-
-    def create(self, auth_headers: dict[str, str]) -> User:
-        """Create the user via API call."""
-        return create_user(auth_headers, **self.model_dump(by_alias=True, exclude_none=True))
-
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary for API requests."""
-        return self.model_dump(by_alias=True, exclude_none=True)
-
-
 @err_chain(IAMUserException)
-def create_user(auth_headers: dict[str, str], **kwargs: Any) -> User:
+def create_user(auth_headers: dict[str, str], create_user: CreateUser) -> User:
     """Create a new user."""
     url = config.IAMCORE_URL + "/api/v1/users"
-    payload = kwargs
     headers = {"Content-Type": "application/json", **auth_headers}
-    response: Response = requests.request("POST", url, json=payload, headers=headers)
+    response: Response = requests.request(
+        "POST",
+        url,
+        json=create_user.model_dump_json(by_alias=True, exclude_none=True),
+        headers=headers,
+        timeout=config.TIMEOUT,
+    )
     return IamEntityResponse(User, **unwrap_post(response)).data
 
 
@@ -98,7 +50,13 @@ def create_user(auth_headers: dict[str, str], **kwargs: Any) -> User:
 def get_user_me(auth_headers: dict[str, str]) -> User:
     url = config.IAMCORE_URL + "/api/v1/users/me"
     headers = {"Content-Type": "application/json", **auth_headers}
-    response: Response = requests.request("GET", url, data="", headers=headers)
+    response: Response = requests.request(
+        "GET",
+        url,
+        data="",
+        headers=headers,
+        timeout=config.TIMEOUT,
+    )
     return IamEntityResponse(User, **unwrap_get(response)).data
 
 
@@ -106,7 +64,13 @@ def get_user_me(auth_headers: dict[str, str]) -> User:
 def get_irn(auth_headers: dict[str, str]) -> IRN:
     url = config.IAMCORE_URL + "/api/v1/users/me/irn"
     headers = {"Content-Type": "application/json", **auth_headers}
-    response: Response = requests.request("GET", url, data="", headers=headers)
+    response: Response = requests.request(
+        "GET",
+        url,
+        data="",
+        headers=headers,
+        timeout=config.TIMEOUT,
+    )
     irn_str = IamEntityResponse(str, **unwrap_get(response)).data
     return IRN.of(irn_str)
 
@@ -114,29 +78,32 @@ def get_irn(auth_headers: dict[str, str]) -> IRN:
 @err_chain(IAMUserException)
 def update_user(
     auth_headers: dict[str, str],
-    user_id: str,
-    payload: dict[str, str] | None = None,
-    enabled: bool | None = None,
+    *,
+    irn: IRN,
     first_name: str | None = None,
     last_name: str | None = None,
     email: str | None = None,
+    enabled: bool | None = None,
 ) -> None:
     if not auth_headers:
         msg = "Missing authorization headers"
         raise IAMUnauthorizedException(msg)
-    if not user_id:
-        msg = "Missing user_id"
-        raise IAMUserException(msg)
-    url = config.IAMCORE_URL + "/api/v1/users/" + IRN.of(user_id).to_base64()
-    if not payload:
-        payload = {
-            "firstName": first_name,
-            "lastName": last_name,
-            "email": email,
-            "enabled": enabled,
-        }
+
+    url = config.IAMCORE_URL + "/api/v1/users/" + irn.to_base64()
+    payload = {
+        "firstName": first_name,
+        "lastName": last_name,
+        "email": email,
+        "enabled": enabled,
+    }
     headers = {"Content-Type": "application/json", **auth_headers}
-    response: Response = requests.request("PATCH", url, json=payload, headers=headers)
+    response: Response = requests.request(
+        "PATCH",
+        url,
+        json=payload,
+        headers=headers,
+        timeout=config.TIMEOUT,
+    )
     return unwrap_patch(response)
 
 
@@ -151,7 +118,13 @@ def delete_user(auth_headers: dict[str, str], user_id: str) -> None:
 
     url = config.IAMCORE_URL + "/api/v1/users/" + IRN.of(user_id).to_base64()
     headers = {"Content-Type": "application/json", **auth_headers}
-    response: Response = requests.request("DELETE", url, data="", headers=headers)
+    response: Response = requests.request(
+        "DELETE",
+        url,
+        data="",
+        headers=headers,
+        timeout=config.TIMEOUT,
+    )
     return unwrap_delete(response)
 
 
@@ -167,15 +140,21 @@ def user_attach_policies(
     if not user_id:
         msg = "Missing user_id"
         raise IAMUserException(msg)
-    if not policies_ids or not isinstance(policies_ids, list):
-        msg = "Missing policies_ids or it's not a list"
+    if not policies_ids:
+        msg = "Missing policies_ids"
         raise IAMUserException(msg)
 
     url = config.IAMCORE_URL + "/api/v1/users/" + user_id + "/policies/attach"
     headers = {"Content-Type": "application/json", **auth_headers}
     payload = {"policyIDs": policies_ids}
 
-    response = requests.request("PUT", url, json=payload, headers=headers)
+    response = requests.request(
+        "PUT",
+        url,
+        json=payload,
+        headers=headers,
+        timeout=config.TIMEOUT,
+    )
     return unwrap_put(response)
 
 
@@ -187,21 +166,28 @@ def user_add_groups(auth_headers: dict[str, str], user_id: str, group_ids: list[
     if not user_id:
         msg = "Missing user_id"
         raise IAMUserException(msg)
-    if not group_ids or not isinstance(group_ids, list):
-        msg = "Missing policies_ids or it's not a list"
+    if not group_ids:
+        msg = "Missing policies_ids"
         raise IAMUserException(msg)
 
     url = config.IAMCORE_URL + "/api/v1/users/" + user_id + "/groups/add"
     headers = {"Content-Type": "application/json", **auth_headers}
     payload = {"groupIDs": group_ids}
 
-    response = requests.request("POST", url, json=payload, headers=headers)
+    response = requests.request(
+        "POST",
+        url,
+        json=payload,
+        headers=headers,
+        timeout=config.TIMEOUT,
+    )
     raise unwrap_put(response)
 
 
 @err_chain(IAMUserException)
 def search_users(
     auth_headers: dict[str, str],
+    *,
     email: str | None = None,
     path: str | None = None,
     first_name: str | None = None,
@@ -227,19 +213,45 @@ def search_users(
         "page": page,
         "pageSize": page_size,
         "sort": sort,
-        "sortOrder": sort_order,
+        "sortOrder": sort_order.name if sort_order else None,
     }
 
     querystring = {k: v for k, v in querystring.items() if v}
 
-    response = requests.request("GET", url, data="", headers=auth_headers, params=querystring)
+    response = requests.request(
+        "GET",
+        url,
+        data="",
+        headers=auth_headers,
+        params=querystring,
+        timeout=config.TIMEOUT,
+    )
     return IamEntitiesResponse(User, **unwrap_get(response))
 
 
 @err_chain(IAMException)
 def search_all_users(
     auth_headers: dict[str, str],
-    *args: Any,
-    **kwargs: Any,
+    *,
+    email: str | None = None,
+    path: str | None = None,
+    first_name: str | None = None,
+    last_name: str | None = None,
+    username: str | None = None,
+    tenant_id: str | None = None,
+    search: str | None = None,
+    sort: str | None = None,
+    sort_order: SortOrder | None = None,
 ) -> Generator[User, None, None]:
-    return generic_search_all(auth_headers, search_users, *args, **kwargs)
+    kwargs = {
+        "email": email,
+        "path": path,
+        "first_name": first_name,
+        "last_name": last_name,
+        "username": username,
+        "tenant_id": tenant_id,
+        "search": search,
+        "sort": sort,
+        "sort_order": sort_order,
+    }
+    return generic_search_all(auth_headers, search_users, **kwargs)
