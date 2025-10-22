@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import requests
-from iamcore.irn import IRN
-from pydantic import Field
 from requests import Response
 
 from iamcore.client.common import (
@@ -22,39 +20,17 @@ from iamcore.client.exceptions import (
     unwrap_post,
     unwrap_put,
 )
-from iamcore.client.models.base import IAMCoreBaseModel
+
+from .dto import Application
 
 if TYPE_CHECKING:
     from collections.abc import Generator
 
 
-class Application(IAMCoreBaseModel):
-    """Application model representing IAM Core applications."""
-
-    id: str
-    irn: IRN
-    name: str
-    display_name: str = Field(alias="displayName")
-    created: str
-    updated: str
-
-    @staticmethod
-    def of(item: Application | dict[str, Any]) -> Application:
-        """Create Application instance from Application object or dict."""
-        if isinstance(item, Application):
-            return item
-        if isinstance(item, dict):
-            return Application.model_validate(item)
-        raise IAMException("Unexpected response format")
-
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
-        return self.model_dump(by_alias=True)
-
-
 @err_chain(IAMException)
 def create_application(
     auth_headers: dict[str, str],
+    *,
     name: str,
     display_name: str | None = None,
 ) -> Application:
@@ -69,7 +45,7 @@ def create_application(
 
 
 @err_chain(IAMException)
-def get_application(headers: dict[str, str], irn: str) -> Application:
+def get_application(headers: dict[str, str], *, irn: str) -> Application:
     url = config.IAMCORE_URL + "/api/v1/applications/" + str(irn)
     response: Response = requests.request("GET", url, data="", headers=headers)
     return IamEntityResponse(Application, **unwrap_get(response)).data
@@ -78,6 +54,7 @@ def get_application(headers: dict[str, str], irn: str) -> Application:
 @err_chain(IAMException)
 def application_attach_policies(
     auth_headers: dict[str, str],
+    *,
     application_id: str,
     policies_ids: list[str],
 ) -> None:
@@ -87,7 +64,7 @@ def application_attach_policies(
     if not application_id:
         msg = "Missing user_id"
         raise IAMException(msg)
-    if not policies_ids or not isinstance(policies_ids, list):
+    if not policies_ids:
         msg = "Missing policies_ids or it's not a list"
         raise IAMException(msg)
 
@@ -102,6 +79,7 @@ def application_attach_policies(
 @err_chain(IAMException)
 def search_application(
     headers: dict[str, str],
+    *,
     irn: str | None = None,
     name: str | None = None,
     display_name: str | None = None,
@@ -119,9 +97,8 @@ def search_application(
         "page": page,
         "pageSize": page_size,
         "sort": sort,
-        "sortOrder": sort_order,
+        "sortOrder": sort_order.name if sort_order else None,
     }
-
     querystring = {k: v for k, v in querystring.items() if v}
 
     response: Response = requests.request("GET", url, data="", headers=headers, params=querystring)
@@ -131,7 +108,19 @@ def search_application(
 @err_chain(IAMException)
 def search_all_applications(
     auth_headers: dict[str, str],
-    *args: Any,
-    **kwargs: Any,
+    *,
+    irn: str | None = None,
+    name: str | None = None,
+    display_name: str | None = None,
+    sort: str | None = None,
+    sort_order: SortOrder | None = None,
 ) -> Generator[Application, None, None]:
-    return generic_search_all(auth_headers, search_application, *args, **kwargs)
+    kwargs = {
+        "irn": irn,
+        "name": name,
+        "display_name": display_name,
+        "sort": sort,
+        "sort_order": sort_order,
+    }
+    kwargs = {k: v for k, v in kwargs.items() if v}
+    return generic_search_all(auth_headers, search_application, **kwargs)

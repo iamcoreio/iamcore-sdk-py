@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, ValidationError
 
@@ -17,7 +17,7 @@ class IAMCoreBaseModel(BaseModel):
     )
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "IAMCoreBaseModel":
+    def from_dict(cls, data: dict[str, Any]) -> "IAMCoreBaseModel":
         """Create model instance from dictionary, handling validation errors."""
         try:
             return cls(**data)
@@ -25,6 +25,6 @@ class IAMCoreBaseModel(BaseModel):
             msg = f"Validation error for {cls.__name__}: {e}"
             raise IAMException(msg) from e
 
-    def to_dict(self, by_alias: bool = True) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert model to dictionary with optional field aliasing."""
-        return self.model_dump(by_alias=by_alias)
+        return self.model_dump(by_alias=True)
