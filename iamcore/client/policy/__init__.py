@@ -1,17 +1,9 @@
-from .client import (
-    create_policy,
-    delete_policy,
-    search_all_policies,
-    search_policy,
-)
+from .client import Client
 from .dto import CreatePolicyRequest, Policy, PolicyStatement
 
 __all__ = [
+    "Client",
     "CreatePolicyRequest",
     "Policy",
     "PolicyStatement",
-    "create_policy",
-    "delete_policy",
-    "search_all_policies",
-    "search_policy",
 ]

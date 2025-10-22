@@ -1,16 +1,11 @@
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING
 
-import requests
-from iamcore.irn import IRN
-from requests import Response
-
-from iamcore.client.config import config
 from iamcore.client.exceptions import (
     IAMException,
     IAMGroupException,
-    IAMUnauthorizedException,
     err_chain,
     unwrap_delete,
     unwrap_get,
@@ -21,180 +16,130 @@ from iamcore.client.models.base import (
     SortOrder,
     generic_search_all,
 )
+from iamcore.client.models.client import HTTPClientWithTimeout
 
 from .dto import Group, IamGroupResponse, IamGroupsResponse
 
 if TYPE_CHECKING:
     from collections.abc import Generator
 
+    from iamcore.irn import IRN
+    from requests import Response
 
-@err_chain(IAMGroupException)
-def create_group(
-    auth_headers: dict[str, str],
-    *,
-    name: str | None = None,
-    display_name: str | None = None,
-    tenant_id: str | None = None,
-    parent_id: str | None = None,
-) -> Group:
-    url = config.IAMCORE_URL + "/api/v1/groups"
-    payload = {
-        "name": name,
-        "displayName": display_name,
-        "parentID": parent_id,
-        "tenantID": tenant_id,
-    }
-    payload = {k: v for k, v in payload.items() if v}
-
-    headers = {"Content-Type": "application/json", **auth_headers}
-    response: Response = requests.request(
-        "POST",
-        url,
-        json=payload,
-        headers=headers,
-        timeout=config.TIMEOUT,
-    )
-    return IamGroupResponse(**unwrap_post(response)).data
+    from iamcore.client.config import BaseConfig
 
 
-@err_chain(IAMGroupException)
-def delete_group(auth_headers: dict[str, str], group_id: str) -> None:
-    if not auth_headers:
-        msg = "Missing authorization headers"
-        raise IAMUnauthorizedException(msg)
-    if not group_id:
-        msg = "Missing group_id"
-        raise IAMGroupException(msg)
+class Client(HTTPClientWithTimeout):
+    """Client for IAM Core Group API."""
 
-    url = config.IAMCORE_URL + "/api/v1/groups/" + IRN.of(group_id).to_base64()
-    headers = {"Content-Type": "application/json", **auth_headers}
-    response: Response = requests.request(
-        "DELETE",
-        url,
-        data="",
-        headers=headers,
-        timeout=config.TIMEOUT,
-    )
-    unwrap_delete(response)
+    def __init__(self, config: BaseConfig) -> None:
+        super().__init__(base_url=config.IAMCORE_URL, timeout=config.TIMEOUT)
 
+    @err_chain(IAMGroupException)
+    def create_group(
+        self,
+        auth_headers: dict[str, str],
+        *,
+        name: str | None = None,
+        display_name: str | None = None,
+        tenant_id: str | None = None,
+        parent_id: str | None = None,
+    ) -> Group:
+        payload = {
+            "name": name,
+            "displayName": display_name,
+            "parentID": parent_id,
+            "tenantID": tenant_id,
+        }
+        payload = {k: v for k, v in payload.items() if v}
 
-@err_chain(IAMGroupException)
-def group_attach_policies(
-    auth_headers: dict[str, str],
-    group_id: str,
-    policies_ids: list[str],
-) -> None:
-    if not auth_headers:
-        msg = "Missing authorization headers"
-        raise IAMUnauthorizedException(msg)
-    if not group_id:
-        msg = "Missing group_id"
-        raise IAMGroupException(msg)
-    if not policies_ids:
-        msg = "Missing policies_ids or it's not a list"
-        raise IAMGroupException(msg)
+        response = self.post("groups", data=json.dumps(payload), headers=auth_headers)
+        return IamGroupResponse(**unwrap_post(response)).data
 
-    url = config.IAMCORE_URL + "/api/v1/groups/" + group_id + "/policies/attach"
-    headers = {"Content-Type": "application/json", **auth_headers}
-    payload = {"policyIDs": policies_ids}
+    @err_chain(IAMGroupException)
+    def delete_group(self, auth_headers: dict[str, str], group_irn: IRN) -> None:
+        path = f"groups/{group_irn.to_base64()}"
+        response: Response = self.delete(path, headers=auth_headers)
+        unwrap_delete(response)
 
-    response = requests.request(
-        "PUT",
-        url,
-        json=payload,
-        headers=headers,
-        timeout=config.TIMEOUT,
-    )
-    unwrap_put(response)
+    @err_chain(IAMGroupException)
+    def group_attach_policies(
+        self,
+        auth_headers: dict[str, str],
+        group_id: str,
+        policies_ids: list[str],
+    ) -> None:
+        path = f"groups/{group_id}/policies/attach"
+        payload = {"policyIDs": policies_ids}
 
+        response = self.put(path, data=json.dumps(payload), headers=auth_headers)
+        unwrap_put(response)
 
-@err_chain(IAMGroupException)
-def group_add_members(auth_headers: dict[str, str], group_id: str, members_ids: list[str]) -> None:
-    if not auth_headers:
-        msg = "Missing authorization headers"
-        raise IAMUnauthorizedException(msg)
-    if not group_id:
-        msg = "Missing group_id"
-        raise IAMGroupException(msg)
-    if not members_ids:
-        msg = "Missing policies_ids or it's not a list"
-        raise IAMGroupException(msg)
+    @err_chain(IAMGroupException)
+    def group_add_members(
+        self,
+        auth_headers: dict[str, str],
+        group_id: str,
+        members_ids: list[str],
+    ) -> None:
+        path = f"groups/{group_id}/members/add"
+        payload = {"userIDs": members_ids}
 
-    url = config.IAMCORE_URL + "/api/v1/groups/" + group_id + "/members/add"
-    headers = {"Content-Type": "application/json", **auth_headers}
-    payload = {"userIDs": members_ids}
+        response = self.post(path, data=json.dumps(payload), headers=auth_headers)
+        unwrap_put(response)
 
-    response = requests.request(
-        "POST",
-        url,
-        json=payload,
-        headers=headers,
-        timeout=config.TIMEOUT,
-    )
-    unwrap_put(response)
+    @err_chain(IAMGroupException)
+    def search_group(
+        self,
+        headers: dict[str, str],
+        *,
+        irn: IRN | None = None,
+        path: str | None = None,
+        name: str | None = None,
+        display_name: str | None = None,
+        tenant_id: str | None = None,
+        page: int | None = None,
+        page_size: int | None = None,
+        sort: str | None = None,
+        sort_order: SortOrder | None = None,
+    ) -> IamGroupsResponse:
+        querystring = {
+            "irn": str(irn) if irn else None,
+            "path": path,
+            "name": name,
+            "displayName": display_name,
+            "tenantID": tenant_id,
+            "page": page,
+            "pageSize": page_size,
+            "sort": sort,
+            "sortOrder": sort_order.name if sort_order else None,
+        }
+        querystring = {k: v for k, v in querystring.items() if v}
 
+        response = self.get("groups", headers=headers, params=querystring)
+        return IamGroupsResponse(**unwrap_get(response))
 
-@err_chain(IAMGroupException)
-def search_group(
-    headers: dict[str, str],
-    *,
-    irn: IRN | None = None,
-    path: str | None = None,
-    name: str | None = None,
-    display_name: str | None = None,
-    tenant_id: str | None = None,
-    page: int | None = None,
-    page_size: int | None = None,
-    sort: str | None = None,
-    sort_order: SortOrder | None = None,
-) -> IamGroupsResponse:
-    url = config.IAMCORE_URL + "/api/v1/groups"
-
-    querystring = {
-        "irn": str(irn) if irn else None,
-        "path": path,
-        "name": name,
-        "displayName": display_name,
-        "tenantID": tenant_id,
-        "page": page,
-        "pageSize": page_size,
-        "sort": sort,
-        "sortOrder": sort_order.name if sort_order else None,
-    }
-
-    querystring = {k: v for k, v in querystring.items() if v}
-
-    response = requests.request(
-        "GET",
-        url,
-        data="",
-        headers=headers,
-        params=querystring,
-        timeout=config.TIMEOUT,
-    )
-    return IamGroupsResponse(**unwrap_get(response))
-
-
-@err_chain(IAMException)
-def search_all_groups(
-    auth_headers: dict[str, str],
-    *,
-    irn: IRN | None = None,
-    path: str | None = None,
-    name: str | None = None,
-    display_name: str | None = None,
-    tenant_id: str | None = None,
-    sort: str | None = None,
-    sort_order: SortOrder | None = None,
-) -> Generator[Group, None, None]:
-    kwargs = {
-        "headers": auth_headers,
-        "irn": irn,
-        "path": path,
-        "name": name,
-        "display_name": display_name,
-        "tenant_id": tenant_id,
-        "sort": sort,
-        "sort_order": sort_order,
-    }
-    return generic_search_all(auth_headers, search_group, **kwargs)
+    @err_chain(IAMException)
+    def search_all_groups(
+        self,
+        auth_headers: dict[str, str],
+        *,
+        irn: IRN | None = None,
+        path: str | None = None,
+        name: str | None = None,
+        display_name: str | None = None,
+        tenant_id: str | None = None,
+        sort: str | None = None,
+        sort_order: SortOrder | None = None,
+    ) -> Generator[Group, None, None]:
+        kwargs = {
+            "headers": auth_headers,
+            "irn": irn,
+            "path": path,
+            "name": name,
+            "display_name": display_name,
+            "tenant_id": tenant_id,
+            "sort": sort,
+            "sort_order": sort_order,
+        }
+        return generic_search_all(auth_headers, self.search_group, **kwargs)

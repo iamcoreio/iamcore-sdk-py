@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Optional
 
 from pydantic import Field
 from typing_extensions import override
@@ -13,36 +13,36 @@ from iamcore.client.models.base import (
 )
 
 
-class ApiKey(IAMCoreBaseModel):
+class ApiKeyResponse(IAMCoreBaseModel):
     """Application API key model representing IAM Core application API keys."""
 
     api_key: str = Field(alias="apiKey")
     state: str
-    last_used: str = Field(alias="lastUsed")
+    last_used: Optional[str] = Field(None, alias="lastUsed")
     created: str
     updated: str
 
     @staticmethod
-    def of(item: ApiKey | dict[str, Any]) -> ApiKey:
+    def of(item: ApiKeyResponse | dict[str, Any]) -> ApiKeyResponse:
         """Create ApplicationApiKey instance from ApplicationApiKey object or dict."""
-        return ApiKey.model_validate(item) if isinstance(item, dict) else item
+        return ApiKeyResponse.model_validate(item) if isinstance(item, dict) else item
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return self.model_dump(by_alias=True)
 
 
-class IamApiKeyResponse(IamEntityResponse[ApiKey]):
-    data: ApiKey
+class IamApiKeyResponse(IamEntityResponse[ApiKeyResponse]):
+    data: ApiKeyResponse
 
     @override
-    def converter(self, item: dict[str, Any]) -> ApiKey:
-        return ApiKey.model_validate(item)
+    def converter(self, item: dict[str, Any]) -> ApiKeyResponse:
+        return ApiKeyResponse.model_validate(item)
 
 
-class IamApiKeysResponse(IamEntitiesResponse[ApiKey]):
-    data: list[ApiKey]
+class IamApiKeysResponse(IamEntitiesResponse[ApiKeyResponse]):
+    data: list[ApiKeyResponse]
 
     @override
-    def converter(self, item: JSON_List) -> list[ApiKey]:
-        return [ApiKey.model_validate(item) for item in item]
+    def converter(self, item: JSON_List) -> list[ApiKeyResponse]:
+        return [ApiKeyResponse.model_validate(item) for item in item]
