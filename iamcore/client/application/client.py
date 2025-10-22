@@ -40,14 +40,26 @@ def create_application(
     payload = {k: v for k, v in payload.items() if v}
 
     headers = {"Content-Type": "application/json", **auth_headers}
-    response: Response = requests.request("POST", url, json=payload, headers=headers)
+    response: Response = requests.request(
+        "POST",
+        url,
+        json=payload,
+        headers=headers,
+        timeout=config.TIMEOUT,
+    )
     return IamEntityResponse(Application, **unwrap_post(response)).data
 
 
 @err_chain(IAMException)
 def get_application(headers: dict[str, str], *, irn: str) -> Application:
     url = config.IAMCORE_URL + "/api/v1/applications/" + str(irn)
-    response: Response = requests.request("GET", url, data="", headers=headers)
+    response: Response = requests.request(
+        "GET",
+        url,
+        data="",
+        headers=headers,
+        timeout=config.TIMEOUT,
+    )
     return IamEntityResponse(Application, **unwrap_get(response)).data
 
 
