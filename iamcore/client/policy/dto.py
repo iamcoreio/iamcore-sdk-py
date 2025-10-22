@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import requests
+from iamcore.irn import IRN
 from pydantic import Field
 from requests import Response
+from typing_extensions import override
 
+from iamcore.client.common import JSON, IamEntitiesResponse, IamEntityResponse, JSON_List
 from iamcore.client.config import config
 from iamcore.client.exceptions import (
     IAMPolicyException,
@@ -16,9 +19,6 @@ from iamcore.client.exceptions import (
 )
 from iamcore.client.models.base import IAMCoreBaseModel
 from iamcore.client.policy.client import create_policy, delete_policy
-
-if TYPE_CHECKING:
-    from iamcore.irn import IRN
 
 logger = logging.getLogger(__name__)
 
@@ -116,3 +116,19 @@ class CreatePolicyRequest(IAMCoreBaseModel):
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for API requests."""
         return self.model_dump(by_alias=True, exclude_none=True)
+
+
+class IamPolicyResponse(IamEntityResponse[Policy]):
+    data: Policy
+
+    @override
+    def converter(self, item: JSON) -> Policy:
+        return Policy.model_validate(item)
+
+
+class IamPoliciesResponse(IamEntitiesResponse[Policy]):
+    data: list[Policy]
+
+    @override
+    def converter(self, item: JSON_List) -> list[Policy]:
+        return [Policy.model_validate(item) for item in item]

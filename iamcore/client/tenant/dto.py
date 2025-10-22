@@ -3,7 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from pydantic import Field
+from typing_extensions import override
 
+from iamcore.client.common import JSON, IamEntitiesResponse, IamEntityResponse, JSON_List
 from iamcore.client.models.base import IAMCoreBaseModel
 
 from .client import delete_tenant, update_tenant
@@ -59,3 +61,35 @@ class TenantIssuer(IAMCoreBaseModel):
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return self.model_dump(by_alias=True)
+
+
+class IamTenantResponse(IamEntityResponse[Tenant]):
+    data: Tenant
+
+    @override
+    def converter(self, item: JSON) -> Tenant:
+        return Tenant.model_validate(item)
+
+
+class IamTenantsResponse(IamEntitiesResponse[Tenant]):
+    data: list[Tenant]
+
+    @override
+    def converter(self, item: JSON_List) -> list[Tenant]:
+        return [Tenant.model_validate(item) for item in item]
+
+
+class IamTenantIssuerResponse(IamEntityResponse[TenantIssuer]):
+    data: TenantIssuer
+
+    @override
+    def converter(self, item: dict[str, Any]) -> TenantIssuer:
+        return TenantIssuer.model_validate(item)
+
+
+class IamTenantIssuersResponse(IamEntitiesResponse[TenantIssuer]):
+    data: list[TenantIssuer]
+
+    @override
+    def converter(self, item: JSON_List) -> list[TenantIssuer]:
+        return [TenantIssuer.model_validate(item) for item in item]

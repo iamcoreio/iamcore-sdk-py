@@ -6,8 +6,6 @@ import requests
 from requests import Response
 
 from iamcore.client.common import (
-    IamEntitiesResponse,
-    IamEntityResponse,
     SortOrder,
     generic_search_all,
 )
@@ -22,7 +20,13 @@ from iamcore.client.exceptions import (
     unwrap_put,
 )
 
-from .dto import Tenant, TenantIssuer
+from .dto import (
+    IamTenantIssuersResponse,
+    IamTenantResponse,
+    IamTenantsResponse,
+    Tenant,
+    TenantIssuer,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -55,7 +59,7 @@ def create_tenant(
         headers=headers,
         timeout=config.TIMEOUT,
     )
-    return IamEntityResponse(Tenant, **unwrap_post(response)).data
+    return IamTenantResponse(**unwrap_post(response)).data
 
 
 @err_chain(IAMTenantException)
@@ -109,7 +113,7 @@ def get_issuer(
         params=querystring,
         timeout=config.TIMEOUT,
     )
-    return IamEntitiesResponse(TenantIssuer, **unwrap_get(response)).data.pop()
+    return IamTenantIssuersResponse(**unwrap_get(response)).data.pop()
 
 
 @err_chain(IAMTenantException)
@@ -125,7 +129,7 @@ def search_tenant(
     page_size: int | None = None,
     sort: str | None = None,
     sort_order: SortOrder | None = None,
-) -> IamEntitiesResponse[Tenant]:
+) -> IamTenantsResponse:
     url = config.IAMCORE_URL + "/api/v1/tenants"
 
     querystring = {
@@ -149,7 +153,7 @@ def search_tenant(
         params=querystring,
         timeout=config.TIMEOUT,
     )
-    return IamEntitiesResponse(Tenant, **unwrap_get(response))
+    return IamTenantsResponse(**unwrap_get(response))
 
 
 @err_chain(IAMException)

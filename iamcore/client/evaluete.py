@@ -7,7 +7,7 @@ import requests
 from iamcore.irn import IRN
 from requests import Response
 
-from iamcore.client.common import IamEntitiesResponse, generic_search_all
+from iamcore.client.common import IamIRNsResponse, generic_search_all
 from iamcore.client.config import config
 from iamcore.client.exceptions import (
     EVALUATE_MAPPING,
@@ -68,7 +68,13 @@ def evaluate(auth_headers: dict[str, str], action: str, resources: list[IRN]) ->
     payload = {"action": action, "resources": [str(r) for r in resources if r]}
     headers = {"Content-Type": "application/json", **auth_headers}
     logger.debug("Going to evaluate resources: POST %s, json=%s", url, payload)
-    response: Response = requests.request("POST", url, json=payload, headers=headers)
+    response: Response = requests.request(
+        "POST",
+        url,
+        json=payload,
+        headers=headers,
+        timeout=config.TIMEOUT,
+    )
     return unwrap_return_empty(response, EVALUATE_MAPPING)
 
 
@@ -81,7 +87,13 @@ def evaluate_actions(
     payload = {"actions": actions, "irns": [str(r) for r in irns if r]}
     headers = {"Content-Type": "application/json", **auth_headers}
     logger.debug("Going to evaluate resources: POST %s, json=%s", url, payload)
-    response: Response = requests.request("POST", url, json=payload, headers=headers)
+    response: Response = requests.request(
+        "POST",
+        url,
+        json=payload,
+        headers=headers,
+        timeout=config.TIMEOUT,
+    )
     return unwrap_return_json(response, EVALUATE_MAPPING)
 
 
@@ -92,7 +104,7 @@ def evaluate_resources(
     resource_type: str,
     page: int = 1,
     page_size: int = 100,
-) -> IamEntitiesResponse[IRN]:
+) -> IamIRNsResponse:
     url = config.IAMCORE_URL + "/api/v1/evaluate/resources"
     payload = {"application": application, "action": action, "resourceType": resource_type}
     querystring = {
@@ -112,8 +124,9 @@ def evaluate_resources(
         json=payload,
         headers=headers,
         params=querystring,
+        timeout=config.TIMEOUT,
     )
-    return IamEntitiesResponse(IRN, **unwrap_return_json(response, EVALUATE_MAPPING))
+    return IamIRNsResponse(**unwrap_return_json(response, EVALUATE_MAPPING))
 
 
 def evaluate_all_resources(

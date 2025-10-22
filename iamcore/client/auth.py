@@ -45,7 +45,13 @@ def get_token_with_password(
     payload = f"grant_type=password&client_id={client_id}&username={username}&password={password}"
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     try:
-        response = requests.request("POST", url, data=payload, headers=headers)
+        response = requests.request(
+            "POST",
+            url,
+            data=payload,
+            headers=headers,
+            timeout=config.TIMEOUT,
+        )
         if response.status_code == http.client.OK:
             return TokenResponse(**response.json())
         if response.status_code == http.client.UNAUTHORIZED:

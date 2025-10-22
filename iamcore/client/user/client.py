@@ -7,8 +7,7 @@ from iamcore.irn import IRN
 from requests import Response
 
 from iamcore.client.common import (
-    IamEntitiesResponse,
-    IamEntityResponse,
+    IamIRNResponse,
     SortOrder,
     generic_search_all,
 )
@@ -25,7 +24,7 @@ from iamcore.client.exceptions import (
     unwrap_put,
 )
 
-from .dto import CreateUser, User
+from .dto import CreateUser, IamUserResponse, IamUsersResponse, User
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -43,7 +42,7 @@ def create_user(auth_headers: dict[str, str], create_user: CreateUser) -> User:
         headers=headers,
         timeout=config.TIMEOUT,
     )
-    return IamEntityResponse(User, **unwrap_post(response)).data
+    return IamUserResponse(**unwrap_post(response)).data
 
 
 @err_chain(IAMUserException)
@@ -57,7 +56,7 @@ def get_user_me(auth_headers: dict[str, str]) -> User:
         headers=headers,
         timeout=config.TIMEOUT,
     )
-    return IamEntityResponse(User, **unwrap_get(response)).data
+    return IamUserResponse(**unwrap_get(response)).data
 
 
 @err_chain(IAMUserException)
@@ -71,8 +70,7 @@ def get_irn(auth_headers: dict[str, str]) -> IRN:
         headers=headers,
         timeout=config.TIMEOUT,
     )
-    irn_str = IamEntityResponse(str, **unwrap_get(response)).data
-    return IRN.of(irn_str)
+    return IamIRNResponse(**unwrap_get(response)).data
 
 
 @err_chain(IAMUserException)
@@ -199,7 +197,7 @@ def search_users(
     page_size: int | None = None,
     sort: str | None = None,
     sort_order: SortOrder | None = None,
-) -> IamEntitiesResponse[User]:
+) -> IamUsersResponse:
     url = config.IAMCORE_URL + "/api/v1/users"
 
     querystring = {
@@ -226,7 +224,7 @@ def search_users(
         params=querystring,
         timeout=config.TIMEOUT,
     )
-    return IamEntitiesResponse(User, **unwrap_get(response))
+    return IamUsersResponse(**unwrap_get(response))
 
 
 @err_chain(IAMException)
@@ -254,4 +252,4 @@ def search_all_users(
         "sort": sort,
         "sort_order": sort_order,
     }
-    return generic_search_all(auth_headers, search_users, **kwargs)
+    return generic_search_all(auth_headers, search_users, **kwargs)  # Return type is unknown

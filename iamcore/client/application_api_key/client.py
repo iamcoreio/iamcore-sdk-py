@@ -6,11 +6,11 @@ import requests
 from iamcore.irn import IRN
 from requests import Response
 
-from iamcore.client.common import IamEntitiesResponse, generic_search_all
+from iamcore.client.common import generic_search_all
 from iamcore.client.config import config
 from iamcore.client.exceptions import IAMException, err_chain, unwrap_get
 
-from .dto import ApplicationApiKey
+from .dto import ApplicationApiKey, IamApplicationApiKeyResponse, IamApplicationApiKeysResponse
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -20,12 +20,12 @@ if TYPE_CHECKING:
 def create_application_api_key(
     auth_headers: dict[str, str],
     application_irn: IRN,
-) -> IamEntitiesResponse[ApplicationApiKey]:
+) -> IamApplicationApiKeyResponse:
     irn = IRN.of(application_irn)
     url = config.IAMCORE_URL + "/api/v1/principals/" + irn.to_base64() + "/api-keys"
     headers = {"Content-Type": "application/json", **auth_headers}
     response: Response = requests.request("POST", url, headers=headers, timeout=config.TIMEOUT)
-    return IamEntitiesResponse(ApplicationApiKey, **unwrap_get(response))
+    return IamApplicationApiKeyResponse(**unwrap_get(response))
 
 
 @err_chain(IAMException)
@@ -33,7 +33,7 @@ def get_application_api_keys(
     headers: dict[str, str],
     irn: str | IRN,
     page: int = 1,
-) -> IamEntitiesResponse[ApplicationApiKey]:
+) -> IamApplicationApiKeysResponse:
     irn = IRN.of(irn) if isinstance(irn, str) else irn
 
     url = f"{config.IAMCORE_URL}/api/v1/principals/{irn.to_base64()}/api-keys?page={page}"
@@ -44,7 +44,7 @@ def get_application_api_keys(
         headers=headers,
         timeout=config.TIMEOUT,
     )
-    return IamEntitiesResponse(ApplicationApiKey, **unwrap_get(response))
+    return IamApplicationApiKeysResponse(**unwrap_get(response))
 
 
 @err_chain(IAMException)

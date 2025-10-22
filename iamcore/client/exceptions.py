@@ -156,8 +156,8 @@ def err_chain(error=IAMException) -> Callable[..., Any]:
         def new_func(*args: Any, **kwargs: Any) -> Any:
             try:
                 return func(*args, **kwargs)
-            except IAMException as e:
-                raise e
+            except IAMException:
+                raise
             except Exception as e:
                 raise error(str(e))
 

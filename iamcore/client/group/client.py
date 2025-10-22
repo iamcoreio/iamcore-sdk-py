@@ -7,8 +7,6 @@ from iamcore.irn import IRN
 from requests import Response
 
 from iamcore.client.common import (
-    IamEntitiesResponse,
-    IamEntityResponse,
     SortOrder,
     generic_search_all,
 )
@@ -24,7 +22,7 @@ from iamcore.client.exceptions import (
     unwrap_put,
 )
 
-from .dto import Group
+from .dto import Group, IamGroupResponse, IamGroupsResponse
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -56,7 +54,7 @@ def create_group(
         headers=headers,
         timeout=config.TIMEOUT,
     )
-    return IamEntityResponse[Group](Group, **unwrap_post(response)).data
+    return IamGroupResponse(**unwrap_post(response)).data
 
 
 @err_chain(IAMGroupException)
@@ -149,7 +147,7 @@ def search_group(
     page_size: int | None = None,
     sort: str | None = None,
     sort_order: SortOrder | None = None,
-) -> IamEntitiesResponse[Group]:
+) -> IamGroupsResponse:
     url = config.IAMCORE_URL + "/api/v1/groups"
 
     querystring = {
@@ -174,7 +172,7 @@ def search_group(
         params=querystring,
         timeout=config.TIMEOUT,
     )
-    return IamEntitiesResponse(Group, **unwrap_get(response))
+    return IamGroupsResponse(**unwrap_get(response))
 
 
 @err_chain(IAMException)

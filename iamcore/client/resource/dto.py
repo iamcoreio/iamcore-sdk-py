@@ -3,7 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from pydantic import Field
+from typing_extensions import override
 
+from iamcore.client.common import JSON, IamEntitiesResponse, IamEntityResponse, JSON_List
 from iamcore.client.models.base import IAMCoreBaseModel
 
 from .client import delete_resource, update_resource
@@ -50,3 +52,19 @@ class Resource(IAMCoreBaseModel):
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return self.model_dump(by_alias=True)
+
+
+class IamResourceResponse(IamEntityResponse[Resource]):
+    data: Resource
+
+    @override
+    def converter(self, item: JSON) -> Resource:
+        return Resource.model_validate(item)
+
+
+class IamResourcesResponse(IamEntitiesResponse[Resource]):
+    data: list[Resource]
+
+    @override
+    def converter(self, item: JSON_List) -> list[Resource]:
+        return [Resource.model_validate(item) for item in item]

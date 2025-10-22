@@ -6,8 +6,6 @@ import requests
 from requests import Response
 
 from iamcore.client.common import (
-    IamEntitiesResponse,
-    IamEntityResponse,
     SortOrder,
     generic_search_all,
 )
@@ -21,7 +19,7 @@ from iamcore.client.exceptions import (
     unwrap_put,
 )
 
-from .dto import Application
+from .dto import Application, IamApplicationResponse, IamApplicationsResponse
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -47,7 +45,7 @@ def create_application(
         headers=headers,
         timeout=config.TIMEOUT,
     )
-    return IamEntityResponse(Application, **unwrap_post(response)).data
+    return IamApplicationResponse(**unwrap_post(response)).data
 
 
 @err_chain(IAMException)
@@ -60,7 +58,7 @@ def get_application(headers: dict[str, str], *, irn: str) -> Application:
         headers=headers,
         timeout=config.TIMEOUT,
     )
-    return IamEntityResponse(Application, **unwrap_get(response)).data
+    return IamApplicationResponse(**unwrap_get(response)).data
 
 
 @err_chain(IAMException)
@@ -99,7 +97,7 @@ def search_application(
     page_size: int | None = None,
     sort: str | None = None,
     sort_order: SortOrder | None = None,
-) -> IamEntitiesResponse[Application]:
+) -> IamApplicationsResponse:
     url = config.IAMCORE_URL + "/api/v1/applications"
 
     querystring = {
@@ -121,7 +119,7 @@ def search_application(
         params=querystring,
         timeout=config.TIMEOUT,
     )
-    return IamEntitiesResponse(Application, **unwrap_get(response))
+    return IamApplicationsResponse(**unwrap_get(response))
 
 
 @err_chain(IAMException)

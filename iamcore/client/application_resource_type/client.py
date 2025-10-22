@@ -7,15 +7,17 @@ from iamcore.irn import IRN
 from requests import Response
 
 from iamcore.client.common import (
-    IamEntitiesResponse,
-    IamEntityResponse,
     SortOrder,
     generic_search_all,
 )
 from iamcore.client.config import config
 from iamcore.client.exceptions import IAMException, err_chain, unwrap_get, unwrap_post
 
-from .dto import ApplicationResourceType
+from .dto import (
+    ApplicationResourceType,
+    IamApplicationResourceTypeResponse,
+    IamApplicationResourceTypesResponse,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -53,7 +55,7 @@ def create_resource_type(
         headers=headers,
         timeout=config.TIMEOUT,
     )
-    return IamEntityResponse(ApplicationResourceType, **unwrap_post(response)).data
+    return IamApplicationResourceTypeResponse(**unwrap_post(response)).data
 
 
 @err_chain(IAMException)
@@ -71,7 +73,7 @@ def get_resource_type(
     )
     headers = {"Content-Type": "application/json", **auth_headers}
     response: Response = requests.request("GET", url, headers=headers, timeout=config.TIMEOUT)
-    return IamEntityResponse(ApplicationResourceType, **unwrap_get(response)).data
+    return IamApplicationResourceTypeResponse(**unwrap_get(response)).data
 
 
 @err_chain(IAMException)
@@ -83,7 +85,7 @@ def search_application_resource_types(
     page_size: int | None = None,
     sort: str | None = None,
     sort_order: SortOrder | None = None,
-) -> IamEntitiesResponse[ApplicationResourceType]:
+) -> IamApplicationResourceTypesResponse:
     url = (
         config.IAMCORE_URL
         + "/api/v1/applications/"
@@ -107,7 +109,7 @@ def search_application_resource_types(
         params=querystring,
         timeout=config.TIMEOUT,
     )
-    return IamEntitiesResponse(ApplicationResourceType, **unwrap_get(response))
+    return IamApplicationResourceTypesResponse(**unwrap_get(response))
 
 
 @err_chain(IAMException)

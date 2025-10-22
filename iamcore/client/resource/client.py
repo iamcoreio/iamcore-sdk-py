@@ -7,8 +7,6 @@ from iamcore.irn import IRN
 from requests import Response
 
 from iamcore.client.common import (
-    IamEntitiesResponse,
-    IamEntityResponse,
     SortOrder,
     generic_search_all,
 )
@@ -23,7 +21,7 @@ from iamcore.client.exceptions import (
     unwrap_put,
 )
 
-from .dto import Resource
+from .dto import IamResourceResponse, IamResourcesResponse, Resource
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -63,7 +61,7 @@ def create_resource(
         headers=headers,
         timeout=config.TIMEOUT,
     )
-    return IamEntityResponse(Resource, **unwrap_post(response)).data
+    return IamResourceResponse(**unwrap_post(response)).data
 
 
 @err_chain(IAMResourceException)
@@ -141,7 +139,7 @@ def search_resource(
     page_size: int | None = None,
     sort: str | None = None,
     sort_order: SortOrder | None = None,
-) -> IamEntitiesResponse[Resource]:
+) -> IamResourcesResponse:
     url = config.IAMCORE_URL + "/api/v1/resources"
 
     querystring = {
@@ -167,7 +165,7 @@ def search_resource(
         params=querystring,
         timeout=config.TIMEOUT,
     )
-    return IamEntitiesResponse(Resource, **unwrap_get(response))
+    return IamResourcesResponse(**unwrap_get(response))
 
 
 @err_chain(IAMException)

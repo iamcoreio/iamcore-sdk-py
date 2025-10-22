@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import re
+from abc import ABC, abstractmethod
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Callable, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Generic, TypeVar, Union
 
 from iamcore.irn import IRN
-
-from iamcore.client.exceptions import IAMException
-from iamcore.client.models.base import IAMCoreBaseModel
+from typing_extensions import override
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -17,65 +16,63 @@ def to_snake_case(field_name: str) -> str:
     return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", field_name).lower()
 
 
-def to_dict(obj: Any) -> dict[str, Any]:
-    """Convert object to dict."""
-
-    def _to_dict_recursive(obj: Any) -> dict[str, Any] | Any:
-        if isinstance(obj, dict):
-            data = {}
-            for k, v in obj.items():  # pyright: ignore[reportUnknownVariableType]
-                data[k] = _to_dict_recursive(v)
-            return data  # pyright: ignore[reportUnknownVariableType]
-
-        if isinstance(obj, IRN):
-            return str(obj)
-        if hasattr(obj, "__iter__") and not isinstance(obj, str):
-            return [_to_dict_recursive(v) for v in obj]
-        if hasattr(obj, "__dict__"):
-            return {
-                key: _to_dict_recursive(value)
-                for key, value in obj.__dict__.items()
-                if not callable(value) and not key.startswith("_")
-            }
-        return obj
-
-    res = _to_dict_recursive(obj)
-    if not isinstance(res, dict):
-        msg = "Unexpected result format"
-        raise IAMException(msg)
-
-    return res  # pyright: ignore[reportUnknownVariableType]
-
-
 class SortOrder(Enum):
     asc = 1
     desc = 2
 
 
-T = TypeVar("T", bound=IAMCoreBaseModel)
+T = TypeVar("T")
+JSON = dict[str, Any]
+JSON_List = Union[list[dict[str, Any]], list[str]]
 
 
-class IamEntityResponse(Generic[T]):
-    def __init__(self, base_class: type[T], data: dict[str, Any] | T) -> None:
-        self.data: T = base_class.model_validate(data) if isinstance(data, dict) else data
+class IamEntityResponse(ABC, Generic[T]):
+    data: T
+
+    def __init__(self, item: JSON) -> None:
+        self.data = self.converter(item)
+        super().__init__()
+
+    @abstractmethod
+    def converter(self, item: JSON) -> T:
+        pass
 
 
-class IamEntitiesResponse(Generic[T]):
+class IamEntitiesResponse(ABC, Generic[T]):
     data: list[T]
     count: int
     page: int
     page_size: int
 
-    def __init__(self, base_class: type[T], data: list[dict[str, Any]], **kwargs: Any) -> None:
-        if not isinstance(data, list):  # pyright: ignore[reportUnnecessaryIsInstance]
-            msg = "Unexpected response format"  # pyright: ignore[reportUnreachable]
-            raise IAMException(msg)
+    def __init__(self, item: JSON_List, count: int, page: int, page_size: int) -> None:
+        self.data = self.converter(item)
+        self.count = count
+        self.page = page
+        self.page_size = page_size
+        super().__init__()
 
-        self.data = [base_class.model_validate(item) for item in data]
+    @abstractmethod
+    def converter(self, item: JSON_List) -> list[T]:
+        pass
 
-        for k, v in kwargs.items():
-            attr = to_snake_case(k)
-            setattr(self, attr, v)
+
+class IamIRNResponse(IamEntityResponse[IRN]):
+    data: IRN
+
+    @override
+    def converter(self, item: JSON) -> IRN:
+        return IRN.of(item)
+
+
+class IamIRNsResponse(IamEntitiesResponse[IRN]):
+    data: list[IRN]
+    count: int
+    page: int
+    page_size: int
+
+    @override
+    def converter(self, item: JSON_List) -> list[IRN]:
+        return [IRN.of(item) for item in item]
 
 
 def generic_search_all(

@@ -3,13 +3,18 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Optional
 
 from pydantic import Field
+from typing_extensions import override
 
+from iamcore.client.common import IamEntityResponse
+from iamcore.client.group.client import IamEntitiesResponse
 from iamcore.client.models.base import IAMCoreBaseModel
 
 from .client import create_user, delete_user
 
 if TYPE_CHECKING:
     from iamcore.irn import IRN
+
+    from iamcore.client.common import JSON, JSON_List
 
 
 class User(IAMCoreBaseModel):
@@ -61,3 +66,19 @@ class CreateUser(IAMCoreBaseModel):
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for API requests."""
         return self.model_dump(by_alias=True, exclude_none=True)
+
+
+class IamUserResponse(IamEntityResponse[User]):
+    data: User
+
+    @override
+    def converter(self, item: JSON) -> User:
+        return User.model_validate(item)
+
+
+class IamUsersResponse(IamEntitiesResponse[User]):
+    data: list[User]
+
+    @override
+    def converter(self, item: JSON_List) -> list[User]:
+        return [User.model_validate(item) for item in item]

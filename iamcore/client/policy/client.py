@@ -8,8 +8,6 @@ from iamcore.irn import IRN
 from requests import Response
 
 from iamcore.client.common import (
-    IamEntitiesResponse,
-    IamEntityResponse,
     SortOrder,
     generic_search_all,
 )
@@ -24,7 +22,7 @@ from iamcore.client.exceptions import (
     unwrap_post,
 )
 
-from .dto import CreatePolicyRequest, Policy
+from .dto import CreatePolicyRequest, IamPoliciesResponse, IamPolicyResponse, Policy
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -45,7 +43,7 @@ def create_policy(auth_headers: dict[str, str], payload: CreatePolicyRequest) ->
         headers=headers,
         timeout=config.TIMEOUT,
     )
-    return IamEntityResponse(Policy, **unwrap_post(response)).data
+    return IamPolicyResponse(**unwrap_post(response)).data
 
 
 @err_chain(IAMPolicyException)
@@ -83,7 +81,7 @@ def search_policy(
     page_size: int | None = None,
     sort: str | None = None,
     sort_order: SortOrder | None = None,
-) -> IamEntitiesResponse[Policy]:
+) -> IamPoliciesResponse:
     url = config.IAMCORE_URL + "/api/v1/policies"
     if not irn and account_id and tenant_id:
         application = application if application else "iamcore"
@@ -108,7 +106,7 @@ def search_policy(
         params=querystring,
         timeout=config.TIMEOUT,
     )
-    return IamEntitiesResponse(Policy, **unwrap_get(response))
+    return IamPoliciesResponse(**unwrap_get(response))
 
 
 @err_chain(IAMException)
