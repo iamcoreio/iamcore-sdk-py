@@ -239,6 +239,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "iamcore-irn-py" },
     { name = "pydantic" },
+    { name = "pydantic-settings" },
     { name = "python-dotenv" },
     { name = "requests" },
 ]
@@ -247,11 +248,9 @@ dependencies = [
 dev = [
     { name = "build" },
     { name = "codecov" },
-    { name = "iamcore-irn-py" },
     { name = "pytest" },
     { name = "pytest-benchmark" },
     { name = "pytest-cov" },
-    { name = "python-dotenv" },
     { name = "requests" },
     { name = "setuptools" },
     { name = "twine" },
@@ -261,6 +260,7 @@ dev = [
 requires-dist = [
     { name = "iamcore-irn-py", specifier = ">=0.0.1" },
     { name = "pydantic", specifier = "==2.0.0" },
+    { name = "pydantic-settings", specifier = ">=2.0.0" },
     { name = "python-dotenv", specifier = "~=1.0.0" },
     { name = "requests", specifier = "~=2.31.0" },
 ]
@@ -269,11 +269,9 @@ requires-dist = [
 dev = [
     { name = "build", specifier = ">=0.10.0" },
     { name = "codecov", specifier = ">=2.1.13" },
-    { name = "iamcore-irn-py", specifier = ">=0.0.1" },
     { name = "pytest", specifier = ">=7.3.1" },
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
     { name = "pytest-cov", specifier = ">=4.1.0" },
-    { name = "python-dotenv", specifier = "~=1.0.0" },
     { name = "requests", specifier = "~=2.31.0" },
     { name = "setuptools", specifier = ">=67.8.0" },
     { name = "twine", specifier = ">=4.0.0" },
@@ -517,6 +515,19 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/df/55/42405666d8441c67d4744659f09524ecf8fa5e4997954c2f724e8fa06361/pydantic_core-2.0.1-pp39-pypy39_pp73-musllinux_1_1_aarch64.whl", hash = "sha256:b56f3758b82f26414a4dccd76f05c768df7bd2735e0ac43f3dfff2f5603d32a9", size = 1607778 },
     { url = "https://files.pythonhosted.org/packages/9a/ec/495bb0c87ba678eed6a4780769069acb979bf54411897235620fdd63ab26/pydantic_core-2.0.1-pp39-pypy39_pp73-musllinux_1_1_x86_64.whl", hash = "sha256:0c8877d9e0bd128f103a1b0f02899aa7d4be1104eef5dc35e2b633042b64a2d1", size = 1712274 },
     { url = "https://files.pythonhosted.org/packages/7a/bd/8062e640ca73d55c3887bc9a9ed50e3a251360ba63819856578688f024c4/pydantic_core-2.0.1-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:1672c8c36414c56adf704753b2d7e22e7528d7bd21cd357f24edeff76d4fd4ca", size = 1511778 },
+]
+
+[[package]]
+name = "pydantic-settings"
+version = "2.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pydantic" },
+    { name = "python-dotenv" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/58/11/4f6c105e990f4fd89d70265a5dd8c3e8fd4806812cb9cf44fc3f51437431/pydantic_settings-2.0.0.tar.gz", hash = "sha256:0dc7b6c599fd2150583d2acce1f8d95cccde426ee31d1e0d2d374d58e74d37e4", size = 30689 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/24/3e/a7733506319a483c04f88719b817c4b6f2c5c22be9ff2c27b1fa89d670de/pydantic_settings-2.0.0-py3-none-any.whl", hash = "sha256:11179e6f1837a129bd7854bcce21006cbcb7e8a988f8ae7239a09a28d2ad35fd", size = 11396 },
 ]
 
 [[package]]

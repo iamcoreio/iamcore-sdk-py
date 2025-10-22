@@ -1,24 +1,13 @@
-import os
-
-from dotenv import load_dotenv
+from pydantic_settings import BaseSettings
 
 
-class BaseConfig:
-    IAMCORE_URL: str
-    IAMCORE_ISSUER_URL: str
-    SYSTEM_BACKEND_CLIENT_ID: str
-    TIMEOUT: int = 30
+class BaseConfig(BaseSettings):
+    iamcore_url: str
+    iamcore_issuer_url: str
+    system_backend_client_id: str
+    iamcore_client_timeout: int = 30
 
-    def set_iamcore_config(self, iamcore_url: str, iamcore_issuer_url: str, client_id: str):
-        self.IAMCORE_URL = iamcore_url
-        self.IAMCORE_ISSUER_URL = iamcore_issuer_url
-        self.SYSTEM_BACKEND_CLIENT_ID = client_id
-
-    def __init__(self):
-        load_dotenv()
-        self.IAMCORE_URL = os.getenv("IAMCORE_URL")
-        self.IAMCORE_ISSUER_URL = os.environ.get("IAMCORE_ISSUER_URL")
-        self.SYSTEM_BACKEND_CLIENT_ID = os.environ.get("SYSTEM_BACKEND_CLIENT_ID")
-
-
-config = BaseConfig()
+    def set_iamcore_config(self, iamcore_url: str, iamcore_issuer_url: str, client_id: str) -> None:
+        self.iamcore_url = iamcore_url
+        self.iamcore_issuer_url = iamcore_issuer_url
+        self.system_backend_client_id = client_id

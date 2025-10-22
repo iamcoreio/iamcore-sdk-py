@@ -9,6 +9,7 @@ authors = [
 dependencies = [
     "iamcore-irn-py>=0.0.1",
     "pydantic==2.0.0",
+    "pydantic-settings>=2.0.0",
     "python-dotenv~=1.0.0",
     "requests~=2.31.0",
 ]
@@ -20,11 +21,9 @@ universal = true
 dev = [
     "build>=0.10.0",
     "codecov>=2.1.13",
-    "iamcore-irn-py>=0.0.1",
     "pytest>=7.3.1",
     "pytest-benchmark>=4.0.0",
     "pytest-cov>=4.1.0",
-    "python-dotenv~=1.0.0",
     "requests~=2.31.0",
     "setuptools>=67.8.0",
     "twine>=4.0.0",

@@ -49,7 +49,8 @@ class HTTPClientWithTimeout:
             msg = "Missing authorization headers"
             raise IAMUnauthorizedException(msg)
 
-        headers = {"Content-Type": "application/json", **headers}
+        if "Content-Type" not in headers:
+            headers["Content-Type"] = "application/json"
 
         url = (
             self.base_url + path.removeprefix("/") if path.startswith("/") else self.base_url + path

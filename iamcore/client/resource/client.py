@@ -33,7 +33,7 @@ class Client(HTTPClientWithTimeout):
     """Client for IAM Core Resource API."""
 
     def __init__(self, config: BaseConfig) -> None:
-        super().__init__(base_url=config.IAMCORE_URL, timeout=config.TIMEOUT)
+        super().__init__(base_url=config.iamcore_url, timeout=config.iamcore_client_timeout)
 
     @err_chain(IAMResourceException)
     def create_resource(

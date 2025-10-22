@@ -2,6 +2,8 @@ from iamcore.client import (
     api_key,
     application,
     application_resource_type,
+    auth,
+    evaluete,
     group,
     policy,
     resource,
@@ -17,6 +19,8 @@ class Client:
     api_key: api_key.Client
     application: application.Client
     application_resource_type: application_resource_type.Client
+    auth: auth.Client
+    evaluate: evaluete.Client
     group: group.Client
     policy: policy.Client
     resource: resource.Client
