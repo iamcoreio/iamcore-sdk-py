@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from iamcore.irn import IRN
 from pydantic import Field
 
 from iamcore.client.models.base import IAMCoreBaseModel
+
+if TYPE_CHECKING:
+    from iamcore.irn import IRN
 
 
 class Application(IAMCoreBaseModel):

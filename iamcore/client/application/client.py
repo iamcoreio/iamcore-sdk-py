@@ -84,7 +84,7 @@ def application_attach_policies(
     headers = {"Content-Type": "application/json", **auth_headers}
     payload = {"policyIDs": policies_ids}
 
-    response = requests.request("PUT", url, json=payload, headers=headers)
+    response = requests.request("PUT", url, json=payload, headers=headers, timeout=config.TIMEOUT)
     return unwrap_put(response)
 
 
@@ -113,7 +113,14 @@ def search_application(
     }
     querystring = {k: v for k, v in querystring.items() if v}
 
-    response: Response = requests.request("GET", url, data="", headers=headers, params=querystring)
+    response: Response = requests.request(
+        "GET",
+        url,
+        data="",
+        headers=headers,
+        params=querystring,
+        timeout=config.TIMEOUT,
+    )
     return IamEntitiesResponse(Application, **unwrap_get(response))
 
 
