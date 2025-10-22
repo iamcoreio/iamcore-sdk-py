@@ -12,8 +12,12 @@ from tests.conf import IAMCORE_ROOT_PASSWORD, IAMCORE_ROOT_USER
 
 @pytest.fixture(scope="class")
 def root_token(request):
-    request.cls.root = get_token_with_password("root", config.SYSTEM_BACKEND_CLIENT_ID,
-                                               IAMCORE_ROOT_USER, IAMCORE_ROOT_PASSWORD)
+    request.cls.root = get_token_with_password(
+        "root",
+        config.SYSTEM_BACKEND_CLIENT_ID,
+        IAMCORE_ROOT_USER,
+        IAMCORE_ROOT_PASSWORD,
+    )
 
 
 @pytest.fixture(scope="class")
@@ -52,14 +56,26 @@ class CrudPoliciesTestCase(unittest.TestCase):
 
     def test_10_account_policy_ok(self):
         tenants = search_tenant(self.root.access_headers, name=self.tenant_name).data
-        tenant = tenants[0] if len(tenants) > 0 else \
-            create_tenant(self.root.access_headers, name=self.tenant_name, display_name=self.tenant_display_name)
+        tenant = (
+            tenants[0]
+            if len(tenants) > 0
+            else create_tenant(
+                self.root.access_headers,
+                name=self.tenant_name,
+                display_name=self.tenant_display_name,
+            )
+        )
 
-        policy_req = CreatePolicyRequest(self.policy_name_account, "account", self.policy_description)
+        policy_req = CreatePolicyRequest(
+            self.policy_name_account, "account", self.policy_description
+        )
         account = IRN.of(tenant.irn).account_id
-        policy_req \
-            .with_statement("allow", self.policy_description, [f"irn:{account}:unittest:{tenant.tenant_id}:*"], ["*"]) \
-            .create(self.root.access_headers)
+        policy_req.with_statement(
+            "allow",
+            self.policy_description,
+            [f"irn:{account}:unittest:{tenant.tenant_id}:*"],
+            ["*"],
+        ).create(self.root.access_headers)
 
         policies = search_policy(self.root.access_headers, name=self.policy_name_account).data
         if policies:
@@ -76,22 +92,43 @@ class CrudPoliciesTestCase(unittest.TestCase):
 
     def test_10_tenant_policy_ok(self):
         tenants = search_tenant(self.root.access_headers, name=self.tenant_name).data
-        tenant = tenants[0] if len(tenants) > 0 else \
-            create_tenant(self.root.access_headers, name=self.tenant_name, display_name=self.tenant_display_name)
+        tenant = (
+            tenants[0]
+            if len(tenants) > 0
+            else create_tenant(
+                self.root.access_headers,
+                name=self.tenant_name,
+                display_name=self.tenant_display_name,
+            )
+        )
 
-        policy_req = CreatePolicyRequest(self.policy_name_tenant, "tenant", self.policy_description,
-                                         tenant_id=tenant.tenant_id)
+        policy_req = CreatePolicyRequest(
+            self.policy_name_tenant, "tenant", self.policy_description, tenant_id=tenant.tenant_id
+        )
         account = IRN.of(tenant.irn).account_id
-        policy_req \
-            .with_statement("allow", self.policy_description, [f"irn:{account}:unittest:{tenant.tenant_id}:*"], ["*"]) \
-            .create(self.root.access_headers)
+        policy_req.with_statement(
+            "allow",
+            self.policy_description,
+            [f"irn:{account}:unittest:{tenant.tenant_id}:*"],
+            ["*"],
+        ).create(self.root.access_headers)
 
-        policies = list(search_all_policies(self.root.access_headers, name=self.policy_name_tenant, account_id=account,
-                                            tenant_id="wrongId"))
+        policies = list(
+            search_all_policies(
+                self.root.access_headers,
+                name=self.policy_name_tenant,
+                account_id=account,
+                tenant_id="wrongId",
+            )
+        )
         self.assertEqual(len(policies), 0)
 
-        policies = search_policy(self.root.access_headers, name=self.policy_name_tenant, account_id=account,
-                                 tenant_id=tenant.tenant_id).data
+        policies = search_policy(
+            self.root.access_headers,
+            name=self.policy_name_tenant,
+            account_id=account,
+            tenant_id=tenant.tenant_id,
+        ).data
         if policies:
             self.assertEqual(len(policies), 1)
             created_policy = policies[0]

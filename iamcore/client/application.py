@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 import requests
 from iamcore.irn import IRN
+from pydantic import Field
 from requests import Response
 
 from iamcore.client.common import (
@@ -11,8 +12,6 @@ from iamcore.client.common import (
     IamEntityResponse,
     SortOrder,
     generic_search_all,
-    to_dict,
-    to_snake_case,
 )
 from iamcore.client.config import config
 from iamcore.client.exceptions import (
@@ -23,56 +22,47 @@ from iamcore.client.exceptions import (
     unwrap_post,
     unwrap_put,
 )
+from iamcore.client.models.base import IAMCoreBaseModel
 
 if TYPE_CHECKING:
     from collections.abc import Generator
 
 
-class IAMEntityBase:
-    def __int__(self, *args: Any, **kwargs: Any) -> None:
-        pass
+class Application(IAMCoreBaseModel):
+    """Application model representing IAM Core applications."""
 
-    @staticmethod
-    def of(item: Any) -> IAMEntityBase:
-        pass
-
-
-class Application(IAMEntityBase):
     id: str
     irn: IRN
     name: str
-    display_name: str
+    display_name: str = Field(alias="displayName")
     created: str
     updated: str
 
-    def __init__(self, irn: str, **kwargs: Any) -> None:
-        self.irn = IRN.from_irn_str(irn)
-        for k, v in kwargs.items():
-            attr = to_snake_case(k)
-            setattr(self, attr, v)
-
     @staticmethod
-    def of(item: dict[str, Any] | Application) -> Application:
+    def of(item: Application | dict[str, Any]) -> Application:
+        """Create Application instance from Application object or dict."""
         if isinstance(item, Application):
             return item
         if isinstance(item, dict):
-            return Application(**item)
+            return Application.model_validate(item)
         raise IAMException("Unexpected response format")
 
-    def to_dict(self):
-        return to_dict(self)
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary."""
+        return self.model_dump(by_alias=True)
 
 
 @err_chain(IAMException)
 def create_application(
     auth_headers: dict[str, str],
-    payload: dict[str, str] | None = None,
-    name: str | None = None,
+    name: str,
     display_name: str | None = None,
 ) -> Application:
     url = config.IAMCORE_URL + "/api/v1/applications"
-    if not payload:
-        payload = {"name": name, "displayName": display_name}
+
+    payload = {"name": name, "displayName": display_name}
+    payload = {k: v for k, v in payload.items() if v}
+
     headers = {"Content-Type": "application/json", **auth_headers}
     response: Response = requests.request("POST", url, json=payload, headers=headers)
     return IamEntityResponse(Application, **unwrap_post(response)).data

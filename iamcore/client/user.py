@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, NoReturn
 
 import requests
 from iamcore.irn import IRN
+from pydantic import Field
 from requests import Response
 
 from iamcore.client.common import (
@@ -11,8 +12,6 @@ from iamcore.client.common import (
     IamEntityResponse,
     SortOrder,
     generic_search_all,
-    to_dict,
-    to_snake_case,
 )
 from iamcore.client.config import config
 from iamcore.client.exceptions import (
@@ -21,113 +20,75 @@ from iamcore.client.exceptions import (
     IAMUserException,
     unwrap_patch,
 )
+from iamcore.client.models.base import IAMCoreBaseModel
 
 from .exceptions import err_chain, unwrap_delete, unwrap_get, unwrap_post, unwrap_put
 
 if TYPE_CHECKING:
     from collections.abc import Generator
-    from uuid import UUID
 
 
-class User:
+class User(IAMCoreBaseModel):
+    """User model representing an IAM Core user."""
+
     id: str
     irn: IRN
     created: str
     updated: str
-    tenant_id: str
-    auth_id: UUID
+    tenant_id: str = Field(alias="tenantId")
+    auth_id: str  # UUID stored as string
     email: str
-    enabled: str
-    first_name: str
-    last_name: str
+    enabled: bool  # API returns boolean, not string
+    first_name: str = Field(alias="firstName")
+    last_name: str = Field(alias="lastName")
     username: str
     path: str
 
     @staticmethod
     def of(item: User | dict[str, Any]) -> User:
+        """Create User instance from User object or dict."""
         if isinstance(item, User):
             return item
         if isinstance(item, dict):
-            return User(**item)
+            return User.model_validate(item)
         raise IAMUserException("Unexpected response format")
 
-    def __init__(self, irn: str, **kwargs: Any) -> None:
-        self.irn = IRN.from_irn_str(irn)
-        for k, v in kwargs.items():
-            attr = to_snake_case(k)
-            setattr(self, attr, v)
-
     def delete(self, auth_headers: dict[str, str]) -> None:
+        """Delete this user."""
         delete_user(auth_headers, self.id)
 
     def to_dict(self) -> dict[str, Any]:
-        return to_dict(self)
+        """Convert to dictionary."""
+        return self.model_dump(by_alias=True)
 
 
-class CreateUser:
-    tenant_id: str
-    email: str
-    enabled: bool
-    first_name: str
-    last_name: str
-    username: str
-    password: str
-    confirm_password: str
-    path: str
+class CreateUser(IAMCoreBaseModel):
+    """Request model for creating a new user."""
 
-    def __init__(
-        self,
-        tenant_id: str | None = None,
-        email: str | None = None,
-        enabled: bool = True,
-        first_name: str | None = None,
-        last_name: str | None = None,
-        username: str | None = None,
-        path: str | None = None,
-        password: str | None = None,
-        confirm_password: str | None = None,
-    ) -> None:
-        self.tenant_id = tenant_id
-        self.email = email
-        self.enabled = enabled
-        self.first_name = first_name
-        self.last_name = last_name
-        self.username = username
-        self.password = password
-        self.confirm_password = confirm_password
-        self.path = path
+    tenant_id: str | None = Field(None, alias="tenantId")
+    email: str | None = None
+    enabled: bool = True
+    first_name: str | None = Field(None, alias="firstName")
+    last_name: str | None = Field(None, alias="lastName")
+    username: str | None = None
+    password: str | None = None
+    confirm_password: str | None = Field(None, alias="confirmPassword")
+    path: str | None = None
 
     def create(self, auth_headers: dict[str, str]) -> User:
-        return create_user(auth_headers, **to_dict(self))
+        """Create the user via API call."""
+        return create_user(auth_headers, **self.model_dump(by_alias=True, exclude_none=True))
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary for API requests."""
+        return self.model_dump(by_alias=True, exclude_none=True)
 
 
 @err_chain(IAMUserException)
-def create_user(
-    auth_headers: dict[str, str],
-    payload: dict[str, str] | None = None,
-    tenant_id: str | None = None,
-    enabled: bool | None = None,
-    first_name: str | None = None,
-    last_name: str | None = None,
-    email: str | None = None,
-    username: str | None = None,
-    password: str | None = None,
-    confirm_password: str | None = None,
-    path: str | None = None,
-) -> User:
+def create_user(auth_headers: dict[str, str], **kwargs: Any) -> User:
+    """Create a new user."""
     url = config.IAMCORE_URL + "/api/v1/users"
-    if not payload:
-        payload = {
-            "tenantId": tenant_id,
-            "firstName": first_name,
-            "lastName": last_name,
-            "email": email,
-            "enabled": enabled,
-            "username": username,
-            "password": password,
-            "confirmPassword": confirm_password,
-            "path": path,
-        }
+    payload = kwargs
     headers = {"Content-Type": "application/json", **auth_headers}
     response: Response = requests.request("POST", url, json=payload, headers=headers)
     return IamEntityResponse(User, **unwrap_post(response)).data

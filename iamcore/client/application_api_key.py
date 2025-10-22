@@ -4,40 +4,39 @@ from typing import TYPE_CHECKING, Any
 
 import requests
 from iamcore.irn import IRN
+from pydantic import Field
 from requests import Response
 
-from iamcore.client.common import IamEntitiesResponse, generic_search_all, to_dict, to_snake_case
+from iamcore.client.common import IamEntitiesResponse, generic_search_all
 from iamcore.client.config import config
 from iamcore.client.exceptions import IAMException, err_chain, unwrap_get
+from iamcore.client.models.base import IAMCoreBaseModel
 
 if TYPE_CHECKING:
     from collections.abc import Generator
 
 
-class ApplicationApiKey:
-    api_key: str
+class ApplicationApiKey(IAMCoreBaseModel):
+    """Application API key model representing IAM Core application API keys."""
+
+    api_key: str = Field(alias="apiKey")
     state: str
-    last_used: str
+    last_used: str = Field(alias="lastUsed")
     created: str
     updated: str
 
-    def __init__(self, **kwargs: Any) -> None:
-        for k, v in kwargs.items():
-            attr = to_snake_case(k)
-            setattr(self, attr, v)
-
     @staticmethod
-    def of(item: dict[str, Any] | list[Any] | ApplicationApiKey) -> ApplicationApiKey:
+    def of(item: ApplicationApiKey | dict[str, Any]) -> ApplicationApiKey:
+        """Create ApplicationApiKey instance from ApplicationApiKey object or dict."""
         if isinstance(item, ApplicationApiKey):
             return item
-        if isinstance(item, list):
-            return [ApplicationApiKey.of(i) for i in item]
         if isinstance(item, dict):
-            return ApplicationApiKey(**item)
+            return ApplicationApiKey.model_validate(item)
         raise IAMException("Unexpected response format")
 
     def to_dict(self) -> dict[str, Any]:
-        return to_dict(self)
+        """Convert to dictionary."""
+        return self.model_dump(by_alias=True)
 
 
 @err_chain(IAMException)

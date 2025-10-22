@@ -1,34 +1,27 @@
 from __future__ import annotations
 
 import http.client
-from typing import TYPE_CHECKING, Any
 
 import requests
+from pydantic import Field
 
 from iamcore.client.config import config
+from iamcore.client.models.base import IAMCoreBaseModel
 
 from .exceptions import IAMException, IAMUnauthorizedException
 
-if TYPE_CHECKING:
-    from uuid import UUID
 
+class TokenResponse(IAMCoreBaseModel):
+    """OAuth2 token response from IAM Core authentication."""
 
-class TokenResponse:
-    access_token: str
+    access_token: str = Field(alias="accessToken")
     expires_in: int
-    refresh_expires_in: int
-    refresh_token: int
-    token_type: str
-    not_before_policy: int
-    session_state: UUID
+    refresh_expires_in: int = Field(alias="refreshExpiresIn")
+    refresh_token: str = Field(alias="refreshToken")  # OAuth2 refresh tokens are strings
+    token_type: str = Field(alias="tokenType")
+    not_before_policy: int = Field(alias="notBeforePolicy")
+    session_state: str  # UUID stored as string
     scope: str
-
-    def __init__(self, **kwargs: Any) -> None:
-        for k, v in kwargs.items():
-            if "-" in k:
-                setattr(self, k.replace("-", "_"), v)
-            else:
-                setattr(self, k, v)
 
     @property
     def access_headers(self) -> dict[str, str]:

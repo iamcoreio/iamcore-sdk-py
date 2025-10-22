@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 import requests
 from iamcore.irn import IRN
+from pydantic import Field
 from requests import Response
 
 from iamcore.client.common import (
@@ -11,8 +12,6 @@ from iamcore.client.common import (
     IamEntityResponse,
     SortOrder,
     generic_search_all,
-    to_dict,
-    to_snake_case,
 )
 from iamcore.client.config import config
 from iamcore.client.exceptions import (
@@ -25,39 +24,37 @@ from iamcore.client.exceptions import (
     unwrap_post,
     unwrap_put,
 )
+from iamcore.client.models.base import IAMCoreBaseModel
 
 if TYPE_CHECKING:
     from collections.abc import Generator
 
 
-class Resource:
+class Resource(IAMCoreBaseModel):
+    """Resource model representing IAM Core resources."""
+
     id: str
     irn: IRN
     name: str
-    display_name: str
+    display_name: str = Field(alias="displayName")
     description: str
     path: str
-    tenant_id: str
+    tenant_id: str = Field(alias="tenantID")
     application: str
-    resourceType: str
+    resource_type: str = Field(alias="resourceType")
     enabled: bool
     metadata: dict[str, str]
     created: str
     updated: str
 
     @staticmethod
-    def of(item: dict[str, Any] | Resource) -> Resource:
+    def of(item: Resource | dict[str, Any]) -> Resource:
+        """Create Resource instance from Resource object or dict."""
         if isinstance(item, Resource):
             return item
         if isinstance(item, dict):
-            return Resource(**item)
+            return Resource.model_validate(item)
         raise IAMResourceException("Unexpected response format")
-
-    def __init__(self, irn: str, **kwargs: Any) -> None:
-        self._irn = IRN.from_irn_str(irn)
-        for k, v in kwargs.items():
-            attr = to_snake_case(k)
-            setattr(self, attr, v)
 
     def delete(self, auth_headers: dict[str, str]) -> None:
         delete_resource(auth_headers, self.id)
@@ -73,7 +70,8 @@ class Resource:
         )
 
     def to_dict(self) -> dict[str, Any]:
-        return to_dict(self)
+        """Convert to dictionary."""
+        return self.model_dump(by_alias=True)
 
 
 @err_chain(IAMResourceException)

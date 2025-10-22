@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Callable, Generic, TypeVar
 from iamcore.irn import IRN
 
 from iamcore.client.exceptions import IAMException
+from iamcore.client.models.base import IAMCoreBaseModel
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -51,12 +52,12 @@ class SortOrder(Enum):
     desc = 2
 
 
-T = TypeVar("T")
+T = TypeVar("T", bound=IAMCoreBaseModel)
 
 
 class IamEntityResponse(Generic[T]):
     def __init__(self, base_class: type[T], data: dict[str, Any] | T) -> None:
-        self.data: T = base_class(**data) if isinstance(data, dict) else data
+        self.data: T = base_class.model_validate(data) if isinstance(data, dict) else data
 
 
 class IamEntitiesResponse(Generic[T]):
@@ -66,10 +67,11 @@ class IamEntitiesResponse(Generic[T]):
     page_size: int
 
     def __init__(self, base_class: type[T], data: list[dict[str, Any]], **kwargs: Any) -> None:
-        if not isinstance(data, list):
-            raise IAMException("Unexpected response format")
+        if not isinstance(data, list):  # pyright: ignore[reportUnnecessaryIsInstance]
+            msg = "Unexpected response format"  # pyright: ignore[reportUnreachable]
+            raise IAMException(msg)
 
-        self.data = [base_class.of(item) for item in data]
+        self.data = [base_class.model_validate(item) for item in data]
 
         for k, v in kwargs.items():
             attr = to_snake_case(k)

@@ -76,7 +76,7 @@ def evaluate_actions(
     auth_headers: dict[str, str],
     actions: list[str],
     irns: list[IRN],
-) -> dict[int, list[str]]:
+) -> dict[str, Any]:
     url = config.IAMCORE_URL + "/api/v1/evaluate/actions"
     payload = {"actions": actions, "irns": [str(r) for r in irns if r]}
     headers = {"Content-Type": "application/json", **auth_headers}

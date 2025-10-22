@@ -5,6 +5,7 @@ from typing import Any
 
 import requests
 from iamcore.irn import IRN
+from pydantic import Field
 from requests import Response
 
 from iamcore.client.common import (
@@ -12,39 +13,36 @@ from iamcore.client.common import (
     IamEntityResponse,
     SortOrder,
     generic_search_all,
-    to_dict,
-    to_snake_case,
 )
 from iamcore.client.config import config
 from iamcore.client.exceptions import IAMException, err_chain, unwrap_get, unwrap_post
+from iamcore.client.models.base import IAMCoreBaseModel
 
 
-class ApplicationResourceType:
+class ApplicationResourceType(IAMCoreBaseModel):
+    """Application resource type model representing IAM Core application resource types."""
+
     id: str
     irn: IRN
     type: str
     description: str
-    action_prefix: str
+    action_prefix: str = Field(alias="actionPrefix")
     operations: list[str]
     created: str
     updated: str
 
-    def __init__(self, irn: str, **kwargs: Any) -> None:
-        self.irn = IRN.from_irn_str(irn)
-        for k, v in kwargs.items():
-            attr = to_snake_case(k)
-            setattr(self, attr, v)
-
     @staticmethod
-    def of(item: dict[str, Any] | ApplicationResourceType) -> ApplicationResourceType:
+    def of(item: ApplicationResourceType | dict[str, Any]) -> ApplicationResourceType:
+        """Create ApplicationResourceType instance from ApplicationResourceType object or dict."""
         if isinstance(item, ApplicationResourceType):
             return item
         if isinstance(item, dict):
-            return ApplicationResourceType(**item)
+            return ApplicationResourceType.model_validate(item)
         raise IAMException("Unexpected response format")
 
     def to_dict(self) -> dict[str, Any]:
-        return to_dict(self)
+        """Convert to dictionary."""
+        return self.model_dump(by_alias=True)
 
 
 @err_chain(IAMException)

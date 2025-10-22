@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 import requests
 from iamcore.irn import IRN
+from pydantic import Field
 from requests import Response
 
 from iamcore.client.common import (
@@ -11,7 +12,6 @@ from iamcore.client.common import (
     IamEntityResponse,
     SortOrder,
     generic_search_all,
-    to_snake_case,
 )
 from iamcore.client.config import config
 from iamcore.client.exceptions import (
@@ -24,34 +24,32 @@ from iamcore.client.exceptions import (
     unwrap_post,
     unwrap_put,
 )
+from iamcore.client.models.base import IAMCoreBaseModel
 
 if TYPE_CHECKING:
     from collections.abc import Generator
 
 
-class Group:
+class Group(IAMCoreBaseModel):
+    """Group model representing IAM Core groups."""
+
     id: str
     irn: IRN
-    tenant_id: str
+    tenant_id: str = Field(alias="tenantID")
     name: str
-    display_name: str
+    display_name: str = Field(alias="displayName")
     path: str
     created: str
     updated: str
 
     @staticmethod
-    def of(item: dict[str, Any] | Group) -> Group:
+    def of(item: Group | dict[str, Any]) -> Group:
+        """Create Group instance from Group object or dict."""
         if isinstance(item, Group):
             return item
         if isinstance(item, dict):
-            return Group(**item)
+            return Group.model_validate(item)
         raise IAMGroupException("Unexpected response format")
-
-    def __init__(self, irn: str, **kwargs: Any) -> None:
-        self._irn = IRN.from_irn_str(irn)
-        for k, v in kwargs.items():
-            attr = to_snake_case(k)
-            setattr(self, attr, v)
 
 
 @err_chain(IAMGroupException)

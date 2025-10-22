@@ -4,17 +4,17 @@ from typing import TYPE_CHECKING, Any
 
 import requests
 from iamcore.irn import IRN
+from pydantic import Field
 from requests import Response
 
 from iamcore.client.config import config
+from iamcore.client.models.base import IAMCoreBaseModel
 
 from .common import (
     IamEntitiesResponse,
     IamEntityResponse,
     SortOrder,
     generic_search_all,
-    to_dict,
-    to_snake_case,
 )
 from .exceptions import (
     IAMException,
@@ -30,71 +30,61 @@ if TYPE_CHECKING:
     from collections.abc import Generator
 
 
-class Tenant:
+class Tenant(IAMCoreBaseModel):
+    """Tenant model representing IAM Core tenants."""
+
     resource_id: str
     irn: IRN
-    tenant_id: str
+    tenant_id: str = Field(alias="tenantID")
     name: str
-    display_name: str
-    login_theme: str
+    display_name: str = Field(alias="displayName")
+    login_theme: str = Field(alias="loginTheme")
     created: str
     updated: str
 
-    def __init__(self, irn: str, **kwargs: Any) -> None:
-        self.irn = IRN.from_irn_str(irn)
-        for k, v in kwargs.items():
-            attr = to_snake_case(k)
-            setattr(self, attr, v)
-
     @staticmethod
-    def of(item: dict[str, Any] | Tenant) -> Tenant:
+    def of(item: Tenant | dict[str, Any]) -> Tenant:
+        """Create Tenant instance from Tenant object or dict."""
         if isinstance(item, Tenant):
             return item
         if isinstance(item, dict):
-            return Tenant(**item)
+            return Tenant.model_validate(item)
         raise IAMTenantException("Unexpected response format")
 
     def to_dict(self) -> dict[str, Any]:
-        return to_dict(self)
+        """Convert to dictionary."""
+        return self.model_dump(by_alias=True)
 
     def update(self, auth_headers: dict[str, str]) -> None:
         return update_tenant(auth_headers, self.resource_id, self.display_name)
 
-    def delete(self, auth_headers: dict[str, str]):
+    def delete(self, auth_headers: dict[str, str]) -> None:
         return delete_tenant(auth_headers, self.resource_id)
 
 
-class TenantIssuer:
+class TenantIssuer(IAMCoreBaseModel):
+    """Tenant issuer model representing IAM Core tenant issuers."""
+
     id: str
     irn: IRN
     name: str
     type: str
     url: str
-    client_id: str
-    login_url: str
-
-    def __init__(self, irn: str, **kwargs: Any):
-        self.irn = IRN.from_irn_str(irn)
-        for k, v in kwargs.items():
-            attr = to_snake_case(k)
-            setattr(self, attr, v)
+    client_id: str = Field(alias="clientId")
+    login_url: str = Field(alias="loginUrl")
 
     @staticmethod
-    def of(item: dict[str, Any] | TenantIssuer) -> TenantIssuer:
+    def of(item: TenantIssuer | dict[str, Any]) -> TenantIssuer:
+        """Create TenantIssuer instance from TenantIssuer object or dict."""
         if isinstance(item, TenantIssuer):
             return item
         if isinstance(item, dict):
-            return TenantIssuer(**item)
+            return TenantIssuer.model_validate(item)
         raise IAMTenantException("Unexpected response format")
 
     def to_dict(self) -> dict[str, Any]:
-        return to_dict(self)
-
-    def update(self, auth_headers: dict[str, str]) -> None:
-        return update_tenant(auth_headers, self.resource_id, self.display_name)
-
-    def delete(self, auth_headers: dict[str, str]):
-        return delete_tenant(auth_headers, self.resource_id)
+        """Convert to dictionary."""
+        return self.model_dump(by_alias=True)
 
 
 @err_chain(IAMTenantException)

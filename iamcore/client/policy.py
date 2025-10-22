@@ -5,11 +5,13 @@ from typing import TYPE_CHECKING, Any
 
 import requests
 from iamcore.irn import IRN
+from pydantic import Field
 from requests import Response
 
 from iamcore.client.config import config
+from iamcore.client.models.base import IAMCoreBaseModel
 
-from .common import IamEntitiesResponse, IamEntityResponse, SortOrder, generic_search_all, to_dict
+from .common import IamEntitiesResponse, IamEntityResponse, SortOrder, generic_search_all
 from .exceptions import (
     IAMException,
     IAMPolicyException,
@@ -27,34 +29,27 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class PolicyStatement:
+class PolicyStatement(IAMCoreBaseModel):
+    """Policy statement model representing IAM policy statements."""
+
     effect: str
     description: str
     resources: list[IRN]
     actions: list[str]
 
     @staticmethod
-    def of(item: dict[str, Any] | PolicyStatement) -> PolicyStatement:
+    def of(item: PolicyStatement | dict[str, Any]) -> PolicyStatement:
+        """Create PolicyStatement instance from PolicyStatement object or dict."""
         if isinstance(item, PolicyStatement):
             return item
         if isinstance(item, dict):
-            return PolicyStatement(**item)
+            return PolicyStatement.model_validate(item)
         raise IAMPolicyException("Unexpected response format")
 
-    def __init__(
-        self,
-        effect: str | None = None,
-        description: str | None = None,
-        resources: list[str] | None = None,
-        actions: list[str] | None = None,
-    ):
-        self.effect = effect
-        self.description = description
-        self.resources = [IRN.of(irn) for irn in resources]
-        self.actions = actions
 
+class Policy(IAMCoreBaseModel):
+    """Policy model representing IAM Core policies."""
 
-class Policy:
     id: str
     irn: IRN
     name: str
@@ -64,24 +59,13 @@ class Policy:
     version: str
     statements: list[PolicyStatement]
 
-    def __init__(
-        self,
-        irn: str,
-        statements: list[dict[str, Any]] | None = None,
-        **kwargs: Any,
-    ) -> None:
-        self.irn = IRN.of(irn)
-        if isinstance(statements, list):
-            self.statements = [PolicyStatement.of(item) for item in statements]
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
     @staticmethod
-    def of(item: dict[str, Any] | Policy) -> Policy:
+    def of(item: Policy | dict[str, Any]) -> Policy:
+        """Create Policy instance from Policy object or dict."""
         if isinstance(item, Policy):
             return item
         if isinstance(item, dict):
-            return Policy(**item)
+            return Policy.model_validate(item)
         raise IAMPolicyException("Unexpected response format")
 
     @err_chain(IAMPolicyException)
@@ -94,7 +78,7 @@ class Policy:
             raise IAMPolicyException(msg)
 
         url = config.IAMCORE_URL + "/api/v1/policies/" + self.id
-        payload = to_dict(self)
+        payload = self.model_dump(by_alias=True)
         headers = {"Content-Type": "application/json", **auth_headers}
         response: Response = requests.request("PUT", url, json=payload, headers=headers)
         unwrap_put(response)
@@ -103,30 +87,18 @@ class Policy:
         delete_policy(auth_headers, policy_id=self.id)
 
     def to_dict(self) -> dict[str, Any]:
-        return to_dict(self)
+        """Convert to dictionary."""
+        return self.model_dump(by_alias=True)
 
 
-class CreatePolicyRequest:
+class CreatePolicyRequest(IAMCoreBaseModel):
+    """Request model for creating a new policy."""
+
     name: str
     level: str
-    tenant_id: str
+    tenant_id: str | None = Field(None, alias="tenantID")
     description: str
-    statements: list[PolicyStatement]
-
-    def __init__(
-        self,
-        name: str,
-        level: str,
-        description: str,
-        tenant_id: str | None = None,
-    ) -> None:
-        self.name = name
-        self.level = level
-        self.tenant_id = tenant_id
-        self.description = description
-        self.statements = []
-        if level == "tenant" and not tenant_id:
-            logger.warning("Missing tenant_id for tenant level policy")
+    statements: list[PolicyStatement] = Field(default_factory=list)
 
     def with_statement(
         self,
@@ -147,22 +119,17 @@ class CreatePolicyRequest:
         return create_policy(auth_headers, self)
 
     def to_dict(self) -> dict[str, Any]:
-        return {
-            "name": self.name,
-            "level": self.level,
-            "description": self.description,
-            "tenantID": self.tenant_id,
-            "statements": to_dict(self.statements),
-        }
+        """Convert to dictionary for API requests."""
+        return self.model_dump(by_alias=True, exclude_none=True)
 
 
 @err_chain(IAMPolicyException)
 def create_policy(auth_headers: dict[str, str], payload: CreatePolicyRequest) -> Policy:
     url = config.IAMCORE_URL + "/api/v1/policies"
-    payload = payload.to_dict()
+    payload_dict = payload.model_dump(by_alias=True, exclude_none=True)
 
     headers = {"Content-Type": "application/json", **auth_headers}
-    response: Response = requests.request("POST", url, json=payload, headers=headers)
+    response: Response = requests.request("POST", url, json=payload_dict, headers=headers)
     return IamEntityResponse(Policy, **unwrap_post(response)).data
 
 
