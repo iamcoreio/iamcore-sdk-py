@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 from pydantic import Field
 from typing_extensions import override
@@ -36,6 +36,15 @@ class ApplicationResourceType(IAMCoreBaseModel):
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return self.model_dump(by_alias=True)
+
+
+class CreateApplicationResourceType(IAMCoreBaseModel):
+    """Request model for creating a new application resource type."""
+
+    type: str
+    description: Optional[str] = None
+    action_prefix: Optional[str] = Field(None, alias="actionPrefix")
+    operations: Optional[list[str]] = None
 
 
 class IamApplicationResourceTypeResponse(IamEntityResponse[ApplicationResourceType]):

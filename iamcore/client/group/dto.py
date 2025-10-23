@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 from pydantic import Field
 from typing_extensions import override
@@ -11,6 +11,7 @@ from iamcore.client.models.base import (
     IamEntityResponse,
     JSON_List,
     JSON_obj,
+    PaginatedSearchFilter,
 )
 
 if TYPE_CHECKING:
@@ -33,6 +34,25 @@ class Group(IAMCoreBaseModel):
     def of(item: Group | dict[str, Any]) -> Group:
         """Create Group instance from Group object or dict."""
         return Group.model_validate(item) if isinstance(item, dict) else item
+
+
+class CreateGroup(IAMCoreBaseModel):
+    """Request model for creating a new group."""
+
+    name: str
+    display_name: Optional[str] = Field(None, alias="displayName")
+    parent_id: Optional[str] = Field(None, alias="parentID")
+    tenant_id: Optional[str] = Field(None, alias="tenantID")
+
+
+class GroupSearchFilter(PaginatedSearchFilter):
+    """Group search filter."""
+
+    irn: Optional[str] = None
+    path: Optional[str] = None
+    name: Optional[str] = None
+    display_name: Optional[str] = None
+    tenant_id: Optional[str] = Field(None, alias="tenantID")
 
 
 class IamGroupResponse(IamEntityResponse[Group]):

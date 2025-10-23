@@ -7,7 +7,7 @@ import requests
 from iamcore.client.exceptions import IAMUnauthorizedException
 
 
-class HTTPMethods(str, Enum):
+class HTTPMethod(str, Enum):
     """HTTP methods."""
 
     GET = "GET"
@@ -38,8 +38,9 @@ class HTTPClientWithTimeout:
 
     def request(
         self,
-        method: str,
+        method: HTTPMethod,
         path: str,
+        *,
         data: str | bytes | None = None,
         headers: dict[str, str] | None = None,
         params: str | dict[str, str | int | bool] | None = None,
@@ -52,9 +53,7 @@ class HTTPClientWithTimeout:
         if "Content-Type" not in headers:
             headers["Content-Type"] = "application/json"
 
-        url = (
-            self.base_url + path.removeprefix("/") if path.startswith("/") else self.base_url + path
-        )
+        url = self.base_url + path.removeprefix("/") if path.startswith("/") else self.base_url + path
         return requests.request(
             method,
             url,
@@ -72,7 +71,7 @@ class HTTPClientWithTimeout:
         params: str | dict[str, str | int | bool] | None = None,
     ) -> requests.Response:
         """Make a GET request to the HTTP server."""
-        return self.request(HTTPMethods.GET, path, data=data, headers=headers, params=params)
+        return self.request(HTTPMethod.GET, path, data=data, headers=headers, params=params)
 
     def post(
         self,
@@ -82,7 +81,7 @@ class HTTPClientWithTimeout:
         params: str | dict[str, str | int | bool] | None = None,
     ) -> requests.Response:
         """Make a POST request to the HTTP server."""
-        return self.request(HTTPMethods.POST, path, data=data, headers=headers, params=params)
+        return self.request(HTTPMethod.POST, path, data=data, headers=headers, params=params)
 
     def put(
         self,
@@ -92,7 +91,7 @@ class HTTPClientWithTimeout:
         params: str | dict[str, str | int | bool] | None = None,
     ) -> requests.Response:
         """Make a PUT request to the HTTP server."""
-        return self.request(HTTPMethods.PUT, path, data=data, headers=headers, params=params)
+        return self.request(HTTPMethod.PUT, path, data=data, headers=headers, params=params)
 
     def patch(
         self,
@@ -102,7 +101,7 @@ class HTTPClientWithTimeout:
         params: str | dict[str, str | int | bool] | None = None,
     ) -> requests.Response:
         """Make a PATCH request to the HTTP server."""
-        return self.request(HTTPMethods.PATCH, path, data=data, headers=headers, params=params)
+        return self.request(HTTPMethod.PATCH, path, data=data, headers=headers, params=params)
 
     def delete(
         self,
@@ -112,4 +111,4 @@ class HTTPClientWithTimeout:
         params: str | dict[str, str | int | bool] | None = None,
     ) -> requests.Response:
         """Make a DELETE request to the HTTP server."""
-        return self.request(HTTPMethods.DELETE, path, data=data, headers=headers, params=params)
+        return self.request(HTTPMethod.DELETE, path, data=data, headers=headers, params=params)

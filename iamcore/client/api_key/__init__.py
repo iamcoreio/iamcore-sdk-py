@@ -1,7 +1,7 @@
 from .client import Client
-from .dto import ApiKeyResponse
+from .dto import ApiKey
 
 __all__ = [
-    "ApiKeyResponse",
+    "ApiKey",
     "Client",
 ]

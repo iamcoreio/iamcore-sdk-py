@@ -18,7 +18,6 @@ from iamcore.client.models.client import HTTPClientWithTimeout
 if TYPE_CHECKING:
     from collections.abc import Generator
 
-    from iamcore.client.config import BaseConfig
 
 logger = logging.getLogger(__name__)
 
@@ -26,8 +25,12 @@ logger = logging.getLogger(__name__)
 class Client(HTTPClientWithTimeout):
     """IAMCore evaluation client."""
 
-    def __init__(self, config: BaseConfig) -> None:
-        super().__init__(config.iamcore_url, config.iamcore_client_timeout)
+    def __init__(
+        self,
+        base_url: str,
+        timeout: int = 30,
+    ) -> None:
+        super().__init__(base_url=base_url, timeout=timeout)
 
     def authorize(
         self,

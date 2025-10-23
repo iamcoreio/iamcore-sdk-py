@@ -3,10 +3,10 @@ from __future__ import annotations
 import re
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Callable, Generic, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Generic, Optional, TypeVar, Union
 
 from iamcore.irn import IRN
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from typing_extensions import override
 
 from iamcore.client.exceptions import IAMException
@@ -38,6 +38,15 @@ class IAMCoreBaseModel(BaseModel):
     def to_dict(self) -> dict[str, Any]:
         """Convert model to dictionary with optional field aliasing."""
         return self.model_dump(by_alias=True)
+
+
+class PaginatedSearchFilter(IAMCoreBaseModel):
+    """Paginated search filter."""
+
+    page: Optional[int] = None
+    page_size: Optional[int] = Field(None, alias="pageSize")
+    sort: Optional[str] = None
+    sort_order: Optional[str] = Field(None, alias="sortOrder")
 
 
 def to_snake_case(field_name: str) -> str:

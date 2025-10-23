@@ -5,7 +5,12 @@ from typing import TYPE_CHECKING, Any, Optional
 from pydantic import Field
 from typing_extensions import override
 
-from iamcore.client.models.base import IAMCoreBaseModel, IamEntitiesResponse, IamEntityResponse
+from iamcore.client.models.base import (
+    IAMCoreBaseModel,
+    IamEntitiesResponse,
+    IamEntityResponse,
+    PaginatedSearchFilter,
+)
 
 if TYPE_CHECKING:
     from iamcore.irn import IRN
@@ -54,6 +59,27 @@ class CreateUser(IAMCoreBaseModel):
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for API requests."""
         return self.model_dump(by_alias=True, exclude_none=True)
+
+
+class UpdateUser(IAMCoreBaseModel):
+    """Request model for updating a user."""
+
+    first_name: Optional[str] = Field(None, alias="firstName")
+    last_name: Optional[str] = Field(None, alias="lastName")
+    email: Optional[str] = None
+    enabled: bool = True
+
+
+class UserSearchFilter(PaginatedSearchFilter):
+    """User search filter."""
+
+    email: Optional[str] = None
+    path: Optional[str] = None
+    first_name: Optional[str] = Field(None, alias="firstName")
+    last_name: Optional[str] = Field(None, alias="lastName")
+    username: Optional[str] = None
+    tenant_id: Optional[str] = Field(None, alias="tenantId")
+    search: Optional[str] = None
 
 
 class IamUserResponse(IamEntityResponse[User]):

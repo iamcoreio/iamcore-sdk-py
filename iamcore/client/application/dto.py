@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 from pydantic import Field
 from typing_extensions import override
@@ -10,6 +10,7 @@ from iamcore.client.models.base import (
     IamEntitiesResponse,
     IamEntityResponse,
     JSON_List,
+    PaginatedSearchFilter,
 )
 
 if TYPE_CHECKING:
@@ -34,6 +35,21 @@ class Application(IAMCoreBaseModel):
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return self.model_dump(by_alias=True)
+
+
+class CreateApplication(IAMCoreBaseModel):
+    """Request model for creating a new application."""
+
+    name: str
+    display_name: Optional[str] = Field(None, alias="displayName")
+
+
+class ApplicationSearchFilter(PaginatedSearchFilter):
+    """Application search filter."""
+
+    irn: Optional[str] = None
+    name: Optional[str] = None
+    display_name: Optional[str] = Field(None, alias="displayName")
 
 
 class IamApplicationResponse(IamEntityResponse[Application]):

@@ -11,43 +11,43 @@ from iamcore.client.exceptions import (
     unwrap_put,
 )
 from iamcore.client.models.base import (
-    SortOrder,
     generic_search_all,
 )
 from iamcore.client.models.client import HTTPClientWithTimeout
 
-from .dto import Application, IamApplicationResponse, IamApplicationsResponse
+from .dto import (
+    Application,
+    ApplicationSearchFilter,
+    CreateApplication,
+    IamApplicationResponse,
+    IamApplicationsResponse,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Generator
 
+    from iamcore.irn import IRN
     from requests import Response
-
-    from iamcore.client.config import BaseConfig
 
 
 class Client(HTTPClientWithTimeout):
     """Client for IAM Core Application API."""
 
-    def __init__(self, config: BaseConfig) -> None:
-        super().__init__(base_url=config.iamcore_url, timeout=config.iamcore_client_timeout)
+    def __init__(self, base_url: str, timeout: int = 30) -> None:
+        super().__init__(base_url=base_url, timeout=timeout)
 
     @err_chain(IAMException)
     def create_application(
         self,
         auth_headers: dict[str, str],
-        *,
-        name: str,
-        display_name: str | None = None,
+        params: CreateApplication,
     ) -> Application:
-        payload = {"name": name, "displayName": display_name}
-        payload = {k: v for k, v in payload.items() if v}
-
-        response = self.post("applications", data=json.dumps(payload), headers=auth_headers)
+        payload = params.model_dump_json(by_alias=True, exclude_none=True)
+        response = self.post("applications", data=payload, headers=auth_headers)
         return IamApplicationResponse(**unwrap_post(response)).data
 
     @err_chain(IAMException)
-    def get_application(self, auth_headers: dict[str, str], *, irn: str) -> Application:
+    def get_application(self, auth_headers: dict[str, str], irn: IRN) -> Application:
         path = f"applications/{irn!s}"
         response: Response = self.get(path, headers=auth_headers)
         return IamApplicationResponse(**unwrap_get(response)).data
@@ -56,13 +56,11 @@ class Client(HTTPClientWithTimeout):
     def application_attach_policies(
         self,
         auth_headers: dict[str, str],
-        *,
-        application_id: str,
+        application_irn: IRN,
         policies_ids: list[str],
     ) -> None:
-        path = f"applications/{application_id}/policies/attach"
+        path = f"applications/{application_irn.to_base64()}/policies/attach"
         payload = {"policyIDs": policies_ids}
-
         response = self.post(path, data=json.dumps(payload), headers=auth_headers)
         return unwrap_put(response)
 
@@ -70,26 +68,9 @@ class Client(HTTPClientWithTimeout):
     def search_application(
         self,
         headers: dict[str, str],
-        *,
-        irn: str | None = None,
-        name: str | None = None,
-        display_name: str | None = None,
-        page: int | None = None,
-        page_size: int | None = None,
-        sort: str | None = None,
-        sort_order: SortOrder | None = None,
+        application_filter: ApplicationSearchFilter | None = None,
     ) -> IamApplicationsResponse:
-        query = {
-            "irn": str(irn) if irn else None,
-            "name": name,
-            "displayName": display_name,
-            "page": page,
-            "pageSize": page_size,
-            "sort": sort,
-            "sortOrder": sort_order.name if sort_order else None,
-        }
-        query = {k: v for k, v in query.items() if v}
-
+        query = application_filter.model_dump(by_alias=True, exclude_none=True) if application_filter else None
         response = self.get("applications", headers=headers, params=query)
         return IamApplicationsResponse(**unwrap_get(response))
 
@@ -97,19 +78,6 @@ class Client(HTTPClientWithTimeout):
     def search_all_applications(
         self,
         auth_headers: dict[str, str],
-        *,
-        irn: str | None = None,
-        name: str | None = None,
-        display_name: str | None = None,
-        sort: str | None = None,
-        sort_order: SortOrder | None = None,
+        application_filter: ApplicationSearchFilter | None = None,
     ) -> Generator[Application, None, None]:
-        kwargs = {
-            "irn": irn,
-            "name": name,
-            "display_name": display_name,
-            "sort": sort,
-            "sort_order": sort_order,
-        }
-        kwargs = {k: v for k, v in kwargs.items() if v}
-        return generic_search_all(auth_headers, self.search_application, **kwargs)
+        return generic_search_all(auth_headers, self.search_application, application_filter)

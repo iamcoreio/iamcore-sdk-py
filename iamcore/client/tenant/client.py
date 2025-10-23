@@ -13,12 +13,14 @@ from iamcore.client.exceptions import (
     unwrap_put,
 )
 from iamcore.client.models.base import (
-    SortOrder,
     generic_search_all,
 )
 from iamcore.client.models.client import HTTPClientWithTimeout
 
 from .dto import (
+    CreateTenant,
+    GetTenantIssuer,
+    GetTenantsFilter,
     IamTenantIssuersResponse,
     IamTenantResponse,
     IamTenantsResponse,
@@ -32,34 +34,26 @@ if TYPE_CHECKING:
     from iamcore.irn import IRN
     from requests import Response
 
-    from iamcore.client.config import BaseConfig
-
-
-DEFAULT_LOGIN_THEME = "iamcore"
-
 
 class Client(HTTPClientWithTimeout):
     """Client for IAM Core Tenant API."""
 
-    def __init__(self, config: BaseConfig) -> None:
-        super().__init__(base_url=config.iamcore_url, timeout=config.iamcore_client_timeout)
+    def __init__(
+        self,
+        base_url: str,
+        timeout: int = 30,
+    ) -> None:
+        super().__init__(base_url=base_url, timeout=timeout)
 
     @err_chain(IAMTenantException)
     def create_tenant(
         self,
         auth_headers: dict[str, str],
-        *,
-        name: str,
-        display_name: str,
-        login_theme: str = DEFAULT_LOGIN_THEME,
+        params: CreateTenant,
     ) -> Tenant:
         path = "tenants/issuer-types/iamcore"
-        payload = {
-            "name": name,
-            "displayName": display_name,
-            "loginTheme": login_theme,
-        }
-        response = self.post(path, data=json.dumps(payload), headers=auth_headers)
+        payload = params.model_dump_json(by_alias=True, exclude_none=True)
+        response = self.post(path, data=payload, headers=auth_headers)
         return IamTenantResponse(**unwrap_post(response)).data
 
     @err_chain(IAMTenantException)
@@ -79,14 +73,12 @@ class Client(HTTPClientWithTimeout):
     def get_issuer(
         self,
         headers: dict[str, str],
-        *,
-        account: str,
-        tenant_id: str,
+        params: GetTenantIssuer,
     ) -> TenantIssuer:
         response = self.get(
             "tenants/issuers",
             headers=headers,
-            params={"account": account, "tenant": tenant_id},
+            params=params.model_dump(by_alias=True),
         )
         return IamTenantIssuersResponse(**unwrap_get(response)).data.pop()
 
@@ -94,53 +86,16 @@ class Client(HTTPClientWithTimeout):
     def search_tenant(
         self,
         headers: dict[str, str],
-        *,
-        irn: str | None = None,
-        tenant_id: str | None = None,
-        name: str | None = None,
-        display_name: str | None = None,
-        issuer_type: str | None = None,
-        page: int | None = None,
-        page_size: int | None = None,
-        sort: str | None = None,
-        sort_order: SortOrder | None = None,
+        tenant_filter: GetTenantsFilter | None = None,
     ) -> IamTenantsResponse:
-        querystring = {
-            "irn": str(irn) if irn else None,
-            "name": name,
-            "displayName": display_name,
-            "tenantID": tenant_id,
-            "issuerType": issuer_type,
-            "page": page,
-            "pageSize": page_size,
-            "sort": sort,
-            "sortOrder": sort_order.name if sort_order else None,
-        }
-        querystring = {k: v for k, v in querystring.items() if v}
-
-        response = self.get("tenants", headers=headers, params=querystring)
+        query = tenant_filter.model_dump(by_alias=True, exclude_none=True) if tenant_filter else None
+        response = self.get("tenants", headers=headers, params=query)
         return IamTenantsResponse(**unwrap_get(response))
 
     @err_chain(IAMException)
     def search_all_tenants(
         self,
         auth_headers: dict[str, str],
-        *,
-        irn: str | None = None,
-        tenant_id: str | None = None,
-        name: str | None = None,
-        display_name: str | None = None,
-        issuer_type: str | None = None,
-        sort: str | None = None,
-        sort_order: SortOrder | None = None,
+        tenant_filter: GetTenantsFilter | None = None,
     ) -> Generator[Tenant, None, None]:
-        kwargs = {
-            "irn": irn,
-            "tenant_id": tenant_id,
-            "name": name,
-            "display_name": display_name,
-            "issuer_type": issuer_type,
-            "sort": sort,
-            "sort_order": sort_order,
-        }
-        return generic_search_all(auth_headers, self.search_tenant, **kwargs)
+        return generic_search_all(auth_headers, self.search_tenant, tenant_filter)

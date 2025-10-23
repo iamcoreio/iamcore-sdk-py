@@ -13,12 +13,11 @@ from iamcore.client.exceptions import (
     unwrap_put,
 )
 from iamcore.client.models.base import (
-    SortOrder,
     generic_search_all,
 )
 from iamcore.client.models.client import HTTPClientWithTimeout
 
-from .dto import Group, IamGroupResponse, IamGroupsResponse
+from .dto import CreateGroup, Group, GroupSearchFilter, IamGroupResponse, IamGroupsResponse
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -26,34 +25,21 @@ if TYPE_CHECKING:
     from iamcore.irn import IRN
     from requests import Response
 
-    from iamcore.client.config import BaseConfig
-
 
 class Client(HTTPClientWithTimeout):
     """Client for IAM Core Group API."""
 
-    def __init__(self, config: BaseConfig) -> None:
-        super().__init__(base_url=config.iamcore_url, timeout=config.iamcore_client_timeout)
+    def __init__(
+        self,
+        base_url: str,
+        timeout: int = 30,
+    ) -> None:
+        super().__init__(base_url=base_url, timeout=timeout)
 
     @err_chain(IAMGroupException)
-    def create_group(
-        self,
-        auth_headers: dict[str, str],
-        *,
-        name: str | None = None,
-        display_name: str | None = None,
-        tenant_id: str | None = None,
-        parent_id: str | None = None,
-    ) -> Group:
-        payload = {
-            "name": name,
-            "displayName": display_name,
-            "parentID": parent_id,
-            "tenantID": tenant_id,
-        }
-        payload = {k: v for k, v in payload.items() if v}
-
-        response = self.post("groups", data=json.dumps(payload), headers=auth_headers)
+    def create_group(self, auth_headers: dict[str, str], create_group: CreateGroup) -> Group:
+        payload = create_group.model_dump_json(by_alias=True, exclude_none=True)
+        response = self.post("groups", data=payload, headers=auth_headers)
         return IamGroupResponse(**unwrap_post(response)).data
 
     @err_chain(IAMGroupException)
@@ -66,12 +52,11 @@ class Client(HTTPClientWithTimeout):
     def group_attach_policies(
         self,
         auth_headers: dict[str, str],
-        group_id: str,
+        group_irn: IRN,
         policies_ids: list[str],
     ) -> None:
-        path = f"groups/{group_id}/policies/attach"
+        path = f"groups/{group_irn.to_base64()}/policies/attach"
         payload = {"policyIDs": policies_ids}
-
         response = self.put(path, data=json.dumps(payload), headers=auth_headers)
         unwrap_put(response)
 
@@ -79,12 +64,11 @@ class Client(HTTPClientWithTimeout):
     def group_add_members(
         self,
         auth_headers: dict[str, str],
-        group_id: str,
+        group_irn: IRN,
         members_ids: list[str],
     ) -> None:
-        path = f"groups/{group_id}/members/add"
+        path = f"groups/{group_irn.to_base64()}/members/add"
         payload = {"userIDs": members_ids}
-
         response = self.post(path, data=json.dumps(payload), headers=auth_headers)
         unwrap_put(response)
 
@@ -92,30 +76,9 @@ class Client(HTTPClientWithTimeout):
     def search_group(
         self,
         headers: dict[str, str],
-        *,
-        irn: IRN | None = None,
-        path: str | None = None,
-        name: str | None = None,
-        display_name: str | None = None,
-        tenant_id: str | None = None,
-        page: int | None = None,
-        page_size: int | None = None,
-        sort: str | None = None,
-        sort_order: SortOrder | None = None,
+        group_filter: GroupSearchFilter | None = None,
     ) -> IamGroupsResponse:
-        querystring = {
-            "irn": str(irn) if irn else None,
-            "path": path,
-            "name": name,
-            "displayName": display_name,
-            "tenantID": tenant_id,
-            "page": page,
-            "pageSize": page_size,
-            "sort": sort,
-            "sortOrder": sort_order.name if sort_order else None,
-        }
-        querystring = {k: v for k, v in querystring.items() if v}
-
+        querystring = group_filter.model_dump(by_alias=True, exclude_none=True) if group_filter else None
         response = self.get("groups", headers=headers, params=querystring)
         return IamGroupsResponse(**unwrap_get(response))
 
@@ -123,23 +86,6 @@ class Client(HTTPClientWithTimeout):
     def search_all_groups(
         self,
         auth_headers: dict[str, str],
-        *,
-        irn: IRN | None = None,
-        path: str | None = None,
-        name: str | None = None,
-        display_name: str | None = None,
-        tenant_id: str | None = None,
-        sort: str | None = None,
-        sort_order: SortOrder | None = None,
+        group_filter: GroupSearchFilter | None = None,
     ) -> Generator[Group, None, None]:
-        kwargs = {
-            "headers": auth_headers,
-            "irn": irn,
-            "path": path,
-            "name": name,
-            "display_name": display_name,
-            "tenant_id": tenant_id,
-            "sort": sort,
-            "sort_order": sort_order,
-        }
-        return generic_search_all(auth_headers, self.search_group, **kwargs)
+        return generic_search_all(auth_headers, self.search_group, group_filter)

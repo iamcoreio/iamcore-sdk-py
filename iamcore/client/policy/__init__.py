@@ -1,9 +1,12 @@
 from .client import Client
-from .dto import CreatePolicyRequest, Policy, PolicyStatement
+from .dto import IamPoliciesResponse, IamPolicyResponse, Policy, PolicySearchFilter, PolicyStatement, UpsertPolicy
 
 __all__ = [
     "Client",
-    "CreatePolicyRequest",
+    "IamPoliciesResponse",
+    "IamPolicyResponse",
     "Policy",
+    "PolicySearchFilter",
     "PolicyStatement",
+    "UpsertPolicy",
 ]

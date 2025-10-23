@@ -242,6 +242,8 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "python-dotenv" },
     { name = "requests" },
+    { name = "typing-extensions", version = "4.6.3", source = { registry = "https://pypi.org/simple" }, marker = "platform_python_implementation == 'PyPy'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "platform_python_implementation != 'PyPy'" },
 ]
 
 [package.dev-dependencies]
@@ -263,6 +265,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.0.0" },
     { name = "python-dotenv", specifier = "~=1.0.0" },
     { name = "requests", specifier = "~=2.31.0" },
+    { name = "typing-extensions", specifier = ">=4.6.3" },
 ]
 
 [package.metadata.requires-dev]

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, Optional
 
 from iamcore.irn import IRN
-from pydantic import Field
+from pydantic import Field, field_validator
 from typing_extensions import override
 
 from iamcore.client.models.base import (
@@ -13,6 +13,7 @@ from iamcore.client.models.base import (
     IamEntityResponse,
     JSON_List,
     JSON_obj,
+    PaginatedSearchFilter,
 )
 
 logger = logging.getLogger(__name__)
@@ -54,7 +55,7 @@ class Policy(IAMCoreBaseModel):
         return self.model_dump(by_alias=True)
 
 
-class CreatePolicyRequest(IAMCoreBaseModel):
+class UpsertPolicy(IAMCoreBaseModel):
     """Request model for creating a new policy."""
 
     name: str
@@ -69,7 +70,7 @@ class CreatePolicyRequest(IAMCoreBaseModel):
         description: str,
         resources: list[str],
         actions: list[str],
-    ) -> CreatePolicyRequest:
+    ) -> UpsertPolicy:
         self.statements.append(
             PolicyStatement(
                 effect=effect,
@@ -83,6 +84,24 @@ class CreatePolicyRequest(IAMCoreBaseModel):
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for API requests."""
         return self.model_dump(by_alias=True, exclude_none=True)
+
+
+class PolicySearchFilter(PaginatedSearchFilter):
+    """Policy search filter."""
+
+    irn: Optional[str] = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+    account_id: Optional[str] = Field(None, alias="accountID")
+    application: Optional[str] = None
+    tenant_id: Optional[str] = Field(None, alias="tenantID")
+
+    @field_validator("irn", mode="after")
+    @classmethod
+    def validate_irn(cls, v: Optional[str]) -> Optional[str]:
+        if not v and (cls.account_id and cls.tenant_id):
+            return f"irn:{cls.account_id}:iamcore:{cls.tenant_id}"
+        return v
 
 
 class IamPolicyResponse(IamEntityResponse[Policy]):
