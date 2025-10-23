@@ -24,7 +24,7 @@ class User(IAMCoreBaseModel):
     irn: IRN
     created: str
     updated: str
-    tenant_id: str = Field(alias="tenantId")
+    tenant_id: str = Field(alias="tenantID")
     auth_id: str = Field(alias="authID")  # UUID stored as string
     email: str
     enabled: bool  # API returns boolean, not string

@@ -95,8 +95,7 @@ class IamEntitiesResponse(ABC, Generic[T]):
         super().__init__()
 
     @abstractmethod
-    def converter(self, item: JSON_List) -> list[T]:
-        pass
+    def converter(self, item: JSON_List) -> list[T]: ...
 
 
 class IamIRNResponse(IamEntityResponse[IRN]):
@@ -121,7 +120,6 @@ class IamIRNsResponse(IamEntitiesResponse[IRN]):
 SEARCH_ALL_PAGE_SIZE = 1_000
 
 
-# Use TypeAlias for a more explicit and readable type definition
 _SearchFunc = Callable[[dict[str, str], PaginatedSearchFilter], IamEntitiesResponse[T]]
 
 

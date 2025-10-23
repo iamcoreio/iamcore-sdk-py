@@ -23,7 +23,7 @@ def sample_user_data() -> dict[str, Any]:
         "created": "2021-10-18T08:47:54.219531Z",
         "updated": "2021-10-18T08:47:54.219531Z",
         "irn": "irn:rc73dbh7q0:iamcore:4atcicnisg::user/org1/tom",
-        "tenantId": "4atcicnisg",
+        "tenantID": "4atcicnisg",
         "authID": "68a8372d-cc0a-4a42-8a56-099ac466e0bd",
         "email": "tom@example.com",
         "enabled": True,
@@ -107,7 +107,7 @@ class TestUserModel:
 
         # ASSERT
         # The output dictionary should have camelCase keys
-        assert user_dict["tenantId"] == "4atcicnisg"
+        assert user_dict["tenantID"] == "4atcicnisg"
         assert user_dict["authID"] == "68a8372d-cc0a-4a42-8a56-099ac466e0bd"
         assert user_dict["firstName"] == "Tom"
         assert user_dict["lastName"] == "Jasper"

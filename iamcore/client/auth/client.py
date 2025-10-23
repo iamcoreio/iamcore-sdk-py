@@ -19,11 +19,7 @@ def get_api_key_auth_headers(api_key: str) -> dict[str, str]:
 class Client(HTTPClientWithTimeout):
     """IAMCore auth client."""
 
-    def __init__(
-        self,
-        base_url: str,
-        timeout: int = 30,
-    ) -> None:
+    def __init__(self, base_url: str, timeout: int = 30) -> None:
         super().__init__(base_url=base_url, timeout=timeout)
 
     def _extract_token(self, response: Response) -> TokenResponse:
