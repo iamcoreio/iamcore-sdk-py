@@ -6,7 +6,7 @@ from iamcore.irn import IRN
 from pydantic import Field, field_validator
 from typing_extensions import override
 
-from iamcore.client.models.base import (
+from iamcore.client.base.models import (
     IAMCoreBaseModel,
     IamEntitiesResponse,
     IamEntityResponse,

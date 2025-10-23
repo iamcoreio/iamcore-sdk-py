@@ -5,7 +5,7 @@ from typing import Any, Optional
 from pydantic import Field
 from typing_extensions import override
 
-from iamcore.client.models.base import (
+from iamcore.client.base.models import (
     IAMCoreBaseModel,
     IamEntitiesResponse,
     IamEntityResponse,

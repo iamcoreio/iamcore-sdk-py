@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pydantic import Field
 
-from iamcore.client.models.base import IAMCoreBaseModel
+from iamcore.client.base.models import IAMCoreBaseModel
 
 
 class TokenResponse(IAMCoreBaseModel):

@@ -4,7 +4,7 @@ import http.client
 from typing import TYPE_CHECKING
 
 from iamcore.client.exceptions import IAMException, IAMUnauthorizedException
-from iamcore.client.models.client import HTTPClientWithTimeout
+from iamcore.client.base.client import HTTPClientWithTimeout
 
 from .dto import TokenResponse
 

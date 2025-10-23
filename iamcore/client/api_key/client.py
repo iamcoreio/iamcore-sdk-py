@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
+from iamcore.client.base.client import HTTPClientWithTimeout
+from iamcore.client.base.models import PaginatedSearchFilter, generic_search_all
 from iamcore.client.exceptions import IAMException, err_chain, unwrap_get
-from iamcore.client.models.base import PaginatedSearchFilter, generic_search_all
-from iamcore.client.models.client import HTTPClientWithTimeout
 
 from .dto import ApiKey, IamApiKeyResponse, IamApiKeysResponse
 

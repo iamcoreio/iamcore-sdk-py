@@ -6,7 +6,7 @@ from iamcore.irn import IRN
 from pydantic import Field, field_validator
 from typing_extensions import override
 
-from iamcore.client.models.base import (
+from iamcore.client.base.models import (
     IAMCoreBaseModel,
     IamEntitiesResponse,
     IamEntityResponse,
@@ -14,7 +14,7 @@ from iamcore.client.models.base import (
 )
 
 if TYPE_CHECKING:
-    from iamcore.client.models.base import JSON_List, JSON_obj
+    from iamcore.client.base.models import JSON_List, JSON_obj
 
 
 class User(IAMCoreBaseModel):

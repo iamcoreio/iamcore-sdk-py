@@ -5,6 +5,10 @@ from typing import TYPE_CHECKING, Optional
 
 from iamcore.irn import IRN
 
+from iamcore.client.base.client import HTTPClientWithTimeout
+from iamcore.client.base.models import (
+    generic_search_all,
+)
 from iamcore.client.exceptions import (
     IAMException,
     IAMPolicyException,
@@ -14,10 +18,6 @@ from iamcore.client.exceptions import (
     unwrap_post,
     unwrap_put,
 )
-from iamcore.client.models.base import (
-    generic_search_all,
-)
-from iamcore.client.models.client import HTTPClientWithTimeout
 
 from .dto import CreatePolicy, IamPoliciesResponse, IamPolicyResponse, Policy, PolicySearchFilter, UpdatePolicy
 

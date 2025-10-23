@@ -3,6 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
 from iamcore.client.application.client import json
+from iamcore.client.base.client import HTTPClientWithTimeout
+from iamcore.client.base.models import (
+    IamIRNResponse,
+    generic_search_all,
+)
 from iamcore.client.exceptions import (
     IAMException,
     IAMUserException,
@@ -13,11 +18,6 @@ from iamcore.client.exceptions import (
     unwrap_post,
     unwrap_put,
 )
-from iamcore.client.models.base import (
-    IamIRNResponse,
-    generic_search_all,
-)
-from iamcore.client.models.client import HTTPClientWithTimeout
 
 from .dto import CreateUser, IamUserResponse, IamUsersResponse, UpdateUser, User, UserSearchFilter
 

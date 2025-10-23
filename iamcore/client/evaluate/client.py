@@ -6,14 +6,14 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from iamcore.irn import IRN
 
+from iamcore.client.base.client import HTTPClientWithTimeout
+from iamcore.client.base.models import IamIRNsResponse, PaginatedSearchFilter, generic_search_all
 from iamcore.client.exceptions import (
     EVALUATE_MAPPING,
     IAMException,
     unwrap_return_empty,
     unwrap_return_json,
 )
-from iamcore.client.models.base import IamIRNsResponse, PaginatedSearchFilter, generic_search_all
-from iamcore.client.models.client import HTTPClientWithTimeout
 
 if TYPE_CHECKING:
     from collections.abc import Generator
