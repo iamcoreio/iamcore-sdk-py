@@ -30,10 +30,7 @@ def sample_resource_data() -> dict[str, Any]:
         "resourceType": "device",
         "enabled": True,
         "description": "Resource description",
-        "metadata": {
-            "temperature": "10",
-            "city": "Kyiv"
-        },
+        "metadata": {"temperature": "10", "city": "Kyiv"},
         "poolIDs": ["aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0YXRjaWNuaXNnOjpwb29sL2Rldg=="],
     }
 
@@ -50,10 +47,7 @@ def sample_create_resource_data() -> dict[str, Any]:
         "resourceType": "device",
         "enabled": True,
         "description": "Resource description",
-        "metadata": {
-            "temperature": "10",
-            "city": "Kyiv"
-        },
+        "metadata": {"temperature": "10", "city": "Kyiv"},
         "poolIDs": ["aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0YXRjaWNuaXNnOjpwb29sL2Rldg=="],
     }
 
@@ -65,10 +59,7 @@ def sample_update_resource_data() -> dict[str, Any]:
         "displayName": "Thermostat",
         "enabled": True,
         "description": "Resource description",
-        "metadata": {
-            "temperature": "10",
-            "city": "Kyiv"
-        },
+        "metadata": {"temperature": "10", "city": "Kyiv"},
         "poolIDs": ["aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0YXRjaWNuaXNnOjpwb29sL2Rldg=="],
     }
 
@@ -85,7 +76,10 @@ class TestResourceModel:
         resource = Resource.model_validate(sample_resource_data)
 
         # ASSERT
-        assert resource.id == "aXJuOnJjNzNkYmg3cTA6bXlhcHA6NGF0Y2ljbmlzZzo6ZGV2aWNlL2Rldi83ZTFlZGFkNS03ODQxLTRkMzgtYmRmMS1iZGM1NzViMGU5ODk="
+        assert (
+            resource.id
+            == "aXJuOnJjNzNkYmg3cTA6bXlhcHA6NGF0Y2ljbmlzZzo6ZGV2aWNlL2Rldi83ZTFlZGFkNS03ODQxLTRkMzgtYmRmMS1iZGM1NzViMGU5ODk="
+        )
         assert str(resource.irn) == "irn:rc73dbh7q0:myapp:4atcicnisg::device/dev/7e1edad5-7841-4d38-bdf1-bdc575b0e989"
         assert resource.tenant_id == "4atcicnisg"
         assert resource.application == "myapp"
@@ -184,7 +178,9 @@ class TestCreateResourceModel:
         # ASSERT
         assert create_resource.display_name is None
 
-    def test_raises_validation_error_for_missing_required_field(self, sample_create_resource_data: dict[str, Any]) -> None:
+    def test_raises_validation_error_for_missing_required_field(
+        self, sample_create_resource_data: dict[str, Any]
+    ) -> None:
         """
         Tests that Pydantic raises a ValidationError if a required field is missing.
         """
@@ -290,7 +286,7 @@ class TestResourceResponseWrappers:
         raw_list = [sample_resource_data, resource_2_data]
 
         # ACT
-        response = IamResourcesResponse(item=raw_list, count=2, page=1, page_size=10)
+        response = IamResourcesResponse(data=raw_list, count=2, page=1, page_size=10)
 
         # ASSERT
         assert response.count == 2

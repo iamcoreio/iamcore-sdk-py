@@ -74,7 +74,9 @@ class TestApplicationResourceTypeModel:
         assert resource_dict["actionPrefix"] == "document"
         assert "action_prefix" not in resource_dict  # The snake_case attribute name should not be a key
 
-    def test_raises_validation_error_for_missing_required_field(self, sample_application_resource_type_data: dict[str, Any]) -> None:
+    def test_raises_validation_error_for_missing_required_field(
+        self, sample_application_resource_type_data: dict[str, Any]
+    ) -> None:
         """
         Tests that Pydantic raises a ValidationError if a required field is missing.
         """
@@ -96,7 +98,9 @@ class TestCreateApplicationResourceTypeModel:
         Tests that a valid dictionary is correctly parsed into a CreateApplicationResourceType object.
         """
         # ACT
-        create_resource_type = CreateApplicationResourceType.model_validate(sample_create_application_resource_type_data)
+        create_resource_type = CreateApplicationResourceType.model_validate(
+            sample_create_application_resource_type_data
+        )
 
         # ASSERT
         assert create_resource_type.type == "document"
@@ -104,12 +108,16 @@ class TestCreateApplicationResourceTypeModel:
         assert create_resource_type.action_prefix == "document"
         assert create_resource_type.operations == ["sign", "export"]
 
-    def test_serialization_to_dict_uses_aliases(self, sample_create_application_resource_type_data: dict[str, Any]) -> None:
+    def test_serialization_to_dict_uses_aliases(
+        self, sample_create_application_resource_type_data: dict[str, Any]
+    ) -> None:
         """
         Tests that the to_dict() method correctly uses camelCase aliases.
         """
         # ARRANGE
-        create_resource_type = CreateApplicationResourceType.model_validate(sample_create_application_resource_type_data)
+        create_resource_type = CreateApplicationResourceType.model_validate(
+            sample_create_application_resource_type_data
+        )
 
         # ACT
         create_dict = create_resource_type.to_dict()
@@ -119,7 +127,9 @@ class TestCreateApplicationResourceTypeModel:
         assert create_dict["actionPrefix"] == "document"
         assert "action_prefix" not in create_dict  # The snake_case attribute name should not be a key
 
-    def test_handles_missing_optional_fields(self, sample_create_application_resource_type_data: dict[str, Any]) -> None:
+    def test_handles_missing_optional_fields(
+        self, sample_create_application_resource_type_data: dict[str, Any]
+    ) -> None:
         """
         Tests that optional fields can be omitted from the input data.
         """
@@ -127,12 +137,16 @@ class TestCreateApplicationResourceTypeModel:
         del sample_create_application_resource_type_data["description"]  # Remove the optional field
 
         # ACT
-        create_resource_type = CreateApplicationResourceType.model_validate(sample_create_application_resource_type_data)
+        create_resource_type = CreateApplicationResourceType.model_validate(
+            sample_create_application_resource_type_data
+        )
 
         # ASSERT
         assert create_resource_type.description is None
 
-    def test_raises_validation_error_for_missing_required_field(self, sample_create_application_resource_type_data: dict[str, Any]) -> None:
+    def test_raises_validation_error_for_missing_required_field(
+        self, sample_create_application_resource_type_data: dict[str, Any]
+    ) -> None:
         """
         Tests that Pydantic raises a ValidationError if a required field is missing.
         """
@@ -150,7 +164,9 @@ class TestCreateApplicationResourceTypeModel:
 class TestApplicationResourceTypeResponseWrappers:
     """Tests for the IamApplicationResourceTypeResponse and IamApplicationResourceTypesResponse wrappers."""
 
-    def test_iam_application_resource_type_response_single_item(self, sample_application_resource_type_data: dict[str, Any]) -> None:
+    def test_iam_application_resource_type_response_single_item(
+        self, sample_application_resource_type_data: dict[str, Any]
+    ) -> None:
         """
         Tests that the single-item response wrapper correctly converts a raw dict.
         """
@@ -161,7 +177,9 @@ class TestApplicationResourceTypeResponseWrappers:
         assert isinstance(response.data, ApplicationResourceType)
         assert response.data.type == "document"
 
-    def test_iam_application_resource_types_response_multiple_items(self, sample_application_resource_type_data: dict[str, Any]) -> None:
+    def test_iam_application_resource_types_response_multiple_items(
+        self, sample_application_resource_type_data: dict[str, Any]
+    ) -> None:
         """
         Tests that the list response wrapper correctly converts a list of raw dicts.
         """
@@ -174,7 +192,7 @@ class TestApplicationResourceTypeResponseWrappers:
         raw_list = [sample_application_resource_type_data, resource_type_2_data]
 
         # ACT
-        response = IamApplicationResourceTypesResponse(item=raw_list, count=2, page=1, page_size=10)
+        response = IamApplicationResourceTypesResponse(data=raw_list, count=2, page=1, page_size=10)
 
         # ASSERT
         assert response.count == 2

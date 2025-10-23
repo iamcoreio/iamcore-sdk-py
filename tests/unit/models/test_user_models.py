@@ -372,7 +372,7 @@ class TestUserResponseWrappers:
         raw_list = [sample_user_data, user_2_data]
 
         # ACT
-        response = IamUsersResponse(item=raw_list, count=2, page=1, page_size=10)
+        response = IamUsersResponse(data=raw_list, count=2, page=1, page_size=10)
 
         # ASSERT
         assert response.count == 2

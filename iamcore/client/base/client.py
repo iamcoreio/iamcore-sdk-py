@@ -5,6 +5,7 @@ from typing import Optional, Union
 
 import requests
 
+from iamcore.client.base.exception_handler import ResponseHandler
 from iamcore.client.exceptions import IAMUnauthorizedException
 
 
@@ -55,7 +56,7 @@ class HTTPClientWithTimeout:
             headers["Content-Type"] = "application/json"
 
         url = self.base_url + path.removeprefix("/") if path.startswith("/") else self.base_url + path
-        return requests.request(
+        resp = requests.request(
             method,
             url,
             data=data,
@@ -63,6 +64,7 @@ class HTTPClientWithTimeout:
             timeout=self.timeout,
             params=params,
         )
+        return ResponseHandler.handle_response(resp)
 
     def get(
         self,

@@ -8,7 +8,7 @@ import pytest
 from iamcore.irn import IRN
 from pydantic import Field
 
-from iamcore.client.models.base import (
+from iamcore.client.base.models import (
     SEARCH_ALL_PAGE_SIZE,
     IAMCoreBaseModel,
     IAMException,
@@ -123,7 +123,7 @@ class TestIamResponseModels:
         irn1_str = "irn:rc73dbh7q0:iamcore:4atcicnisg::user/org1/tom"
         irn2_str = "irn:rc73dbh7q0:iamcore:4atcicnisg::user/org1/jerry"
         json_list = [irn1_str, irn2_str]
-        response = IamIRNsResponse(item=json_list, count=2, page=1, page_size=10)
+        response = IamIRNsResponse(data=json_list, count=2, page=1, page_size=10)
 
         assert response.count == 2
         assert response.page == 1
@@ -157,10 +157,10 @@ class TestGenericSearchAll:
 
         # Define the responses for each page
         page1_response = IamIRNsResponse(
-            item=irns[:SEARCH_ALL_PAGE_SIZE], count=total_items, page=1, page_size=SEARCH_ALL_PAGE_SIZE
+            data=irns[:SEARCH_ALL_PAGE_SIZE], count=total_items, page=1, page_size=SEARCH_ALL_PAGE_SIZE
         )
         page2_response = IamIRNsResponse(
-            item=irns[SEARCH_ALL_PAGE_SIZE:], count=total_items, page=2, page_size=SEARCH_ALL_PAGE_SIZE
+            data=irns[SEARCH_ALL_PAGE_SIZE:], count=total_items, page=2, page_size=SEARCH_ALL_PAGE_SIZE
         )
 
         mock_search_func.side_effect = [page1_response, page2_response]
@@ -180,7 +180,7 @@ class TestGenericSearchAll:
         mock_search_func = Mock()
         irn1_str = "irn:rc73dbh7q0:iamcore:4atcicnisg::user/org1/tom"
         # Simulate a single page of results
-        response = IamIRNsResponse(item=[irn1_str], count=1, page=1, page_size=SEARCH_ALL_PAGE_SIZE)
+        response = IamIRNsResponse(data=[irn1_str], count=1, page=1, page_size=SEARCH_ALL_PAGE_SIZE)
         mock_search_func.side_effect = [response]
 
         # Call with search_filter=None

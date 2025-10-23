@@ -8,12 +8,7 @@ from iamcore.irn import IRN
 
 from iamcore.client.base.client import HTTPClientWithTimeout
 from iamcore.client.base.models import IamIRNsResponse, PaginatedSearchFilter, generic_search_all
-from iamcore.client.exceptions import (
-    EVALUATE_MAPPING,
-    IAMException,
-    unwrap_return_empty,
-    unwrap_return_json,
-)
+from iamcore.client.exceptions import IAMException
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -30,7 +25,8 @@ class Client(HTTPClientWithTimeout):
 
     def authorize(
         self,
-        authorization_headers: dict[str, str],
+        auth_headers: dict[str, str],
+        *,
         principal_irn: IRN,
         account_id: str,
         application: str,
@@ -60,35 +56,37 @@ class Client(HTTPClientWithTimeout):
             ]
             logger.debug(
                 "Going to evaluate %s %s %s",
-                authorization_headers,
+                auth_headers,
                 action,
                 resources_irn_list,
             )
-            self.evaluate(authorization_headers, action, resources_irn_list)
+            self.evaluate(auth_headers, action, resources_irn_list)
             return resources_irn_list
         logger.debug("Going to evaluate by type")
-        return list(self.evaluate_all_resources(authorization_headers, application, action, resource_type))
+        return list(
+            self.evaluate_all_resources(
+                auth_headers,
+                application=application,
+                action=action,
+                resource_type=resource_type,
+            )
+        )
 
     def evaluate(self, auth_headers: dict[str, str], action: str, resources: list[IRN]) -> None:
         payload = {"action": action, "resources": [str(r) for r in resources if r]}
         logger.debug("Going to evaluate resources: json=%s", payload)
-        response = self.post("evaluate", data=json.dumps(payload), headers=auth_headers)
-        return unwrap_return_empty(response, EVALUATE_MAPPING)
+        self.post("evaluate", data=json.dumps(payload), headers=auth_headers)
 
-    def evaluate_actions(
-        self,
-        auth_headers: dict[str, str],
-        actions: list[str],
-        irns: list[IRN],
-    ) -> dict[str, Any]:
+    def evaluate_actions(self, auth_headers: dict[str, str], actions: list[str], irns: list[IRN]) -> dict[str, Any]:
         payload = {"actions": actions, "irns": [str(r) for r in irns if r]}
         logger.debug("Going to evaluate resources: json=%s", payload)
         response = self.post("evaluate/actions", data=json.dumps(payload), headers=auth_headers)
-        return unwrap_return_json(response, EVALUATE_MAPPING)
+        return response.json()
 
     def evaluate_resources(
         self,
         auth_headers: dict[str, str],
+        *,
         application: str,
         action: str,
         resource_type: str,
@@ -102,11 +100,12 @@ class Client(HTTPClientWithTimeout):
             headers=auth_headers,
             params=search_filter.model_dump(by_alias=True, exclude_none=True) if search_filter else None,
         )
-        return IamIRNsResponse(**unwrap_return_json(response, EVALUATE_MAPPING))
+        return IamIRNsResponse(**response.json())
 
     def evaluate_all_resources(
         self,
         auth_headers: dict[str, str],
+        *,
         application: str,
         action: str,
         resource_type: str,
@@ -115,9 +114,9 @@ class Client(HTTPClientWithTimeout):
             auth_headers,
             lambda headers, search_filter: self.evaluate_resources(
                 headers,
-                application,
-                action,
-                resource_type,
+                application=application,
+                action=action,
+                resource_type=resource_type,
                 search_filter=search_filter,
             ),
             None,

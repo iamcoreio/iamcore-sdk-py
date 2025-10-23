@@ -241,7 +241,7 @@ class TestApplicationResponseWrappers:
         raw_list = [sample_application_data, app_2_data]
 
         # ACT
-        response = IamApplicationsResponse(item=raw_list, count=2, page=1, page_size=10)
+        response = IamApplicationsResponse(data=raw_list, count=2, page=1, page_size=10)
 
         # ASSERT
         assert response.count == 2

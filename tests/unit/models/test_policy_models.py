@@ -370,7 +370,7 @@ class TestPolicyResponseWrappers:
         raw_list = [sample_policy_data, policy_2_data]
 
         # ACT
-        response = IamPoliciesResponse(item=raw_list, count=2, page=1, page_size=10)
+        response = IamPoliciesResponse(data=raw_list, count=2, page=1, page_size=10)
 
         # ASSERT
         assert response.count == 2

@@ -3,8 +3,8 @@ import json
 import pytest
 import responses
 
+from iamcore.client.base.client import APIVersion, HTTPClientWithTimeout, HTTPMethod
 from iamcore.client.exceptions import IAMUnauthorizedException
-from iamcore.client.models.client import APIVersion, HTTPClientWithTimeout, HTTPMethod
 
 BASE_URL = "http://localhost:8080"
 

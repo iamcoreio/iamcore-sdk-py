@@ -4,18 +4,8 @@ from typing import TYPE_CHECKING, Optional
 
 from iamcore.client.application.client import json
 from iamcore.client.base.client import HTTPClientWithTimeout
-from iamcore.client.base.models import (
-    generic_search_all,
-)
-from iamcore.client.exceptions import (
-    IAMException,
-    IAMTenantException,
-    err_chain,
-    unwrap_delete,
-    unwrap_get,
-    unwrap_post,
-    unwrap_put,
-)
+from iamcore.client.base.models import generic_search_all
+from iamcore.client.exceptions import IAMException, IAMTenantException, err_chain
 
 from .dto import (
     CreateTenant,
@@ -32,7 +22,6 @@ if TYPE_CHECKING:
     from collections.abc import Generator
 
     from iamcore.irn import IRN
-    from requests import Response
 
 
 class Client(HTTPClientWithTimeout):
@@ -46,20 +35,18 @@ class Client(HTTPClientWithTimeout):
         path = "tenants/issuer-types/iamcore"
         payload = params.model_dump_json(by_alias=True, exclude_none=True)
         response = self.post(path, data=payload, headers=auth_headers)
-        return IamTenantResponse(**unwrap_post(response)).data
+        return IamTenantResponse(**response.json()).data
 
     @err_chain(IAMTenantException)
     def update_tenant(self, auth_headers: dict[str, str], irn: IRN, display_name: str) -> None:
         path = f"tenants/{irn.to_base64()}"
         payload = {"displayName": display_name}
-        response: Response = self.put(path, data=json.dumps(payload), headers=auth_headers)
-        return unwrap_put(response)
+        self.put(path, data=json.dumps(payload), headers=auth_headers)
 
     @err_chain(IAMTenantException)
     def delete_tenant(self, auth_headers: dict[str, str], irn: IRN) -> None:
         path = f"tenants/{irn.to_base64()}"
-        response = self.delete(path, headers=auth_headers)
-        unwrap_delete(response)
+        self.delete(path, headers=auth_headers)
 
     @err_chain(IAMTenantException)
     def get_issuer(self, headers: dict[str, str], params: GetTenantIssuer) -> TenantIssuer:
@@ -68,7 +55,7 @@ class Client(HTTPClientWithTimeout):
             headers=headers,
             params=params.model_dump(by_alias=True),
         )
-        return IamTenantIssuersResponse(**unwrap_get(response)).data.pop()
+        return IamTenantIssuersResponse(**response.json()).data.pop()
 
     @err_chain(IAMTenantException)
     def search_tenant(
@@ -78,7 +65,7 @@ class Client(HTTPClientWithTimeout):
     ) -> IamTenantsResponse:
         query = tenant_filter.model_dump(by_alias=True, exclude_none=True) if tenant_filter else None
         response = self.get("tenants", headers=headers, params=query)
-        return IamTenantsResponse(**unwrap_get(response))
+        return IamTenantsResponse(**response.json())
 
     @err_chain(IAMException)
     def search_all_tenants(

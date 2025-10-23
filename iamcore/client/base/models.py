@@ -87,8 +87,8 @@ class IamEntitiesResponse(ABC, Generic[T]):
     page: int
     page_size: int
 
-    def __init__(self, item: JSON_List, count: int, page: int, page_size: int) -> None:
-        self.data = self.converter(item)
+    def __init__(self, data: JSON_List, count: int, page: int, page_size: int) -> None:
+        self.data = self.converter(data)
         self.count = count
         self.page = page
         self.page_size = page_size

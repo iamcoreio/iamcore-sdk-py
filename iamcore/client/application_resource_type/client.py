@@ -3,11 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
 from iamcore.client.base.client import HTTPClientWithTimeout
-from iamcore.client.base.models import (
-    PaginatedSearchFilter,
-    generic_search_all,
-)
-from iamcore.client.exceptions import IAMException, err_chain, unwrap_get, unwrap_post
+from iamcore.client.base.models import PaginatedSearchFilter, generic_search_all
+from iamcore.client.exceptions import IAMException, err_chain
 
 from .dto import (
     ApplicationResourceType,
@@ -38,7 +35,7 @@ class Client(HTTPClientWithTimeout):
         path = f"applications/{application_irn.to_base64()}/resource-types"
         payload = params.model_dump_json(by_alias=True, exclude_none=True)
         response = self.post(path, data=payload, headers=auth_headers)
-        return IamApplicationResourceTypeResponse(**unwrap_post(response)).data
+        return IamApplicationResourceTypeResponse(**response.json()).data
 
     @err_chain(IAMException)
     def get_resource_type(
@@ -49,7 +46,7 @@ class Client(HTTPClientWithTimeout):
     ) -> ApplicationResourceType:
         path = f"applications/{application_irn.to_base64()}/resource-types/{type_irn.to_base64()}"
         response = self.get(path, headers=auth_headers)
-        return IamApplicationResourceTypeResponse(**unwrap_get(response)).data
+        return IamApplicationResourceTypeResponse(**response.json()).data
 
     @err_chain(IAMException)
     def search_application_resource_types(
@@ -61,7 +58,7 @@ class Client(HTTPClientWithTimeout):
         path = f"applications/{application_irn.to_base64()}/resource-types"
         query = resource_type_filter.model_dump(by_alias=True, exclude_none=True) if resource_type_filter else None
         response = self.get(path, headers=headers, params=query)
-        return IamApplicationResourceTypesResponse(**unwrap_get(response))
+        return IamApplicationResourceTypesResponse(**response.json())
 
     @err_chain(IAMException)
     def search_all_application_resource_types(

@@ -107,7 +107,7 @@ class TestApiResponseWrappers:
         raw_list = [sample_api_key_data, api_key_2_data]
 
         # ACT
-        response = IamApiKeysResponse(item=raw_list, count=2, page=1, page_size=10)
+        response = IamApiKeysResponse(data=raw_list, count=2, page=1, page_size=10)
 
         # ASSERT
         assert response.count == 2

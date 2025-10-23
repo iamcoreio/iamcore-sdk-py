@@ -252,7 +252,7 @@ class TestGroupResponseWrappers:
         raw_list = [sample_group_data, group_2_data]
 
         # ACT
-        response = IamGroupsResponse(item=raw_list, count=2, page=1, page_size=10)
+        response = IamGroupsResponse(data=raw_list, count=2, page=1, page_size=10)
 
         # ASSERT
         assert response.count == 2

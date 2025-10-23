@@ -4,16 +4,8 @@ import json
 from typing import TYPE_CHECKING, Optional
 
 from iamcore.client.base.client import HTTPClientWithTimeout
-from iamcore.client.base.models import (
-    generic_search_all,
-)
-from iamcore.client.exceptions import (
-    IAMException,
-    err_chain,
-    unwrap_get,
-    unwrap_post,
-    unwrap_put,
-)
+from iamcore.client.base.models import generic_search_all
+from iamcore.client.exceptions import IAMException, err_chain
 
 from .dto import (
     Application,
@@ -27,7 +19,6 @@ if TYPE_CHECKING:
     from collections.abc import Generator
 
     from iamcore.irn import IRN
-    from requests import Response
 
 
 class Client(HTTPClientWithTimeout):
@@ -44,13 +35,13 @@ class Client(HTTPClientWithTimeout):
     ) -> Application:
         payload = params.model_dump_json(by_alias=True, exclude_none=True)
         response = self.post("applications", data=payload, headers=auth_headers)
-        return IamApplicationResponse(**unwrap_post(response)).data
+        return IamApplicationResponse(**response.json()).data
 
     @err_chain(IAMException)
     def get_application(self, auth_headers: dict[str, str], irn: IRN) -> Application:
         path = f"applications/{irn!s}"
-        response: Response = self.get(path, headers=auth_headers)
-        return IamApplicationResponse(**unwrap_get(response)).data
+        response = self.get(path, headers=auth_headers)
+        return IamApplicationResponse(**response.json()).data
 
     @err_chain(IAMException)
     def application_attach_policies(
@@ -61,8 +52,7 @@ class Client(HTTPClientWithTimeout):
     ) -> None:
         path = f"applications/{application_irn.to_base64()}/policies/attach"
         payload = {"policyIDs": policies_ids}
-        response = self.post(path, data=json.dumps(payload), headers=auth_headers)
-        return unwrap_put(response)
+        self.post(path, data=json.dumps(payload), headers=auth_headers)
 
     @err_chain(IAMException)
     def search_application(
@@ -72,7 +62,7 @@ class Client(HTTPClientWithTimeout):
     ) -> IamApplicationsResponse:
         query = application_filter.model_dump(by_alias=True, exclude_none=True) if application_filter else None
         response = self.get("applications", headers=headers, params=query)
-        return IamApplicationsResponse(**unwrap_get(response))
+        return IamApplicationsResponse(**response.json())
 
     @err_chain(IAMException)
     def search_all_applications(

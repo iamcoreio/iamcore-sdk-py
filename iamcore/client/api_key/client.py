@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Optional
 
 from iamcore.client.base.client import HTTPClientWithTimeout
 from iamcore.client.base.models import PaginatedSearchFilter, generic_search_all
-from iamcore.client.exceptions import IAMException, err_chain, unwrap_get
+from iamcore.client.exceptions import IAMException, err_chain
 
 from .dto import ApiKey, IamApiKeyResponse, IamApiKeysResponse
 
@@ -23,7 +23,7 @@ class Client(HTTPClientWithTimeout):
         path = f"principals/{principal_id}/api-keys"
         headers = {"Content-Type": "application/json", **auth_headers}
         response = self.post(path, headers=headers)
-        return IamApiKeyResponse(**unwrap_get(response))
+        return IamApiKeyResponse(**response.json())
 
     @err_chain(IAMException)
     def get_application_api_keys(
@@ -35,7 +35,7 @@ class Client(HTTPClientWithTimeout):
         query = search_filter.model_dump(by_alias=True, exclude_none=True) if search_filter else None
         path = f"principals/{principal_id}/api-keys"
         response = self.get(path, headers=headers, params=query)
-        return IamApiKeysResponse(**unwrap_get(response))
+        return IamApiKeysResponse(**response.json())
 
     @err_chain(IAMException)
     def get_all_applications_api_keys(

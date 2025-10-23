@@ -160,7 +160,9 @@ class TestTenantIssuerModel:
         assert tenant_issuer_dict["loginURL"] == "https://iamcore.io/login"
         assert "client_id" not in tenant_issuer_dict  # The snake_case attribute name should not be a key
 
-    def test_raises_validation_error_for_missing_required_field(self, sample_tenant_issuer_data: dict[str, Any]) -> None:
+    def test_raises_validation_error_for_missing_required_field(
+        self, sample_tenant_issuer_data: dict[str, Any]
+    ) -> None:
         """
         Tests that Pydantic raises a ValidationError if a required field is missing.
         """
@@ -222,7 +224,9 @@ class TestCreateTenantModel:
         # ASSERT
         assert create_tenant.user_metadata_ui_schema is None
 
-    def test_raises_validation_error_for_missing_required_field(self, sample_create_tenant_data: dict[str, Any]) -> None:
+    def test_raises_validation_error_for_missing_required_field(
+        self, sample_create_tenant_data: dict[str, Any]
+    ) -> None:
         """
         Tests that Pydantic raises a ValidationError if a required field is missing.
         """
@@ -281,7 +285,9 @@ class TestUpdateTenantModel:
         # ASSERT
         assert update_tenant.user_metadata_ui_schema is None
 
-    def test_raises_validation_error_for_missing_required_field(self, sample_update_tenant_data: dict[str, Any]) -> None:
+    def test_raises_validation_error_for_missing_required_field(
+        self, sample_update_tenant_data: dict[str, Any]
+    ) -> None:
         """
         Tests that Pydantic raises a ValidationError if a required field is missing.
         """
@@ -323,7 +329,7 @@ class TestTenantResponseWrappers:
         raw_list = [sample_tenant_data, tenant_2_data]
 
         # ACT
-        response = IamTenantsResponse(item=raw_list, count=2, page=1, page_size=10)
+        response = IamTenantsResponse(data=raw_list, count=2, page=1, page_size=10)
 
         # ASSERT
         assert response.count == 2
@@ -360,7 +366,7 @@ class TestTenantResponseWrappers:
         raw_list = [sample_tenant_issuer_data, issuer_2_data]
 
         # ACT
-        response = IamTenantIssuersResponse(item=raw_list, count=2, page=1, page_size=10)
+        response = IamTenantIssuersResponse(data=raw_list, count=2, page=1, page_size=10)
 
         # ASSERT
         assert response.count == 2

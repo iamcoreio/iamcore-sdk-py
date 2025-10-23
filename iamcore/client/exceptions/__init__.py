@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from http.client import BAD_REQUEST, CONFLICT, CREATED, FORBIDDEN, NO_CONTENT, OK, UNAUTHORIZED
 from typing import TYPE_CHECKING, Any, Callable
 
 if TYPE_CHECKING:
@@ -10,145 +9,63 @@ if TYPE_CHECKING:
 class IAMException(Exception):
     msg: str
 
-    def __init__(self, msg: str) -> None:
+    def __init__(self, msg: str, status_code: int | None = None) -> None:
         self.msg = msg
+        self.status_code = status_code
+        super().__init__(msg)
+
+    @classmethod
+    def from_response(cls, resp: Response) -> IAMException:
+        """Create an exception instance from a requests.Response object."""
+        try:
+            data = resp.json()
+            message = data.get("message") or data.get("detail") or data.get("error", "An unknown error occurred.")
+        except Exception:
+            message = resp.text or "An unknown error occurred."
+
+        return cls(message, status_code=resp.status_code)
 
 
-class IAMUnauthorizedException(IAMException):
-    pass
+class IAMUnauthorizedException(IAMException): ...
 
 
-class IAMForbiddenException(IAMException):
-    pass
+class IAMForbiddenException(IAMException): ...
 
 
-class IAMBedRequestException(IAMException):
-    pass
+class IAMBedRequestException(IAMException): ...
 
 
-class IAMConflictException(IAMException):
-    pass
+class IAMConflictException(IAMException): ...
 
 
-class IAMTenantException(IAMException):
-    pass
+class IAMTenantException(IAMException): ...
 
 
-class IAMTenantExistsException(IAMTenantException):
-    pass
+class IAMTenantExistsException(IAMTenantException): ...
 
 
-class IAMPolicyException(IAMException):
-    pass
+class IAMPolicyException(IAMException): ...
 
 
-class IAMPolicyExistsException(IAMPolicyException):
-    pass
+class IAMPolicyExistsException(IAMPolicyException): ...
 
 
-class IAMUserException(IAMException):
-    pass
+class IAMUserException(IAMException): ...
 
 
-class IAMUserExistsException(IAMUserException):
-    pass
+class IAMUserExistsException(IAMUserException): ...
 
 
-class IAMGroupException(IAMException):
-    pass
+class IAMGroupException(IAMException): ...
 
 
-class IAMGroupExistsException(IAMGroupException):
-    pass
+class IAMGroupExistsException(IAMGroupException): ...
 
 
-class IAMResourceException(IAMException):
-    pass
+class IAMResourceException(IAMException): ...
 
 
-class IAMResourceExistsException(IAMResourceException):
-    pass
-
-
-GET_MAPPING = {OK: None, UNAUTHORIZED: IAMUnauthorizedException, FORBIDDEN: IAMForbiddenException}
-
-POST_MAPPING = {
-    CREATED: None,
-    BAD_REQUEST: IAMBedRequestException,
-    CONFLICT: IAMConflictException,
-    UNAUTHORIZED: IAMUnauthorizedException,
-    FORBIDDEN: IAMForbiddenException,
-}
-
-PUT_MAPPING = {
-    NO_CONTENT: None,
-    BAD_REQUEST: IAMBedRequestException,
-    UNAUTHORIZED: IAMUnauthorizedException,
-    FORBIDDEN: IAMForbiddenException,
-}
-
-DELETE_MAPPING = {
-    NO_CONTENT: None,
-    UNAUTHORIZED: IAMUnauthorizedException,
-    FORBIDDEN: IAMForbiddenException,
-}
-
-EVALUATE_MAPPING = {
-    OK: None,
-    BAD_REQUEST: IAMBedRequestException,
-    UNAUTHORIZED: IAMUnauthorizedException,
-    FORBIDDEN: IAMForbiddenException,
-}
-
-
-def unwrap_return_empty(resp: Response, mapping: dict[int, Any]) -> None:
-    if resp.status_code not in mapping:
-        msg = f"Unexpected error code: {resp.status_code}"
-        raise IAMTenantException(msg)
-    mapped_exception = mapping.get(resp.status_code)
-    if mapped_exception is None:
-        return
-    raise mapped_exception(resp.json()["message"])
-
-
-def unwrap_return_json(resp: Response, mapping: dict[int, Any]) -> dict[str, Any]:
-    if resp.status_code not in mapping:
-        msg = f"Unexpected error code: {resp.status_code}"
-        raise IAMTenantException(msg)
-    mapped_exception = mapping.get(resp.status_code)
-    if mapped_exception is None:
-        return resp.json()
-    raise mapped_exception(resp.json()["message"])
-
-
-def unwrap_get(resp: Response, mapping: dict[int, Any] | None = None) -> dict[str, Any]:
-    if mapping is None:
-        mapping = GET_MAPPING
-    return unwrap_return_json(resp, mapping)
-
-
-def unwrap_post(resp: Response, mapping: dict[int, Any] | None = None) -> dict[str, Any]:
-    if mapping is None:
-        mapping = POST_MAPPING
-    return unwrap_return_json(resp, mapping)
-
-
-def unwrap_put(resp: Response, mapping: dict[int, Any] | None = None) -> None:
-    if mapping is None:
-        mapping = PUT_MAPPING
-    return unwrap_return_empty(resp, mapping)
-
-
-def unwrap_patch(resp: Response, mapping: dict[int, Any] | None = None) -> None:
-    if mapping is None:
-        mapping = PUT_MAPPING
-    return unwrap_return_empty(resp, mapping)
-
-
-def unwrap_delete(resp: Response, mapping: dict[int, Any] | None = None) -> None:
-    if mapping is None:
-        mapping = DELETE_MAPPING
-    return unwrap_return_empty(resp, mapping)
+class IAMResourceExistsException(IAMResourceException): ...
 
 
 def err_chain(error: type[IAMException] = IAMException) -> Callable[..., Any]:
