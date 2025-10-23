@@ -21,9 +21,6 @@ class IAMCoreBaseModel(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
         arbitrary_types_allowed=True,
-        alias_generator=lambda field_name: "".join(
-            word.capitalize() if i > 0 else word for i, word in enumerate(field_name.split("_"))
-        ),
     )
 
     @classmethod
@@ -112,21 +109,24 @@ class IamIRNsResponse(IamEntitiesResponse[IRN]):
         return [IRN.of(item) for item in item]
 
 
+DEFAULT_PAGE_SIZE = 1_000
+
+
 def generic_search_all(
     auth_headers: dict[str, str],
-    func: Callable[..., IamEntitiesResponse[T]],
-    *args: Any,
-    **kwargs: Any,
+    func: Callable[[dict[str, str], PaginatedSearchFilter], IamEntitiesResponse[T]],
+    search_filter: PaginatedSearchFilter | None = None,
 ) -> Generator[T, None, None]:
-    if "page" in kwargs:
-        kwargs.pop("page")
-
     new_results = True
     page = 1
 
+    search_filter = search_filter or PaginatedSearchFilter()
+    search_filter.page_size = search_filter.page_size or DEFAULT_PAGE_SIZE
+
     counter = 0
     while new_results:
-        resp = func(auth_headers, *args, page=page, **kwargs)
+        search_filter.page = page
+        resp = func(auth_headers, search_filter)
         if not resp.data:
             break
         for d in resp.data:
