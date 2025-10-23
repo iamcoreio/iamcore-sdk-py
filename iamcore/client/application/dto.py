@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional
+from typing import Any, Optional
 
-from pydantic import Field
+from iamcore.irn import IRN
+from pydantic import Field, field_validator
 from typing_extensions import override
 
 from iamcore.client.models.base import (
@@ -12,9 +13,6 @@ from iamcore.client.models.base import (
     JSON_List,
     PaginatedSearchFilter,
 )
-
-if TYPE_CHECKING:
-    from iamcore.irn import IRN
 
 
 class Application(IAMCoreBaseModel):
@@ -27,6 +25,13 @@ class Application(IAMCoreBaseModel):
     created: str
     updated: str
 
+    @field_validator("irn", mode="before")
+    @classmethod
+    def validate_irn_field(cls, v: Any) -> IRN:
+        if isinstance(v, str):
+            return IRN.of(v)
+        return v
+
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return self.model_dump(by_alias=True)
@@ -36,7 +41,13 @@ class CreateApplication(IAMCoreBaseModel):
     """Request model for creating a new application."""
 
     name: str
-    display_name: Optional[str] = Field(None, alias="displayName")
+    display_name: Optional[str] = Field(default=None, alias="displayName")
+
+
+class UpdateApplication(IAMCoreBaseModel):
+    """Request model for updating an application."""
+
+    display_name: str = Field(alias="displayName")
 
 
 class ApplicationSearchFilter(PaginatedSearchFilter):
@@ -44,7 +55,7 @@ class ApplicationSearchFilter(PaginatedSearchFilter):
 
     irn: Optional[str] = None
     name: Optional[str] = None
-    display_name: Optional[str] = Field(None, alias="displayName")
+    display_name: Optional[str] = Field(default=None, alias="displayName")
 
 
 class IamApplicationResponse(IamEntityResponse[Application]):

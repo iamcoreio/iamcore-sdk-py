@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from iamcore.irn import IRN
 
@@ -19,7 +19,7 @@ from iamcore.client.models.base import (
 )
 from iamcore.client.models.client import HTTPClientWithTimeout
 
-from .dto import IamPoliciesResponse, IamPolicyResponse, Policy, PolicySearchFilter, UpsertPolicy
+from .dto import CreatePolicy, IamPoliciesResponse, IamPolicyResponse, Policy, PolicySearchFilter, UpdatePolicy
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -37,7 +37,7 @@ class Client(HTTPClientWithTimeout):
         super().__init__(base_url=base_url, timeout=timeout)
 
     @err_chain(IAMPolicyException)
-    def create_policy(self, auth_headers: dict[str, str], params: UpsertPolicy) -> Policy:
+    def create_policy(self, auth_headers: dict[str, str], params: CreatePolicy) -> Policy:
         payload_dict = params.model_dump_json(by_alias=True, exclude_none=True)
 
         response: Response = self.post("policies", data=payload_dict, headers=auth_headers)
@@ -50,7 +50,7 @@ class Client(HTTPClientWithTimeout):
         unwrap_delete(response)
 
     @err_chain(IAMPolicyException)
-    def update_policy(self, auth_headers: dict[str, str], policy_id: str, params: UpsertPolicy) -> None:
+    def update_policy(self, auth_headers: dict[str, str], policy_id: str, params: UpdatePolicy) -> None:
         path = "policies/" + policy_id
         data = params.model_dump_json(by_alias=True, exclude_none=True)
         response: Response = self.put(path, data=data, headers=auth_headers)
@@ -60,7 +60,7 @@ class Client(HTTPClientWithTimeout):
     def search_policy(
         self,
         headers: dict[str, str],
-        policy_filter: PolicySearchFilter | None = None,
+        policy_filter: Optional[PolicySearchFilter] = None,
     ) -> IamPoliciesResponse:
         query = policy_filter.model_dump(by_alias=True, exclude_none=True) if policy_filter else None
         response = self.get("policies", headers=headers, params=query)
@@ -70,6 +70,6 @@ class Client(HTTPClientWithTimeout):
     def search_all_policies(
         self,
         auth_headers: dict[str, str],
-        policy_filter: PolicySearchFilter | None = None,
+        policy_filter: Optional[PolicySearchFilter] = None,
     ) -> Generator[Policy, None, None]:
         return generic_search_all(auth_headers, self.search_policy, policy_filter)

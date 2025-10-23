@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from iamcore.client.application.client import json
 from iamcore.client.exceptions import (
@@ -38,17 +38,17 @@ class Client(HTTPClientWithTimeout):
         """Create a new user."""
         data = params.model_dump_json(by_alias=True, exclude_none=True)
         response = self.post("users", data=data, headers=auth_headers)
-        return IamUserResponse(**unwrap_post(response)).data
+        return IamUserResponse(item=unwrap_post(response)).data
 
     @err_chain(IAMUserException)
     def get_user_me(self, auth_headers: dict[str, str]) -> User:
         response = self.get("users/me", headers=auth_headers)
-        return IamUserResponse(**unwrap_get(response)).data
+        return IamUserResponse(item=unwrap_get(response)).data
 
     @err_chain(IAMUserException)
     def get_irn(self, auth_headers: dict[str, str]) -> IRN:
         response = self.get("users/me/irn", headers=auth_headers)
-        return IamIRNResponse(**unwrap_get(response)).data
+        return IamIRNResponse(item=unwrap_get(response)).data
 
     @err_chain(IAMUserException)
     def update_user(self, auth_headers: dict[str, str], irn: IRN, params: UpdateUser) -> None:
@@ -76,7 +76,12 @@ class Client(HTTPClientWithTimeout):
         unwrap_put(response)
 
     @err_chain(IAMUserException)
-    def user_add_groups(self, auth_headers: dict[str, str], user_irn: IRN, group_ids: list[str]) -> None:
+    def user_add_groups(
+        self,
+        auth_headers: dict[str, str],
+        user_irn: IRN,
+        group_ids: list[str],
+    ) -> None:
         path = f"users/{user_irn.to_base64()}/groups/add"
         payload = {"groupIDs": group_ids}
         response = self.post(path, data=json.dumps(payload), headers=auth_headers)
@@ -86,16 +91,21 @@ class Client(HTTPClientWithTimeout):
     def search_users(
         self,
         auth_headers: dict[str, str],
-        user_filter: UserSearchFilter | None = None,
+        user_filter: Optional[UserSearchFilter] = None,
     ) -> IamUsersResponse:
         query = user_filter.model_dump(by_alias=True, exclude_none=True) if user_filter else None
         response = self.get("users", headers=auth_headers, params=query)
-        return IamUsersResponse(**unwrap_get(response))
+        return IamUsersResponse(
+            item=unwrap_get(response)["data"],
+            count=unwrap_get(response)["meta"]["total"],
+            page=unwrap_get(response)["meta"]["offset"],
+            page_size=unwrap_get(response)["meta"]["limit"],
+        )
 
     @err_chain(IAMException)
     def search_all_users(
         self,
         auth_headers: dict[str, str],
-        user_filter: UserSearchFilter | None = None,
+        user_filter: Optional[UserSearchFilter] = None,
     ) -> Generator[User, None, None]:
         return generic_search_all(auth_headers, self.search_users, user_filter)

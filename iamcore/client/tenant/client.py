@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from iamcore.client.application.client import json
 from iamcore.client.exceptions import (
@@ -42,11 +42,7 @@ class Client(HTTPClientWithTimeout):
         super().__init__(base_url=base_url, timeout=timeout)
 
     @err_chain(IAMTenantException)
-    def create_tenant(
-        self,
-        auth_headers: dict[str, str],
-        params: CreateTenant,
-    ) -> Tenant:
+    def create_tenant(self, auth_headers: dict[str, str], params: CreateTenant) -> Tenant:
         path = "tenants/issuer-types/iamcore"
         payload = params.model_dump_json(by_alias=True, exclude_none=True)
         response = self.post(path, data=payload, headers=auth_headers)
@@ -66,11 +62,7 @@ class Client(HTTPClientWithTimeout):
         unwrap_delete(response)
 
     @err_chain(IAMTenantException)
-    def get_issuer(
-        self,
-        headers: dict[str, str],
-        params: GetTenantIssuer,
-    ) -> TenantIssuer:
+    def get_issuer(self, headers: dict[str, str], params: GetTenantIssuer) -> TenantIssuer:
         response = self.get(
             "tenants/issuers",
             headers=headers,
@@ -82,7 +74,7 @@ class Client(HTTPClientWithTimeout):
     def search_tenant(
         self,
         headers: dict[str, str],
-        tenant_filter: GetTenantsFilter | None = None,
+        tenant_filter: Optional[GetTenantsFilter] = None,
     ) -> IamTenantsResponse:
         query = tenant_filter.model_dump(by_alias=True, exclude_none=True) if tenant_filter else None
         response = self.get("tenants", headers=headers, params=query)
@@ -92,6 +84,6 @@ class Client(HTTPClientWithTimeout):
     def search_all_tenants(
         self,
         auth_headers: dict[str, str],
-        tenant_filter: GetTenantsFilter | None = None,
+        tenant_filter: Optional[GetTenantsFilter] = None,
     ) -> Generator[Tenant, None, None]:
         return generic_search_all(auth_headers, self.search_tenant, tenant_filter)

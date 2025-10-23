@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from iamcore.client.exceptions import IAMException, err_chain, unwrap_get
 from iamcore.client.models.base import PaginatedSearchFilter, generic_search_all
@@ -19,11 +19,7 @@ class Client(HTTPClientWithTimeout):
         super().__init__(base_url=base_url, timeout=timeout)
 
     @err_chain(IAMException)
-    def create_application_api_key(
-        self,
-        auth_headers: dict[str, str],
-        principal_id: str,
-    ) -> IamApiKeyResponse:
+    def create_application_api_key(self, auth_headers: dict[str, str], principal_id: str) -> IamApiKeyResponse:
         path = f"principals/{principal_id}/api-keys"
         headers = {"Content-Type": "application/json", **auth_headers}
         response = self.post(path, headers=headers)
@@ -34,7 +30,7 @@ class Client(HTTPClientWithTimeout):
         self,
         headers: dict[str, str],
         principal_id: str,
-        search_filter: PaginatedSearchFilter | None = None,
+        search_filter: Optional[PaginatedSearchFilter] = None,
     ) -> IamApiKeysResponse:
         query = search_filter.model_dump(by_alias=True, exclude_none=True) if search_filter else None
         path = f"principals/{principal_id}/api-keys"

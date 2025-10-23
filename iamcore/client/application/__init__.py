@@ -5,6 +5,7 @@ from .dto import (
     CreateApplication,
     IamApplicationResponse,
     IamApplicationsResponse,
+    UpdateApplication,
 )
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "CreateApplication",
     "IamApplicationResponse",
     "IamApplicationsResponse",
+    "UpdateApplication",
 ]

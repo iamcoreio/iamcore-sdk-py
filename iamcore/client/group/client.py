@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from iamcore.client.exceptions import (
     IAMException,
@@ -72,7 +72,7 @@ class Client(HTTPClientWithTimeout):
     def search_group(
         self,
         headers: dict[str, str],
-        group_filter: GroupSearchFilter | None = None,
+        group_filter: Optional[GroupSearchFilter] = None,
     ) -> IamGroupsResponse:
         querystring = group_filter.model_dump(by_alias=True, exclude_none=True) if group_filter else None
         response = self.get("groups", headers=headers, params=querystring)
@@ -82,6 +82,6 @@ class Client(HTTPClientWithTimeout):
     def search_all_groups(
         self,
         auth_headers: dict[str, str],
-        group_filter: GroupSearchFilter | None = None,
+        group_filter: Optional[GroupSearchFilter] = None,
     ) -> Generator[Group, None, None]:
         return generic_search_all(auth_headers, self.search_group, group_filter)

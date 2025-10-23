@@ -18,7 +18,7 @@ class ApiKey(IAMCoreBaseModel):
 
     api_key: str = Field(alias="apiKey")
     state: str
-    last_used: Optional[str] = Field(None, alias="lastUsed")
+    last_used: Optional[str] = Field(default=None, alias="lastUsed")
     created: str
     updated: str
 

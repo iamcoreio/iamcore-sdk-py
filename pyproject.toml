@@ -28,6 +28,8 @@ dev = [
   "pytest-cov>=4.1.0",
   "setuptools>=67.8.0",
   "twine>=4.0.0",
+  "pytest-mock>=3.10.0",
+  "responses>=0.23.0",
 ]
 
 
@@ -155,6 +157,7 @@ ignore = [
   "RUF012",
   "DJ008",
   "DJ001",
+  "UP007",
 ]
 
 # Allow fix for all enabled rules (when `--fix` is provided)

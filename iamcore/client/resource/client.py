@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from iamcore.client.application.client import json
 from iamcore.client.exceptions import (
@@ -40,11 +40,7 @@ class Client(HTTPClientWithTimeout):
         super().__init__(base_url=base_url, timeout=timeout)
 
     @err_chain(IAMResourceException)
-    def create_resource(
-        self,
-        auth_headers: dict[str, str],
-        params: CreateResource,
-    ) -> Resource:
+    def create_resource(self, auth_headers: dict[str, str], params: CreateResource) -> Resource:
         payload = params.model_dump_json(by_alias=True, exclude_none=True)
         response = self.post("resources", data=payload, headers=auth_headers)
         return IamResourceResponse(**unwrap_post(response)).data
@@ -77,7 +73,7 @@ class Client(HTTPClientWithTimeout):
     def search_resource(
         self,
         auth_headers: dict[str, str],
-        resource_filter: ResourceSearchFilter | None = None,
+        resource_filter: Optional[ResourceSearchFilter] = None,
     ) -> IamResourcesResponse:
         query = resource_filter.model_dump(by_alias=True, exclude_none=True) if resource_filter else None
         response = self.get("resources", headers=auth_headers, params=query)
@@ -87,6 +83,6 @@ class Client(HTTPClientWithTimeout):
     def search_all_resources(
         self,
         auth_headers: dict[str, str],
-        resource_filter: ResourceSearchFilter | None = None,
+        resource_filter: Optional[ResourceSearchFilter] = None,
     ) -> Generator[Resource, None, None]:
         return generic_search_all(auth_headers, self.search_resource, resource_filter)

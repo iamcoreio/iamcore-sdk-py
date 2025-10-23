@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional
+from typing import Any, Optional
 
-from pydantic import Field
+from iamcore.irn import IRN
+from pydantic import Field, field_validator
 from typing_extensions import override
 
 from iamcore.client.models.base import (
@@ -11,9 +12,6 @@ from iamcore.client.models.base import (
     IamEntityResponse,
     JSON_List,
 )
-
-if TYPE_CHECKING:
-    from iamcore.irn import IRN
 
 
 class ApplicationResourceType(IAMCoreBaseModel):
@@ -28,6 +26,13 @@ class ApplicationResourceType(IAMCoreBaseModel):
     created: str
     updated: str
 
+    @field_validator("irn", mode="before")
+    @classmethod
+    def validate_irn_field(cls, v: Any) -> IRN:
+        if isinstance(v, str):
+            return IRN.of(v)
+        return v
+
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return self.model_dump(by_alias=True)
@@ -38,7 +43,7 @@ class CreateApplicationResourceType(IAMCoreBaseModel):
 
     type: str
     description: Optional[str] = None
-    action_prefix: Optional[str] = Field(None, alias="actionPrefix")
+    action_prefix: Optional[str] = Field(default=None, alias="actionPrefix")
     operations: Optional[list[str]] = None
 
 

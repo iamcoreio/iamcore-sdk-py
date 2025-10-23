@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from iamcore.client.exceptions import (
     IAMException,
@@ -68,7 +68,7 @@ class Client(HTTPClientWithTimeout):
     def search_application(
         self,
         headers: dict[str, str],
-        application_filter: ApplicationSearchFilter | None = None,
+        application_filter: Optional[ApplicationSearchFilter] = None,
     ) -> IamApplicationsResponse:
         query = application_filter.model_dump(by_alias=True, exclude_none=True) if application_filter else None
         response = self.get("applications", headers=headers, params=query)
@@ -78,6 +78,6 @@ class Client(HTTPClientWithTimeout):
     def search_all_applications(
         self,
         auth_headers: dict[str, str],
-        application_filter: ApplicationSearchFilter | None = None,
+        application_filter: Optional[ApplicationSearchFilter] = None,
     ) -> Generator[Application, None, None]:
         return generic_search_all(auth_headers, self.search_application, application_filter)

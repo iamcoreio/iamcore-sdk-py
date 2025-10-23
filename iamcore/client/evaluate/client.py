@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 from iamcore.irn import IRN
 
@@ -38,7 +38,7 @@ class Client(HTTPClientWithTimeout):
         resource_type: str,
         resource_path: str,
         action: str,
-        resource_ids: list[str] | None = None,
+        resource_ids: Optional[list[str]] = None,
     ) -> list[IRN]:
         if not action:
             msg = "Action must be defined"
@@ -92,7 +92,7 @@ class Client(HTTPClientWithTimeout):
         application: str,
         action: str,
         resource_type: str,
-        search_filter: PaginatedSearchFilter | None = None,
+        search_filter: Optional[PaginatedSearchFilter] = None,
     ) -> IamIRNsResponse:
         payload = {"application": application, "action": action, "resourceType": resource_type}
         logger.debug("Going to evaluate resource type: json=%s", payload)

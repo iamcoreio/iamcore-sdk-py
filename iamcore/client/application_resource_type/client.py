@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from iamcore.client.exceptions import IAMException, err_chain, unwrap_get, unwrap_post
 from iamcore.client.models.base import (
@@ -56,7 +56,7 @@ class Client(HTTPClientWithTimeout):
         self,
         headers: dict[str, str],
         application_irn: IRN,
-        resource_type_filter: PaginatedSearchFilter | None = None,
+        resource_type_filter: Optional[PaginatedSearchFilter] = None,
     ) -> IamApplicationResourceTypesResponse:
         path = f"applications/{application_irn.to_base64()}/resource-types"
         query = resource_type_filter.model_dump(by_alias=True, exclude_none=True) if resource_type_filter else None
@@ -67,6 +67,15 @@ class Client(HTTPClientWithTimeout):
     def search_all_application_resource_types(
         self,
         auth_headers: dict[str, str],
-        resource_type_filter: PaginatedSearchFilter | None = None,
+        application_irn: IRN,
+        resource_type_filter: Optional[PaginatedSearchFilter] = None,
     ) -> Generator[ApplicationResourceType, None, None]:
-        return generic_search_all(auth_headers, self.search_application_resource_types, resource_type_filter)
+        return generic_search_all(
+            auth_headers,
+            lambda headers, search_filter: self.search_application_resource_types(
+                headers,
+                application_irn,
+                search_filter,
+            ),
+            resource_type_filter,
+        )

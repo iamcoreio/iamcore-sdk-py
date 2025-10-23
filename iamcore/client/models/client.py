@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
+from typing import Optional, Union
 
 import requests
 
@@ -33,7 +34,7 @@ class HTTPClientWithTimeout:
         api_version: APIVersion = APIVersion.V1,
     ) -> None:
         self.base_url: str = base_url if base_url.endswith("/") else base_url + "/"
-        self.base_url = self.base_url + api_version.value
+        self.base_url = self.base_url + api_version.value + "/"
         self.timeout: int = timeout
 
     def request(
@@ -41,9 +42,9 @@ class HTTPClientWithTimeout:
         method: HTTPMethod,
         path: str,
         *,
-        data: str | bytes | None = None,
-        headers: dict[str, str] | None = None,
-        params: str | dict[str, str | int | bool] | None = None,
+        data: Optional[Union[str, bytes]] = None,
+        headers: Optional[dict[str, str]] = None,
+        params: Optional[Union[str, dict[str, Union[str, int, bool]]]] = None,
     ) -> requests.Response:
         """Make a request to the HTTP server."""
         if not headers:
@@ -66,9 +67,10 @@ class HTTPClientWithTimeout:
     def get(
         self,
         path: str,
-        data: str | bytes | None = None,
-        headers: dict[str, str] | None = None,
-        params: str | dict[str, str | int | bool] | None = None,
+        *,
+        data: Optional[Union[str, bytes]] = None,
+        headers: Optional[dict[str, str]] = None,
+        params: Optional[Union[str, dict[str, Union[str, int, bool]]]] = None,
     ) -> requests.Response:
         """Make a GET request to the HTTP server."""
         return self.request(HTTPMethod.GET, path, data=data, headers=headers, params=params)
@@ -76,9 +78,10 @@ class HTTPClientWithTimeout:
     def post(
         self,
         path: str,
-        data: str | bytes | None = None,
-        headers: dict[str, str] | None = None,
-        params: str | dict[str, str | int | bool] | None = None,
+        *,
+        data: Optional[Union[str, bytes]] = None,
+        headers: Optional[dict[str, str]] = None,
+        params: Optional[Union[str, dict[str, Union[str, int, bool]]]] = None,
     ) -> requests.Response:
         """Make a POST request to the HTTP server."""
         return self.request(HTTPMethod.POST, path, data=data, headers=headers, params=params)
@@ -86,9 +89,10 @@ class HTTPClientWithTimeout:
     def put(
         self,
         path: str,
-        data: str | bytes | None = None,
-        headers: dict[str, str] | None = None,
-        params: str | dict[str, str | int | bool] | None = None,
+        *,
+        data: Optional[Union[str, bytes]] = None,
+        headers: Optional[dict[str, str]] = None,
+        params: Optional[Union[str, dict[str, Union[str, int, bool]]]] = None,
     ) -> requests.Response:
         """Make a PUT request to the HTTP server."""
         return self.request(HTTPMethod.PUT, path, data=data, headers=headers, params=params)
@@ -96,9 +100,10 @@ class HTTPClientWithTimeout:
     def patch(
         self,
         path: str,
-        data: str | bytes | None = None,
-        headers: dict[str, str] | None = None,
-        params: str | dict[str, str | int | bool] | None = None,
+        *,
+        data: Optional[Union[str, bytes]] = None,
+        headers: Optional[dict[str, str]] = None,
+        params: Optional[Union[str, dict[str, Union[str, int, bool]]]] = None,
     ) -> requests.Response:
         """Make a PATCH request to the HTTP server."""
         return self.request(HTTPMethod.PATCH, path, data=data, headers=headers, params=params)
@@ -106,9 +111,10 @@ class HTTPClientWithTimeout:
     def delete(
         self,
         path: str,
-        data: str | bytes | None = None,
-        headers: dict[str, str] | None = None,
-        params: str | dict[str, str | int | bool] | None = None,
+        *,
+        data: Optional[Union[str, bytes]] = None,
+        headers: Optional[dict[str, str]] = None,
+        params: Optional[Union[str, dict[str, Union[str, int, bool]]]] = None,
     ) -> requests.Response:
         """Make a DELETE request to the HTTP server."""
         return self.request(HTTPMethod.DELETE, path, data=data, headers=headers, params=params)

@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional
+from typing import Any, Optional
 
-from pydantic import Field
+from iamcore.irn import IRN
+from pydantic import Field, field_validator
 from typing_extensions import override
 
 from iamcore.client.models.base import (
@@ -13,9 +14,6 @@ from iamcore.client.models.base import (
     JSON_obj,
     PaginatedSearchFilter,
 )
-
-if TYPE_CHECKING:
-    from iamcore.irn import IRN
 
 
 class Resource(IAMCoreBaseModel):
@@ -32,8 +30,16 @@ class Resource(IAMCoreBaseModel):
     resource_type: str = Field(alias="resourceType")
     enabled: bool
     metadata: dict[str, str]
+    pool_ids: Optional[list[str]] = Field(None, alias="poolIDs")
     created: str
     updated: str
+
+    @field_validator("irn", mode="before")
+    @classmethod
+    def validate_irn_field(cls, v: Any) -> IRN:
+        if isinstance(v, str):
+            return IRN.of(v)
+        return v
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
@@ -52,6 +58,7 @@ class CreateResource(IAMCoreBaseModel):
     display_name: Optional[str] = Field(None, alias="displayName")
     enabled: Optional[bool] = True
     metadata: Optional[dict[str, str]] = None
+    pool_ids: Optional[list[str]] = Field(None, alias="poolIDs")
 
 
 class UpdateResource(IAMCoreBaseModel):
@@ -61,6 +68,7 @@ class UpdateResource(IAMCoreBaseModel):
     enabled: Optional[bool] = True
     description: Optional[str] = None
     metadata: Optional[dict[str, str]] = None
+    pool_ids: Optional[list[str]] = Field(None, alias="poolIDs")
 
 
 class ResourceSearchFilter(PaginatedSearchFilter):
@@ -68,11 +76,11 @@ class ResourceSearchFilter(PaginatedSearchFilter):
 
     irn: Optional[str] = None
     path: Optional[str] = None
-    display_name: Optional[str] = Field(None, alias="displayName")
+    display_name: Optional[str] = Field(default=None, alias="displayName")
     enabled: Optional[bool] = None
-    tenant_id: Optional[str] = Field(None, alias="tenantID")
+    tenant_id: Optional[str] = Field(default=None, alias="tenantID")
     application: Optional[str] = None
-    resource_type: Optional[str] = Field(None, alias="resourceType")
+    resource_type: Optional[str] = Field(default=None, alias="resourceType")
 
 
 class IamResourceResponse(IamEntityResponse[Resource]):
