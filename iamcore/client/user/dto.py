@@ -34,11 +34,6 @@ class User(IAMCoreBaseModel):
     username: str
     path: str
 
-    @staticmethod
-    def of(item: User | dict[str, Any]) -> User:
-        """Create User instance from User object or dict."""
-        return User.model_validate(item) if isinstance(item, dict) else item
-
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return self.model_dump(by_alias=True)

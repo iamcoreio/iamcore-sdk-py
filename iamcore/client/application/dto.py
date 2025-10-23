@@ -27,11 +27,6 @@ class Application(IAMCoreBaseModel):
     created: str
     updated: str
 
-    @staticmethod
-    def of(item: Application | dict[str, Any]) -> Application:
-        """Create Application instance from Application object or dict."""
-        return Application.model_validate(item) if isinstance(item, dict) else item
-
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return self.model_dump(by_alias=True)

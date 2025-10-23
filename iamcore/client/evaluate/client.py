@@ -25,11 +25,7 @@ logger = logging.getLogger(__name__)
 class Client(HTTPClientWithTimeout):
     """IAMCore evaluation client."""
 
-    def __init__(
-        self,
-        base_url: str,
-        timeout: int = 30,
-    ) -> None:
+    def __init__(self, base_url: str, timeout: int = 30) -> None:
         super().__init__(base_url=base_url, timeout=timeout)
 
     def authorize(
@@ -71,9 +67,7 @@ class Client(HTTPClientWithTimeout):
             self.evaluate(authorization_headers, action, resources_irn_list)
             return resources_irn_list
         logger.debug("Going to evaluate by type")
-        return list(
-            self.evaluate_all_resources(authorization_headers, application, action, resource_type)
-        )
+        return list(self.evaluate_all_resources(authorization_headers, application, action, resource_type))
 
     def evaluate(self, auth_headers: dict[str, str], action: str, resources: list[IRN]) -> None:
         payload = {"action": action, "resources": [str(r) for r in resources if r]}

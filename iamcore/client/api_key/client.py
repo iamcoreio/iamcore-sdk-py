@@ -17,11 +17,7 @@ if TYPE_CHECKING:
 class Client(HTTPClientWithTimeout):
     """Client for IAM Core API Keys."""
 
-    def __init__(
-        self,
-        base_url: str,
-        timeout: int = 30,
-    ) -> None:
+    def __init__(self, base_url: str, timeout: int = 30) -> None:
         super().__init__(base_url=base_url, timeout=timeout)
 
     @err_chain(IAMException)

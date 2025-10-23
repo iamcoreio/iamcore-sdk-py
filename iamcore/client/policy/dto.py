@@ -27,11 +27,6 @@ class PolicyStatement(IAMCoreBaseModel):
     resources: list[IRN]
     actions: list[str]
 
-    @staticmethod
-    def of(item: PolicyStatement | dict[str, Any]) -> PolicyStatement:
-        """Create PolicyStatement instance from PolicyStatement object or dict."""
-        return PolicyStatement.model_validate(item) if isinstance(item, dict) else item
-
 
 class Policy(IAMCoreBaseModel):
     """Policy model representing IAM Core policies."""
@@ -44,11 +39,6 @@ class Policy(IAMCoreBaseModel):
     origin: str
     version: str
     statements: list[PolicyStatement]
-
-    @staticmethod
-    def of(item: Policy | dict[str, Any]) -> Policy:
-        """Create Policy instance from Policy object or dict."""
-        return Policy.model_validate(item) if isinstance(item, dict) else item
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""

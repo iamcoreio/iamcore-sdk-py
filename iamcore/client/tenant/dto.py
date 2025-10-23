@@ -30,11 +30,6 @@ class Tenant(IAMCoreBaseModel):
     created: str
     updated: str
 
-    @staticmethod
-    def of(item: Tenant | dict[str, Any]) -> Tenant:
-        """Create Tenant instance from Tenant object or dict."""
-        return Tenant.model_validate(item) if isinstance(item, dict) else item
-
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return self.model_dump(by_alias=True)
@@ -50,11 +45,6 @@ class TenantIssuer(IAMCoreBaseModel):
     url: str
     client_id: str = Field(alias="clientId")
     login_url: str = Field(alias="loginUrl")
-
-    @staticmethod
-    def of(item: TenantIssuer | dict[str, Any]) -> TenantIssuer:
-        """Create TenantIssuer instance from TenantIssuer object or dict."""
-        return TenantIssuer.model_validate(item) if isinstance(item, dict) else item
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""

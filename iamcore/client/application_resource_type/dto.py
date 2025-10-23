@@ -28,11 +28,6 @@ class ApplicationResourceType(IAMCoreBaseModel):
     created: str
     updated: str
 
-    @staticmethod
-    def of(item: ApplicationResourceType | dict[str, Any]) -> ApplicationResourceType:
-        """Create ApplicationResourceType instance from ApplicationResourceType object or dict."""
-        return ApplicationResourceType.model_validate(item) if isinstance(item, dict) else item
-
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return self.model_dump(by_alias=True)

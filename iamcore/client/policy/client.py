@@ -33,11 +33,7 @@ logger = logging.getLogger(__name__)
 class Client(HTTPClientWithTimeout):
     """Client for IAM Core Policy API."""
 
-    def __init__(
-        self,
-        base_url: str,
-        timeout: int = 30,
-    ) -> None:
+    def __init__(self, base_url: str, timeout: int = 30) -> None:
         super().__init__(base_url=base_url, timeout=timeout)
 
     @err_chain(IAMPolicyException)

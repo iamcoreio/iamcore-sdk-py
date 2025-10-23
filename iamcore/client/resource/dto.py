@@ -35,11 +35,6 @@ class Resource(IAMCoreBaseModel):
     created: str
     updated: str
 
-    @staticmethod
-    def of(item: Resource | dict[str, Any]) -> Resource:
-        """Create Resource instance from Resource object or dict."""
-        return Resource.model_validate(item) if isinstance(item, dict) else item
-
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return self.model_dump(by_alias=True)

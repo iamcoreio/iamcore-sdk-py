@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Optional
 
 from pydantic import Field
 from typing_extensions import override
@@ -29,11 +29,6 @@ class Group(IAMCoreBaseModel):
     path: str
     created: str
     updated: str
-
-    @staticmethod
-    def of(item: Group | dict[str, Any]) -> Group:
-        """Create Group instance from Group object or dict."""
-        return Group.model_validate(item) if isinstance(item, dict) else item
 
 
 class CreateGroup(IAMCoreBaseModel):
