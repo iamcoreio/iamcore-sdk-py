@@ -253,7 +253,6 @@ dev = [
     { name = "pytest" },
     { name = "pytest-benchmark" },
     { name = "pytest-cov" },
-    { name = "requests" },
     { name = "setuptools" },
     { name = "twine" },
 ]
@@ -275,7 +274,6 @@ dev = [
     { name = "pytest", specifier = ">=7.3.1" },
     { name = "pytest-benchmark", specifier = ">=4.0.0" },
     { name = "pytest-cov", specifier = ">=4.1.0" },
-    { name = "requests", specifier = "~=2.31.0" },
     { name = "setuptools", specifier = ">=67.8.0" },
     { name = "twine", specifier = ">=4.0.0" },
 ]

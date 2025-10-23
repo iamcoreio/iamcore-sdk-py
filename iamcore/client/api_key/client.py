@@ -3,15 +3,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from iamcore.client.exceptions import IAMException, err_chain, unwrap_get
-from iamcore.client.models.base import generic_search_all
+from iamcore.client.models.base import PaginatedSearchFilter, generic_search_all
 from iamcore.client.models.client import HTTPClientWithTimeout
 
 from .dto import ApiKey, IamApiKeyResponse, IamApiKeysResponse
 
 if TYPE_CHECKING:
     from collections.abc import Generator
-
-    from iamcore.irn import IRN
 
 
 class Client(HTTPClientWithTimeout):
@@ -36,16 +34,25 @@ class Client(HTTPClientWithTimeout):
         self,
         headers: dict[str, str],
         principal_id: str,
-        page: int = 1,
+        search_filter: PaginatedSearchFilter | None = None,
     ) -> IamApiKeysResponse:
-        path = f"principals/{principal_id}/api-keys?page={page}"
-        response = self.get(path, headers=headers)
+        query = search_filter.model_dump(by_alias=True, exclude_none=True) if search_filter else None
+        path = f"principals/{principal_id}/api-keys"
+        response = self.get(path, headers=headers, params=query)
         return IamApiKeysResponse(**unwrap_get(response))
 
     @err_chain(IAMException)
     def get_all_applications_api_keys(
         self,
         auth_headers: dict[str, str],
-        irn: str | IRN,
+        principal_id: str,
     ) -> Generator[ApiKey, None, None]:
-        return generic_search_all(auth_headers, self.get_application_api_keys, irn)
+        return generic_search_all(
+            auth_headers,
+            lambda headers, search_filter: self.get_application_api_keys(
+                headers,
+                principal_id,
+                search_filter=search_filter,
+            ),
+            None,
+        )

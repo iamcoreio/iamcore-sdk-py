@@ -26,7 +26,6 @@ dev = [
   "pytest>=7.3.1",
   "pytest-benchmark>=4.0.0",
   "pytest-cov>=4.1.0",
-  "requests~=2.31.0",
   "setuptools>=67.8.0",
   "twine>=4.0.0",
 ]
@@ -36,7 +35,7 @@ dev = [
 venvPath = "."
 venv = ".venv"
 typeCheckingMode = "strict"
-include = ["iamcoretenant", "tenant_manager", "typings"]
+include = ["iamcore"]
 exclude = ["**/__pycache__", "**/migrations"]
 reportMissingImports = true
 reportMissingTypeStubs = false

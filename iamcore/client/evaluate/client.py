@@ -12,7 +12,7 @@ from iamcore.client.exceptions import (
     unwrap_return_empty,
     unwrap_return_json,
 )
-from iamcore.client.models.base import IamIRNsResponse, generic_search_all
+from iamcore.client.models.base import IamIRNsResponse, PaginatedSearchFilter, generic_search_all
 from iamcore.client.models.client import HTTPClientWithTimeout
 
 if TYPE_CHECKING:
@@ -92,8 +92,7 @@ class Client(HTTPClientWithTimeout):
         application: str,
         action: str,
         resource_type: str,
-        page: int = 1,
-        page_size: int = 100,
+        search_filter: PaginatedSearchFilter | None = None,
     ) -> IamIRNsResponse:
         payload = {"application": application, "action": action, "resourceType": resource_type}
         logger.debug("Going to evaluate resource type: json=%s", payload)
@@ -101,14 +100,25 @@ class Client(HTTPClientWithTimeout):
             "evaluate/resources",
             data=json.dumps(payload),
             headers=auth_headers,
-            params={"page": page, "pageSize": page_size},
+            params=search_filter.model_dump(by_alias=True, exclude_none=True) if search_filter else None,
         )
         return IamIRNsResponse(**unwrap_return_json(response, EVALUATE_MAPPING))
 
     def evaluate_all_resources(
         self,
         auth_headers: dict[str, str],
-        *args: Any,
-        **kwargs: Any,
+        application: str,
+        action: str,
+        resource_type: str,
     ) -> Generator[IRN, None, None]:
-        return generic_search_all(auth_headers, self.evaluate_resources, *args, **kwargs)
+        return generic_search_all(
+            auth_headers,
+            lambda headers, search_filter: self.evaluate_resources(
+                headers,
+                application,
+                action,
+                resource_type,
+                search_filter=search_filter,
+            ),
+            None,
+        )
