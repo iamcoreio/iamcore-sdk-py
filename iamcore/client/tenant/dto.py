@@ -4,16 +4,8 @@ from typing import Any, Optional
 
 from iamcore.irn import IRN
 from pydantic import Field, field_validator
-from typing_extensions import override
 
-from iamcore.client.base.models import (
-    IAMCoreBaseModel,
-    IamEntitiesResponse,
-    IamEntityResponse,
-    JSON_List,
-    JSON_obj,
-    PaginatedSearchFilter,
-)
+from iamcore.client.base.models import IAMCoreBaseModel, PaginatedSearchFilter
 
 
 class Tenant(IAMCoreBaseModel):

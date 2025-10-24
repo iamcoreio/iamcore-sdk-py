@@ -5,10 +5,7 @@ from typing import Any, Optional
 from iamcore.irn import IRN
 from pydantic import Field, field_validator
 
-from iamcore.client.base.models import (
-    IAMCoreBaseModel,
-    PaginatedSearchFilter,
-)
+from iamcore.client.base.models import IAMCoreBaseModel, PaginatedSearchFilter
 
 
 class Application(IAMCoreBaseModel):

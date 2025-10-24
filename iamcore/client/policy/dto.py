@@ -6,10 +6,7 @@ from typing import Any, Optional
 from iamcore.irn import IRN
 from pydantic import Field, field_serializer, field_validator
 
-from iamcore.client.base.models import (
-    IAMCoreBaseModel,
-    PaginatedSearchFilter,
-)
+from iamcore.client.base.models import IAMCoreBaseModel, PaginatedSearchFilter
 
 logger = logging.getLogger(__name__)
 

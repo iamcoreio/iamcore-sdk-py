@@ -1,20 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional
+from typing import Any, Optional
 
 from iamcore.irn import IRN
 from pydantic import Field, field_validator
-from typing_extensions import override
 
-from iamcore.client.base.models import (
-    IAMCoreBaseModel,
-    IamEntitiesResponse,
-    IamEntityResponse,
-    PaginatedSearchFilter,
-)
-
-if TYPE_CHECKING:
-    from iamcore.client.base.models import JSON_List, JSON_obj
+from iamcore.client.base.models import IAMCoreBaseModel, PaginatedSearchFilter
 
 
 class User(IAMCoreBaseModel):
