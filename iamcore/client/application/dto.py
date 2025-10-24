@@ -4,13 +4,9 @@ from typing import Any, Optional
 
 from iamcore.irn import IRN
 from pydantic import Field, field_validator
-from typing_extensions import override
 
 from iamcore.client.base.models import (
     IAMCoreBaseModel,
-    IamEntitiesResponse,
-    IamEntityResponse,
-    JSON_List,
     PaginatedSearchFilter,
 )
 
@@ -21,7 +17,7 @@ class Application(IAMCoreBaseModel):
     id: str
     irn: IRN
     name: str
-    display_name: str = Field(alias="displayName")
+    display_name: Optional[str] = Field(default=None, alias="displayName")
     created: str
     updated: str
 
@@ -58,17 +54,12 @@ class ApplicationSearchFilter(PaginatedSearchFilter):
     display_name: Optional[str] = Field(default=None, alias="displayName")
 
 
-class IamApplicationResponse(IamEntityResponse[Application]):
+class IamApplicationResponse(IAMCoreBaseModel):
     data: Application
 
-    @override
-    def converter(self, item: dict[str, Any]) -> Application:
-        return Application.model_validate(item)
 
-
-class IamApplicationsResponse(IamEntitiesResponse[Application]):
+class IamApplicationsResponse(IAMCoreBaseModel):
     data: list[Application]
-
-    @override
-    def converter(self, item: JSON_List) -> list[Application]:
-        return [Application.model_validate(item) for item in item]
+    count: int
+    page: int
+    page_size: int = Field(alias="pageSize")

@@ -218,7 +218,7 @@ class TestApplicationResponseWrappers:
         Tests that the single-item response wrapper correctly converts a raw dict.
         """
         # ACT
-        response = IamApplicationResponse(sample_application_data)
+        response = IamApplicationResponse(data=Application.model_validate(sample_application_data))
 
         # ASSERT
         assert isinstance(response.data, Application)
@@ -241,7 +241,9 @@ class TestApplicationResponseWrappers:
         raw_list = [sample_application_data, app_2_data]
 
         # ACT
-        response = IamApplicationsResponse(data=raw_list, count=2, page=1, page_size=10)
+        response = IamApplicationsResponse(
+            data=[Application.model_validate(item) for item in raw_list], count=2, page=1, pageSize=10
+        )
 
         # ASSERT
         assert response.count == 2
