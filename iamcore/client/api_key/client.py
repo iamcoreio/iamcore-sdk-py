@@ -6,7 +6,7 @@ from iamcore.client.base.client import HTTPClientWithTimeout
 from iamcore.client.base.models import PaginatedSearchFilter, generic_search_all
 from iamcore.client.exceptions import IAMException, err_chain
 
-from .dto import ApiKey, IamApiKeyResponse, IamApiKeysResponse
+from .dto import ApiKey, IamApiKeysResponse
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -19,11 +19,10 @@ class Client(HTTPClientWithTimeout):
         super().__init__(base_url=base_url, timeout=timeout)
 
     @err_chain(IAMException)
-    def create_application_api_key(self, auth_headers: dict[str, str], principal_id: str) -> IamApiKeyResponse:
+    def create_application_api_key(self, auth_headers: dict[str, str], principal_id: str) -> None:
         path = f"principals/{principal_id}/api-keys"
         headers = {"Content-Type": "application/json", **auth_headers}
-        response = self.post(path, headers=headers)
-        return IamApiKeyResponse(**response.json())
+        self.post(path, headers=headers)
 
     @err_chain(IAMException)
     def get_application_api_keys(
