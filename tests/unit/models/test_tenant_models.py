@@ -310,7 +310,7 @@ class TestTenantResponseWrappers:
         Tests that the single-item response wrapper correctly converts a raw dict.
         """
         # ACT
-        response = IamTenantResponse(sample_tenant_data)
+        response = IamTenantResponse.model_validate({"data": sample_tenant_data})
 
         # ASSERT
         assert isinstance(response.data, Tenant)
@@ -329,7 +329,7 @@ class TestTenantResponseWrappers:
         raw_list = [sample_tenant_data, tenant_2_data]
 
         # ACT
-        response = IamTenantsResponse(data=raw_list, count=2, page=1, page_size=10)
+        response = IamTenantsResponse(data=raw_list, count=2, page=1, pageSize=10)
 
         # ASSERT
         assert response.count == 2
@@ -347,7 +347,7 @@ class TestTenantResponseWrappers:
         Tests that the single-item tenant issuer response wrapper correctly converts a raw dict.
         """
         # ACT
-        response = IamTenantIssuerResponse(sample_tenant_issuer_data)
+        response = IamTenantIssuerResponse.model_validate({"data": sample_tenant_issuer_data})
 
         # ASSERT
         assert isinstance(response.data, TenantIssuer)
@@ -366,7 +366,7 @@ class TestTenantResponseWrappers:
         raw_list = [sample_tenant_issuer_data, issuer_2_data]
 
         # ACT
-        response = IamTenantIssuersResponse(data=raw_list, count=2, page=1, page_size=10)
+        response = IamTenantIssuersResponse(data=raw_list, count=2, page=1, pageSize=10)
 
         # ASSERT
         assert response.count == 2

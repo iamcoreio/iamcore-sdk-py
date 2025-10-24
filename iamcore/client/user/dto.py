@@ -90,20 +90,15 @@ class UserSearchFilter(PaginatedSearchFilter):
     search: Optional[str] = None
 
 
-class IamUserResponse(IamEntityResponse[User]):
+class IamUserResponse(IAMCoreBaseModel):
     data: User
 
-    @override
-    def converter(self, item: JSON_obj) -> User:
-        return User.model_validate(item)
 
-
-class IamUsersResponse(IamEntitiesResponse[User]):
+class IamUsersResponse(IAMCoreBaseModel):
     data: list[User]
-
-    @override
-    def converter(self, item: JSON_List) -> list[User]:
-        return [User.model_validate(item) for item in item]
+    count: int
+    page: int
+    page_size: int = Field(alias="pageSize")
 
 
 User.model_rebuild()

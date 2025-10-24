@@ -3,14 +3,8 @@ from __future__ import annotations
 from typing import Any, Optional
 
 from pydantic import Field
-from typing_extensions import override
 
-from iamcore.client.base.models import (
-    IAMCoreBaseModel,
-    IamEntitiesResponse,
-    IamEntityResponse,
-    JSON_List,
-)
+from iamcore.client.base.models import IAMCoreBaseModel
 
 
 class ApiKey(IAMCoreBaseModel):
@@ -27,17 +21,12 @@ class ApiKey(IAMCoreBaseModel):
         return self.model_dump(by_alias=True)
 
 
-class IamApiKeyResponse(IamEntityResponse[ApiKey]):
+class IamApiKeyResponse(IAMCoreBaseModel):
     data: ApiKey
 
-    @override
-    def converter(self, item: dict[str, Any]) -> ApiKey:
-        return ApiKey.model_validate(item)
 
-
-class IamApiKeysResponse(IamEntitiesResponse[ApiKey]):
+class IamApiKeysResponse(IAMCoreBaseModel):
     data: list[ApiKey]
-
-    @override
-    def converter(self, item: JSON_List) -> list[ApiKey]:
-        return [ApiKey.model_validate(item) for item in item]
+    count: int
+    page: int
+    page_size: int = Field(alias="pageSize")

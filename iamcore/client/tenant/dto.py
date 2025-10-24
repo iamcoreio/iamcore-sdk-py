@@ -103,33 +103,23 @@ class GetTenantIssuer(IAMCoreBaseModel):
     tenant_id: str = Field(alias="tenantID")
 
 
-class IamTenantResponse(IamEntityResponse[Tenant]):
+class IamTenantResponse(IAMCoreBaseModel):
     data: Tenant
 
-    @override
-    def converter(self, item: JSON_obj) -> Tenant:
-        return Tenant.model_validate(item)
 
-
-class IamTenantsResponse(IamEntitiesResponse[Tenant]):
+class IamTenantsResponse(IAMCoreBaseModel):
     data: list[Tenant]
+    count: int
+    page: int
+    page_size: int = Field(alias="pageSize")
 
-    @override
-    def converter(self, item: JSON_List) -> list[Tenant]:
-        return [Tenant.model_validate(item) for item in item]
 
-
-class IamTenantIssuerResponse(IamEntityResponse[TenantIssuer]):
+class IamTenantIssuerResponse(IAMCoreBaseModel):
     data: TenantIssuer
 
-    @override
-    def converter(self, item: dict[str, Any]) -> TenantIssuer:
-        return TenantIssuer.model_validate(item)
 
-
-class IamTenantIssuersResponse(IamEntitiesResponse[TenantIssuer]):
+class IamTenantIssuersResponse(IAMCoreBaseModel):
     data: list[TenantIssuer]
-
-    @override
-    def converter(self, item: JSON_List) -> list[TenantIssuer]:
-        return [TenantIssuer.model_validate(item) for item in item]
+    count: int
+    page: int
+    page_size: int = Field(alias="pageSize")

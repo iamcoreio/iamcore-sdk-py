@@ -350,7 +350,7 @@ class TestUserResponseWrappers:
         Tests that the single-item response wrapper correctly converts a raw dict.
         """
         # ACT
-        response = IamUserResponse(sample_user_data)
+        response = IamUserResponse.model_validate({"data": sample_user_data})
 
         # ASSERT
         assert isinstance(response.data, User)
@@ -372,7 +372,7 @@ class TestUserResponseWrappers:
         raw_list = [sample_user_data, user_2_data]
 
         # ACT
-        response = IamUsersResponse(data=raw_list, count=2, page=1, page_size=10)
+        response = IamUsersResponse(data=raw_list, count=2, page=1, pageSize=10)
 
         # ASSERT
         assert response.count == 2

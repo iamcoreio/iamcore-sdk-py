@@ -89,7 +89,7 @@ class TestApiResponseWrappers:
         Tests that the single-item response wrapper correctly converts a raw dict.
         """
         # ACT
-        response = IamApiKeyResponse(sample_api_key_data)
+        response = IamApiKeyResponse.model_validate({"data": sample_api_key_data})
 
         # ASSERT
         assert isinstance(response.data, ApiKey)
@@ -107,7 +107,7 @@ class TestApiResponseWrappers:
         raw_list = [sample_api_key_data, api_key_2_data]
 
         # ACT
-        response = IamApiKeysResponse(data=raw_list, count=2, page=1, page_size=10)
+        response = IamApiKeysResponse(data=raw_list, count=2, page=1, pageSize=10)
 
         # ASSERT
         assert response.count == 2
