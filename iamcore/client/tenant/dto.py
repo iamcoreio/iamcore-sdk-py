@@ -100,7 +100,7 @@ class GetTenantIssuer(IAMCoreBaseModel):
     """Request model for getting a tenant issuer."""
 
     account: str
-    tenant_id: str
+    tenant_id: str = Field(alias="tenantID")
 
 
 class IamTenantResponse(IamEntityResponse[Tenant]):

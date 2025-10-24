@@ -35,7 +35,7 @@ class Client(HTTPClientWithTimeout):
         path = "tenants/issuer-types/iamcore"
         payload = params.model_dump_json(by_alias=True, exclude_none=True)
         response = self.post(path, data=payload, headers=auth_headers)
-        return IamTenantResponse(**response.json()).data
+        return IamTenantResponse(response.json()["data"]).data
 
     @err_chain(IAMTenantException)
     def update_tenant(self, auth_headers: dict[str, str], irn: IRN, display_name: str) -> None:
@@ -55,7 +55,10 @@ class Client(HTTPClientWithTimeout):
             headers=headers,
             params=params.model_dump(by_alias=True),
         )
-        return IamTenantIssuersResponse(**response.json()).data.pop()
+        resp_data = response.json()
+        return IamTenantIssuersResponse(
+            data=resp_data["data"], count=resp_data["count"], page=resp_data["page"], page_size=resp_data["pageSize"]
+        ).data.pop()
 
     @err_chain(IAMTenantException)
     def search_tenant(
@@ -65,7 +68,10 @@ class Client(HTTPClientWithTimeout):
     ) -> IamTenantsResponse:
         query = tenant_filter.model_dump(by_alias=True, exclude_none=True) if tenant_filter else None
         response = self.get("tenants", headers=headers, params=query)
-        return IamTenantsResponse(**response.json())
+        resp_data = response.json()
+        return IamTenantsResponse(
+            data=resp_data["data"], count=resp_data["count"], page=resp_data["page"], page_size=resp_data["pageSize"]
+        )
 
     @err_chain(IAMException)
     def search_all_tenants(
