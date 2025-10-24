@@ -37,13 +37,13 @@ class Client(HTTPClientWithTimeout):
     @err_chain(IAMResourceException)
     def update_resource(self, auth_headers: dict[str, str], irn: IRN, params: UpdateResource) -> None:
         path = f"resources/{irn.to_base64()}"
-        payload = params.model_dump_json(by_alias=True, exclude_none=True)
+        payload = params.model_dump_json(by_alias=True, exclude_none=True, exclude_unset=True)
         self.patch(path, data=payload, headers=auth_headers)
 
     @err_chain(IAMResourceException)
     def delete_resource(self, auth_headers: dict[str, str], resource_irn: IRN) -> None:
-        url = f"/api/v1/resources/{resource_irn.to_base64()}"
-        self.delete(url, headers=auth_headers)
+        path = f"resources/{resource_irn.to_base64()}"
+        self.delete(path, headers=auth_headers)
 
     @err_chain(IAMResourceException)
     def delete_resources(self, auth_headers: dict[str, str], resources_irns: list[IRN]) -> None:

@@ -267,7 +267,7 @@ class TestResourceResponseWrappers:
         Tests that the single-item response wrapper correctly converts a raw dict.
         """
         # ACT
-        response = IamResourceResponse(sample_resource_data)
+        response = IamResourceResponse(data=sample_resource_data)  # type: ignore
 
         # ASSERT
         assert isinstance(response.data, Resource)
@@ -286,7 +286,9 @@ class TestResourceResponseWrappers:
         raw_list = [sample_resource_data, resource_2_data]
 
         # ACT
-        response = IamResourcesResponse(data=raw_list, count=2, page=1, page_size=10)
+        response = IamResourcesResponse(
+            data=[Resource.model_validate(item) for item in raw_list], count=2, page=1, pageSize=10
+        )
 
         # ASSERT
         assert response.count == 2

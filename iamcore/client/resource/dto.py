@@ -4,14 +4,9 @@ from typing import Any, Optional
 
 from iamcore.irn import IRN
 from pydantic import Field, field_validator
-from typing_extensions import override
 
 from iamcore.client.base.models import (
     IAMCoreBaseModel,
-    IamEntitiesResponse,
-    IamEntityResponse,
-    JSON_List,
-    JSON_obj,
     PaginatedSearchFilter,
 )
 
@@ -53,22 +48,22 @@ class CreateResource(IAMCoreBaseModel):
     application: str
     path: str
     resource_type: str = Field(alias="resourceType")
-    tenant_id: Optional[str] = Field(None, alias="tenantID")
+    tenant_id: Optional[str] = Field(default=None, alias="tenantID")
     description: Optional[str] = None
-    display_name: Optional[str] = Field(None, alias="displayName")
+    display_name: Optional[str] = Field(default=None, alias="displayName")
     enabled: Optional[bool] = True
     metadata: Optional[dict[str, str]] = None
-    pool_ids: Optional[list[str]] = Field(None, alias="poolIDs")
+    pool_ids: Optional[list[str]] = Field(default=None, alias="poolIDs")
 
 
 class UpdateResource(IAMCoreBaseModel):
     """Request model for updating a resource."""
 
-    display_name: Optional[str] = Field(None, alias="displayName")
+    display_name: Optional[str] = Field(default=None, alias="displayName")
     enabled: Optional[bool] = True
     description: Optional[str] = None
     metadata: Optional[dict[str, str]] = None
-    pool_ids: Optional[list[str]] = Field(None, alias="poolIDs")
+    pool_ids: Optional[list[str]] = Field(default=None, alias="poolIDs")
 
 
 class ResourceSearchFilter(PaginatedSearchFilter):
@@ -83,17 +78,12 @@ class ResourceSearchFilter(PaginatedSearchFilter):
     resource_type: Optional[str] = Field(default=None, alias="resourceType")
 
 
-class IamResourceResponse(IamEntityResponse[Resource]):
+class IamResourceResponse(IAMCoreBaseModel):
     data: Resource
 
-    @override
-    def converter(self, item: JSON_obj) -> Resource:
-        return Resource.model_validate(item)
 
-
-class IamResourcesResponse(IamEntitiesResponse[Resource]):
+class IamResourcesResponse(IAMCoreBaseModel):
     data: list[Resource]
-
-    @override
-    def converter(self, item: JSON_List) -> list[Resource]:
-        return [Resource.model_validate(item) for item in item]
+    count: int
+    page: int
+    page_size: int = Field(alias="pageSize")
