@@ -4,14 +4,9 @@ from typing import Any, Optional
 
 from iamcore.irn import IRN
 from pydantic import Field, field_validator
-from typing_extensions import override
 
 from iamcore.client.base.models import (
     IAMCoreBaseModel,
-    IamEntitiesResponse,
-    IamEntityResponse,
-    JSON_List,
-    JSON_obj,
     PaginatedSearchFilter,
 )
 
@@ -83,17 +78,12 @@ class GroupSearchFilter(PaginatedSearchFilter):
     tenant_id: Optional[str] = Field(default=None, alias="tenantID")
 
 
-class IamGroupResponse(IamEntityResponse[Group]):
+class IamGroupResponse(IAMCoreBaseModel):
     data: Group
 
-    @override
-    def converter(self, item: JSON_obj) -> Group:
-        return Group.model_validate(item)
 
-
-class IamGroupsResponse(IamEntitiesResponse[Group]):
+class IamGroupsResponse(IAMCoreBaseModel):
     data: list[Group]
-
-    @override
-    def converter(self, item: JSON_List) -> list[Group]:
-        return [Group.model_validate(item) for item in item]
+    count: int
+    page: int
+    page_size: int = Field(alias="pageSize")
