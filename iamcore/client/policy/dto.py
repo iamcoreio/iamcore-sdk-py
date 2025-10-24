@@ -31,10 +31,6 @@ class PolicyStatement(IAMCoreBaseModel):
     def serialize_resources(self, value: list[IRN]) -> list[str]:
         return [str(irn) for irn in value]
 
-    @field_serializer("resources")
-    def serialize_resources(self, value: list[IRN]) -> list[str]:
-        return [str(irn) for irn in value]
-
 
 class Policy(IAMCoreBaseModel):
     """Policy model representing IAM Core policies."""
@@ -65,10 +61,10 @@ class CreatePolicy(IAMCoreBaseModel):
 
     name: str
     level: str
-    tenant_id: Optional[str] = Field(None, alias="tenantID")
+    tenant_id: Optional[str] = Field(default=None, alias="tenantID")
     description: Optional[str] = None
     statements: list[PolicyStatement] = Field(default_factory=list)
-    pool_ids: Optional[list[str]] = Field(None, alias="poolIDs")
+    pool_ids: Optional[list[str]] = Field(default=None, alias="poolIDs")
 
     def with_statement(
         self,
@@ -97,7 +93,7 @@ class UpdatePolicy(IAMCoreBaseModel):
 
     description: str
     statements: list[PolicyStatement]
-    pool_ids: Optional[list[str]] = Field(None, alias="poolIDs")
+    pool_ids: Optional[list[str]] = Field(default=None, alias="poolIDs")
 
     def with_statement(
         self,

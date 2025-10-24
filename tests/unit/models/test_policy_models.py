@@ -351,7 +351,7 @@ class TestPolicyResponseWrappers:
         Tests that the single-item response wrapper correctly converts a raw dict.
         """
         # ACT
-        response = IamPolicyResponse(sample_policy_data)
+        response = IamPolicyResponse(**{"data": sample_policy_data})
 
         # ASSERT
         assert isinstance(response.data, Policy)
@@ -370,7 +370,9 @@ class TestPolicyResponseWrappers:
         raw_list = [sample_policy_data, policy_2_data]
 
         # ACT
-        response = IamPoliciesResponse(data=raw_list, count=2, page=1, page_size=10)
+        response = IamPoliciesResponse(
+            data=[Policy.model_validate(item) for item in raw_list], count=2, page=1, pageSize=10
+        )
 
         # ASSERT
         assert response.count == 2

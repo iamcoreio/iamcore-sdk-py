@@ -74,7 +74,7 @@ class TestPolicyClient:
                 PolicyStatement(
                     effect="allow",
                     description="Allow all actions on Jerry",
-                    resources=["irn:rc73dbh7q0:iamcore:4atcicnisg::user/jerry"],
+                    resources=[IRN.of("irn:rc73dbh7q0:iamcore:4atcicnisg::user/jerry")],
                     actions=["iamcore:user:*"],
                 )
             ],
@@ -114,7 +114,7 @@ class TestPolicyClient:
     def test_create_policy_minimal_params(self) -> None:
         """Test policy creation with minimal parameters."""
         expected_url = f"{self.expected_base_url}policies"
-        policy_response = {
+        policy_response: dict[str, Any] = {
             "data": {
                 "id": "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0YXRjaWNuaXNnOjpwb2xpY3kvYWxsb3ctYWxsLWFjdGlvbnMtb24tamVycnk=",
                 "irn": "irn:rc73dbh7q0:iamcore:4atcicnisg::policy/allow-all-actions-on-jerry",
@@ -176,7 +176,7 @@ class TestPolicyClient:
                 PolicyStatement(
                     effect="allow",
                     description="Allow all actions on Jerry",
-                    resources=["irn:rc73dbh7q0:iamcore:4atcicnisg::user/jerry"],
+                    resources=[IRN.of("irn:rc73dbh7q0:iamcore:4atcicnisg::user/jerry")],
                     actions=["iamcore:user:*"],
                 )
             ],
