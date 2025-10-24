@@ -4,15 +4,10 @@ import logging
 from typing import Any, Optional
 
 from iamcore.irn import IRN
-from pydantic import Field, field_validator
-from typing_extensions import override
+from pydantic import Field, field_serializer, field_validator
 
 from iamcore.client.base.models import (
     IAMCoreBaseModel,
-    IamEntitiesResponse,
-    IamEntityResponse,
-    JSON_List,
-    JSON_obj,
     PaginatedSearchFilter,
 )
 
@@ -31,6 +26,14 @@ class PolicyStatement(IAMCoreBaseModel):
     @classmethod
     def validate_resources(cls, v: list[Any]) -> list[IRN]:
         return [IRN.of(r) if isinstance(r, str) else r for r in v]
+
+    @field_serializer("resources")
+    def serialize_resources(self, value: list[IRN]) -> list[str]:
+        return [str(irn) for irn in value]
+
+    @field_serializer("resources")
+    def serialize_resources(self, value: list[IRN]) -> list[str]:
+        return [str(irn) for irn in value]
 
 
 class Policy(IAMCoreBaseModel):
@@ -136,17 +139,12 @@ class PolicySearchFilter(PaginatedSearchFilter):
         return v
 
 
-class IamPolicyResponse(IamEntityResponse[Policy]):
+class IamPolicyResponse(IAMCoreBaseModel):
     data: Policy
 
-    @override
-    def converter(self, item: JSON_obj) -> Policy:
-        return Policy.model_validate(item)
 
-
-class IamPoliciesResponse(IamEntitiesResponse[Policy]):
+class IamPoliciesResponse(IAMCoreBaseModel):
     data: list[Policy]
-
-    @override
-    def converter(self, item: JSON_List) -> list[Policy]:
-        return [Policy.model_validate(item) for item in item]
+    count: int
+    page: int
+    page_size: int = Field(alias="pageSize")
