@@ -5,8 +5,9 @@ from typing import Optional, Union
 
 import requests
 
-from iamcore.client.base.exception_handler import ResponseHandler
 from iamcore.client.exceptions import IAMUnauthorizedException
+
+from .exception_handler import ResponseHandler
 
 
 class HTTPMethod(str, Enum):

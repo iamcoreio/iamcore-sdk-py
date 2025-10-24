@@ -28,11 +28,7 @@ class Client(HTTPClientWithTimeout):
         super().__init__(base_url=base_url, timeout=timeout)
 
     @err_chain(IAMException)
-    def create_application(
-        self,
-        auth_headers: dict[str, str],
-        params: CreateApplication,
-    ) -> Application:
+    def create_application(self, auth_headers: dict[str, str], params: CreateApplication) -> Application:
         payload = params.model_dump_json(by_alias=True, exclude_none=True)
         response = self.post("applications", data=payload, headers=auth_headers)
         return IamApplicationResponse(**response.json()).data
