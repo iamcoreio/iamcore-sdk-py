@@ -1,6 +1,7 @@
 import json
 from typing import Any, cast
 
+import pytest
 import responses
 from iamcore.irn import IRN
 
@@ -10,6 +11,13 @@ from iamcore.client.application.dto import (
     ApplicationSearchFilter,
     CreateApplication,
     IamApplicationsResponse,
+)
+from iamcore.client.exceptions import (
+    IAMBedRequestException,
+    IAMConflictException,
+    IAMException,
+    IAMForbiddenException,
+    IAMUnauthorizedException,
 )
 
 BASE_URL = "http://localhost:8080"
@@ -256,3 +264,221 @@ class TestApplicationClient:
         assert len(responses.calls) == 1
         assert responses.calls[0].request.method == "GET"
         assert responses.calls[0].request.url == f"{expected_url}?page=1&pageSize=1000"
+
+    @responses.activate
+    def test_create_application_bad_request_error(self) -> None:
+        """Test create_application raises IAMBedRequestException for 400 Bad Request."""
+        expected_url = f"{self.expected_base_url}applications"
+        responses.add(
+            responses.POST,
+            expected_url,
+            json={"message": "Invalid application data", "errors": ["name is required"]},
+            status=400,
+        )
+
+        auth_headers = {"Authorization": "Bearer token"}
+        create_params = CreateApplication(name="")  # Invalid: empty name
+
+        with pytest.raises(IAMBedRequestException) as excinfo:
+            self.client.create_application(auth_headers, create_params)
+
+        assert excinfo.value.status_code == 400
+        assert "Invalid application data" in str(excinfo.value)
+
+    @responses.activate
+    def test_create_application_unauthorized_error(self) -> None:
+        """Test create_application raises IAMUnauthorizedException for 401 Unauthorized."""
+        expected_url = f"{self.expected_base_url}applications"
+        responses.add(responses.POST, expected_url, json={"message": "Authentication required"}, status=401)
+
+        auth_headers = {"Authorization": "Bearer invalid_token"}
+        create_params = CreateApplication(name="myapp")
+
+        with pytest.raises(IAMUnauthorizedException) as excinfo:
+            self.client.create_application(auth_headers, create_params)
+
+        assert excinfo.value.status_code == 401
+        assert "Authentication required" in str(excinfo.value)
+
+    @responses.activate
+    def test_create_application_forbidden_error(self) -> None:
+        """Test create_application raises IAMForbiddenException for 403 Forbidden."""
+        expected_url = f"{self.expected_base_url}applications"
+        responses.add(
+            responses.POST,
+            expected_url,
+            json={"message": "Insufficient permissions to create applications"},
+            status=403,
+        )
+
+        auth_headers = {"Authorization": "Bearer token"}
+        create_params = CreateApplication(name="myapp")
+
+        with pytest.raises(IAMForbiddenException) as excinfo:
+            self.client.create_application(auth_headers, create_params)
+
+        assert excinfo.value.status_code == 403
+        assert "Insufficient permissions" in str(excinfo.value)
+
+    @responses.activate
+    def test_create_application_conflict_error(self) -> None:
+        """Test create_application raises IAMConflictException for 409 Conflict."""
+        expected_url = f"{self.expected_base_url}applications"
+        responses.add(
+            responses.POST, expected_url, json={"message": "Application with this name already exists"}, status=409
+        )
+
+        auth_headers = {"Authorization": "Bearer token"}
+        create_params = CreateApplication(name="existing_app")
+
+        with pytest.raises(IAMConflictException) as excinfo:
+            self.client.create_application(auth_headers, create_params)
+
+        assert excinfo.value.status_code == 409
+        assert "already exists" in str(excinfo.value)
+
+    @responses.activate
+    def test_create_application_validation_error(self) -> None:
+        """Test create_application raises IAMException for 400 Bad Request."""
+        expected_url = f"{self.expected_base_url}applications"
+        responses.add(
+            responses.POST,
+            expected_url,
+            json={"message": "Validation failed", "errors": ["Invalid application name format"]},
+            status=400,
+        )
+
+        auth_headers = {"Authorization": "Bearer token"}
+        create_params = CreateApplication(name="invalid@name!")
+
+        with pytest.raises(IAMBedRequestException) as excinfo:
+            self.client.create_application(auth_headers, create_params)
+
+        assert excinfo.value.status_code == 400
+        assert "Validation failed" in str(excinfo.value)
+
+    @responses.activate
+    def test_get_application_not_found_error(self) -> None:
+        """Test get_application raises IAMException for 404 Not Found."""
+        application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/nonexistent")
+        expected_url = f"{self.expected_base_url}applications/{application_irn!s}"
+        responses.add(responses.GET, expected_url, json={"message": "Application not found"}, status=404)
+
+        auth_headers = {"Authorization": "Bearer token"}
+
+        with pytest.raises(IAMException) as excinfo:
+            self.client.get_application(auth_headers, application_irn)
+
+        assert excinfo.value.status_code == 404
+        assert "not found" in str(excinfo.value)
+
+    @responses.activate
+    def test_get_application_unauthorized_error(self) -> None:
+        """Test get_application raises IAMUnauthorizedException for 401 Unauthorized."""
+        application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
+        expected_url = f"{self.expected_base_url}applications/{application_irn!s}"
+        responses.add(responses.GET, expected_url, json={"message": "Authentication required"}, status=401)
+
+        auth_headers = {"Authorization": "Bearer invalid_token"}
+
+        with pytest.raises(IAMUnauthorizedException) as excinfo:
+            self.client.get_application(auth_headers, application_irn)
+
+        assert excinfo.value.status_code == 401
+        assert "Authentication required" in str(excinfo.value)
+
+    @responses.activate
+    def test_get_application_forbidden_error(self) -> None:
+        """Test get_application raises IAMForbiddenException for 403 Forbidden."""
+        application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/restricted")
+        expected_url = f"{self.expected_base_url}applications/{application_irn!s}"
+        responses.add(responses.GET, expected_url, json={"message": "Access denied to this application"}, status=403)
+
+        auth_headers = {"Authorization": "Bearer token"}
+
+        with pytest.raises(IAMForbiddenException) as excinfo:
+            self.client.get_application(auth_headers, application_irn)
+
+        assert excinfo.value.status_code == 403
+        assert "Access denied" in str(excinfo.value)
+
+    @responses.activate
+    def test_application_attach_policies_bad_request_error(self) -> None:
+        """Test application_attach_policies raises IAMBedRequestException for 400 Bad Request."""
+        application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
+        expected_url = f"{self.expected_base_url}applications/{application_irn.to_base64()}/policies/attach"
+        responses.add(
+            responses.POST,
+            expected_url,
+            json={"message": "Invalid policy IDs provided", "errors": ["Policy ID format invalid"]},
+            status=400,
+        )
+
+        auth_headers = {"Authorization": "Bearer token"}
+        policy_ids = ["invalid@policy@id"]
+
+        with pytest.raises(IAMBedRequestException) as excinfo:
+            self.client.application_attach_policies(auth_headers, application_irn, policy_ids)
+
+        assert excinfo.value.status_code == 400
+        assert "Invalid policy IDs" in str(excinfo.value)
+
+    @responses.activate
+    def test_application_attach_policies_not_found_error(self) -> None:
+        """Test application_attach_policies raises IAMException for 404 Not Found."""
+        application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/nonexistent")
+        expected_url = f"{self.expected_base_url}applications/{application_irn.to_base64()}/policies/attach"
+        responses.add(responses.POST, expected_url, json={"message": "Application not found"}, status=404)
+
+        auth_headers = {"Authorization": "Bearer token"}
+        policy_ids = ["policy1", "policy2"]
+
+        with pytest.raises(IAMException) as excinfo:
+            self.client.application_attach_policies(auth_headers, application_irn, policy_ids)
+
+        assert excinfo.value.status_code == 404
+        assert "not found" in str(excinfo.value)
+
+    @responses.activate
+    def test_search_application_unauthorized_error(self) -> None:
+        """Test search_application raises IAMUnauthorizedException for 401 Unauthorized."""
+        expected_url = f"{self.expected_base_url}applications"
+        responses.add(responses.GET, expected_url, json={"message": "Authentication required"}, status=401)
+
+        auth_headers = {"Authorization": "Bearer invalid_token"}
+
+        with pytest.raises(IAMUnauthorizedException) as excinfo:
+            self.client.search_application(auth_headers)
+
+        assert excinfo.value.status_code == 401
+        assert "Authentication required" in str(excinfo.value)
+
+    @responses.activate
+    def test_search_application_forbidden_error(self) -> None:
+        """Test search_application raises IAMForbiddenException for 403 Forbidden."""
+        expected_url = f"{self.expected_base_url}applications"
+        responses.add(
+            responses.GET, expected_url, json={"message": "Insufficient permissions to search applications"}, status=403
+        )
+
+        auth_headers = {"Authorization": "Bearer token"}
+
+        with pytest.raises(IAMForbiddenException) as excinfo:
+            self.client.search_application(auth_headers)
+
+        assert excinfo.value.status_code == 403
+        assert "Insufficient permissions" in str(excinfo.value)
+
+    @responses.activate
+    def test_search_application_server_error(self) -> None:
+        """Test search_application raises IAMException for 500 Internal Server Error."""
+        expected_url = f"{self.expected_base_url}applications"
+        responses.add(responses.GET, expected_url, json={"message": "Internal server error occurred"}, status=500)
+
+        auth_headers = {"Authorization": "Bearer token"}
+
+        with pytest.raises(IAMException) as excinfo:
+            self.client.search_application(auth_headers)
+
+        assert excinfo.value.status_code == 500
+        assert "Internal server error" in str(excinfo.value)
