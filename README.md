@@ -2,19 +2,10 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![PyPI Version](https://img.shields.io/pypi/v/iamcore-sdk-py.svg)](https://pypi.org/project/iamcore-sdk-py/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-A comprehensive Python SDK for interacting with IAM Core, a powerful identity and access management platform. This SDK provides a clean, type-safe interface for managing users, tenants, applications, policies, and other IAM resources.
+A comprehensive Python SDK for interacting with IAMCore. This SDK provides interface for managing users, tenants, applications, policies, and other IAM resources.
 
-## ✨ Features
-
-- **Type-Safe**: Full type hints and Pydantic models for reliable development
-- **Comprehensive**: Support for all IAM Core resources (users, tenants, applications, policies, etc.)
-- **Easy to Use**: Simple, intuitive API with clear method names
-- **Well Tested**: High test coverage with comprehensive unit tests
-- **Production Ready**: Robust error handling and timeout management
-
-## 🚀 Installation
+## Installation
 
 Install the SDK using pip:
 
@@ -28,12 +19,12 @@ Or using uv (recommended):
 uv add iamcore-sdk-py
 ```
 
-## 📋 Requirements
+## Requirements
 
 - Python 3.9+
 - Dependencies are automatically managed
 
-## 🏁 Quick Start
+## Quick Start
 
 ### 1. Configuration
 
@@ -113,52 +104,62 @@ created_user = iam_client.user.create_user(headers, new_user_data)
 print(f"Created user: {created_user.username}")
 ```
 
-## 📚 Available Clients
+## Available Clients
 
 The SDK provides clients for all major IAM Core resources:
 
-### 🔐 Authentication (`iam_client.auth`)
+### Authentication (`iam_client.auth`)
+
 - User authentication and token management
 
-### 👥 Users (`iam_client.user`)
+### Users (`iam_client.user`)
+
 - Create, read, update, delete users
 - User search and filtering
 - User group management
 - Policy attachment
 
-### 🏢 Tenants (`iam_client.tenant`)
+### Tenants (`iam_client.tenant`)
+
 - Tenant management
 - Tenant issuer configuration
 - Multi-tenant operations
 
-### 📱 Applications (`iam_client.application`)
+### Applications (`iam_client.application`)
+
 - Application lifecycle management
 - Application search and filtering
 - Policy attachment to applications
 
-### 🔑 API Keys (`iam_client.api_key`)
+### API Keys (`iam_client.api_key`)
+
 - API key creation and management
 - Key retrieval and pagination
 
-### 👥 Groups (`iam_client.group`)
+### Groups (`iam_client.group`)
+
 - Group management
 - User-group associations
 
-### 📋 Policies (`iam_client.policy`)
+### Policies (`iam_client.policy`)
+
 - Policy CRUD operations
 - Policy attachment to resources
 
-### 🔍 Resources (`iam_client.resource`)
+### Resources (`iam_client.resource`)
+
 - Resource management
 - Resource search and filtering
 
-### ⚡ Evaluation (`iam_client.evaluate`)
+### Evaluation (`iam_client.evaluate`)
+
 - Policy evaluation against resources
 
-### 📊 Application Resource Types (`iam_client.application_resource_type`)
+### Application Resource Types (`iam_client.application_resource_type`)
+
 - Application resource type management
 
-## 💡 Usage Examples
+## Usage Examples
 
 ### Managing Users
 
@@ -233,7 +234,7 @@ tenant_data = CreateTenant(
 new_tenant = iam_client.tenant.create_tenant(headers, tenant_data)
 ```
 
-## 🔧 Development
+## Development
 
 ### Setup Development Environment
 
@@ -246,66 +247,36 @@ cd iamcore-sdk-py
 uv sync --dev
 
 # Run tests
-pytest
+uc run pytest
 
 # Run linting
-ruff check .
+ruff check . --fix
 
 # Run type checking
-pyright .
+basedpyright .
 ```
 
 ### Running Tests
 
 ```bash
 # Run all tests
-pytest
+uv run pytest
 
 # Run with coverage
-pytest --cov --cov-report html
+uv run pytest --cov --cov-report html
 
 # Run specific test file
-pytest tests/unit/clients/test_user_client.py
+uv run pytest tests/unit/clients/test_user_client.py
 
 # Run tests matching pattern
-pytest -k "test_create"
+uv run pytest -k "test_create"
 ```
 
 ### Code Quality
 
 This project uses:
+
 - **ruff** for linting and formatting
-- **pyright** for type checking
+- **basedpyright** for type checking
 - **pytest** for testing
 - **pre-commit** hooks for quality gates
-
-### Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
-
-## 📖 API Documentation
-
-For detailed API documentation, see the [IAM Core API Documentation](https://iamcore-api-docs.vercel.app).
-
-## 🐛 Issues & Support
-
-- **Bug Reports**: [GitHub Issues](https://github.com/your-org/iamcore-sdk-py/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-org/iamcore-sdk-py/discussions)
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Built with ❤️ by the IAM Core team
-- Thanks to all contributors and the open-source community
-
----
-
-**Happy coding with IAM Core! 🚀**
