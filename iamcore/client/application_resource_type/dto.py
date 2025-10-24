@@ -4,14 +4,8 @@ from typing import Any, Optional
 
 from iamcore.irn import IRN
 from pydantic import Field, field_validator
-from typing_extensions import override
 
-from iamcore.client.base.models import (
-    IAMCoreBaseModel,
-    IamEntitiesResponse,
-    IamEntityResponse,
-    JSON_List,
-)
+from iamcore.client.base.models import IAMCoreBaseModel
 
 
 class ApplicationResourceType(IAMCoreBaseModel):
@@ -20,8 +14,8 @@ class ApplicationResourceType(IAMCoreBaseModel):
     id: str
     irn: IRN
     type: str
-    description: str
-    action_prefix: str = Field(alias="actionPrefix")
+    description: Optional[str] = None
+    action_prefix: Optional[str] = Field(default=None, alias="actionPrefix")
     operations: list[str]
     created: str
     updated: str
@@ -47,17 +41,12 @@ class CreateApplicationResourceType(IAMCoreBaseModel):
     operations: Optional[list[str]] = None
 
 
-class IamApplicationResourceTypeResponse(IamEntityResponse[ApplicationResourceType]):
+class IamApplicationResourceTypeResponse(IAMCoreBaseModel):
     data: ApplicationResourceType
 
-    @override
-    def converter(self, item: dict[str, Any]) -> ApplicationResourceType:
-        return ApplicationResourceType.model_validate(item)
 
-
-class IamApplicationResourceTypesResponse(IamEntitiesResponse[ApplicationResourceType]):
+class IamApplicationResourceTypesResponse(IAMCoreBaseModel):
     data: list[ApplicationResourceType]
-
-    @override
-    def converter(self, item: JSON_List) -> list[ApplicationResourceType]:
-        return [ApplicationResourceType.model_validate(item) for item in item]
+    count: int
+    page: int
+    page_size: int = Field(alias="pageSize")
