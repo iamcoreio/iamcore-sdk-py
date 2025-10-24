@@ -305,7 +305,6 @@ class TestUserSearchFilterModel:
             "firstName": "John",
             "lastName": "Doe",
             "username": "johndoe",
-            "tenantId": "tenant123",
             "search": "query",
         }
 
@@ -318,7 +317,6 @@ class TestUserSearchFilterModel:
         assert search_filter.first_name == "John"
         assert search_filter.last_name == "Doe"
         assert search_filter.username == "johndoe"
-        assert search_filter.tenant_id == "tenant123"
         assert search_filter.search == "query"
 
     def test_handles_missing_optional_fields(self) -> None:

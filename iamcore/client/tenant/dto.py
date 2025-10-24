@@ -17,8 +17,8 @@ class Tenant(IAMCoreBaseModel):
     name: str
     display_name: str = Field(alias="displayName")
     login_theme: str = Field(alias="loginTheme")
-    user_metadata_ui_schema: Optional[dict[str, Any]] = Field(None, alias="userMetadataUiSchema")
-    group_metadata_ui_schema: Optional[dict[str, Any]] = Field(None, alias="groupMetadataUiSchema")
+    user_metadata_ui_schema: Optional[dict[str, Any]] = Field(default=None, alias="userMetadataUiSchema")
+    group_metadata_ui_schema: Optional[dict[str, Any]] = Field(default=None, alias="groupMetadataUiSchema")
     created: str
     updated: str
 
@@ -65,17 +65,17 @@ class CreateTenant(IAMCoreBaseModel):
 
     name: str
     display_name: str = Field(alias="displayName")
-    login_theme: str = Field(DEFAULT_LOGIN_THEME, alias="loginTheme")
-    user_metadata_ui_schema: Optional[dict[str, Any]] = Field(None, alias="userMetadataUiSchema")
-    group_metadata_ui_schema: Optional[dict[str, Any]] = Field(None, alias="groupMetadataUiSchema")
+    login_theme: str = Field(default=DEFAULT_LOGIN_THEME, alias="loginTheme")
+    user_metadata_ui_schema: Optional[dict[str, Any]] = Field(default=None, alias="userMetadataUiSchema")
+    group_metadata_ui_schema: Optional[dict[str, Any]] = Field(default=None, alias="groupMetadataUiSchema")
 
 
 class UpdateTenant(IAMCoreBaseModel):
     """Request model for updating a tenant."""
 
     display_name: str = Field(alias="displayName")
-    user_metadata_ui_schema: Optional[dict[str, Any]] = Field(None, alias="userMetadataUiSchema")
-    group_metadata_ui_schema: Optional[dict[str, Any]] = Field(None, alias="groupMetadataUiSchema")
+    user_metadata_ui_schema: Optional[dict[str, Any]] = Field(default=None, alias="userMetadataUiSchema")
+    group_metadata_ui_schema: Optional[dict[str, Any]] = Field(default=None, alias="groupMetadataUiSchema")
 
 
 class GetTenantsFilter(PaginatedSearchFilter):

@@ -77,7 +77,7 @@ class UserSearchFilter(PaginatedSearchFilter):
     first_name: Optional[str] = Field(default=None, alias="firstName")
     last_name: Optional[str] = Field(default=None, alias="lastName")
     username: Optional[str] = None
-    tenant_id: Optional[str] = Field(default=None, alias="tenantId")
+    tenant_id: Optional[str] = Field(default=None, alias="tenantID")
     search: Optional[str] = None
 
 
