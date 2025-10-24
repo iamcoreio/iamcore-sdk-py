@@ -3,8 +3,9 @@ run tests:
   image: python:3.9.18
   script:
     - cp .env.example .env
-    - uv sync --dev
-    - pytest --cov --cov-report term --cov-report xml:coverage.xml
+    - pip install uv
+    - uv sync
+    - uv run pytest --cov --cov-report term --cov-report xml:coverage.xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:
