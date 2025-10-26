@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from iamcore.client.api_key import Client as ApiKeyClient
 from iamcore.client.application import Client as AppClient
 from iamcore.client.application_resource_type import Client as AppResourceTypeClient
@@ -18,14 +20,16 @@ class Client:
         # Client configuration
         self.config = config
         # Authentication client
-        self.auth = AuthClient(config.iamcore_issuer_url, config.iamcore_client_timeout)
+        self.auth = AuthClient(self.config.iamcore_issuer_url_str, self.config.iamcore_client_timeout)
         # Resource clients
-        self.api_key = ApiKeyClient(config.iamcore_url, config.iamcore_client_timeout)
-        self.application = AppClient(config.iamcore_url, config.iamcore_client_timeout)
-        self.application_resource_type = AppResourceTypeClient(config.iamcore_url, config.iamcore_client_timeout)
-        self.evaluate = EvaluateClient(config.iamcore_url, config.iamcore_client_timeout)
-        self.group = GroupClient(config.iamcore_url, config.iamcore_client_timeout)
-        self.policy = PolicyClient(config.iamcore_url, config.iamcore_client_timeout)
-        self.resource = ResourceClient(config.iamcore_url, config.iamcore_client_timeout)
-        self.tenant = TenantClient(config.iamcore_url, config.iamcore_client_timeout)
-        self.user = UserClient(config.iamcore_url, config.iamcore_client_timeout)
+        self.api_key = ApiKeyClient(self.config.iamcore_url_str, self.config.iamcore_client_timeout)
+        self.application = AppClient(self.config.iamcore_url_str, self.config.iamcore_client_timeout)
+        self.application_resource_type = AppResourceTypeClient(
+            self.config.iamcore_url_str, self.config.iamcore_client_timeout
+        )
+        self.evaluate = EvaluateClient(self.config.iamcore_url_str, self.config.iamcore_client_timeout)
+        self.group = GroupClient(self.config.iamcore_url_str, self.config.iamcore_client_timeout)
+        self.policy = PolicyClient(self.config.iamcore_url_str, self.config.iamcore_client_timeout)
+        self.resource = ResourceClient(self.config.iamcore_url_str, self.config.iamcore_client_timeout)
+        self.tenant = TenantClient(self.config.iamcore_url_str, self.config.iamcore_client_timeout)
+        self.user = UserClient(self.config.iamcore_url_str, self.config.iamcore_client_timeout)
