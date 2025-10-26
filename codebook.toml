@@ -1,1 +1,4 @@
-words = ["bytearray"]
+words = [
+    "bytearray",
+    "monkeypatch",
+]

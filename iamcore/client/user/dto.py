@@ -19,8 +19,8 @@ class User(IAMCoreBaseModel):
     auth_id: str = Field(alias="authID")  # UUID stored as string
     email: str
     enabled: bool  # API returns boolean, not string
-    first_name: str = Field(alias="firstName")
-    last_name: str = Field(alias="lastName")
+    first_name: Optional[str] = Field(default=None, alias="firstName")
+    last_name: Optional[str] = Field(default=None, alias="lastName")
     username: str
     path: str
     metadata: Optional[dict[str, Any]] = None
