@@ -111,8 +111,8 @@ class TestIamResponseModels:
         """Test the single IRN response wrapper."""
 
         irn_str = "irn:rc73dbh7q0:iamcore:4atcicnisg::user/org1/tom"
-        json_obj = {"irn": irn_str}
-        response = IamIRNResponse(json_obj)
+        json_obj = {"data": irn_str}
+        response = IamIRNResponse(**json_obj)
 
         assert isinstance(response.data, IRN)
         assert response.data.__str__() == irn_str

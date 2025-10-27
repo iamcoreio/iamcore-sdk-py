@@ -210,7 +210,7 @@ class TestUserClient:
     def test_get_irn_success(self) -> None:
         """Test successful retrieval of current user IRN."""
         expected_url = f"{self.expected_base_url}users/me/irn"
-        irn_response = {"irn": "irn:rc73dbh7q0:iamcore:::user/johndoe"}
+        irn_response = {"data": "irn:rc73dbh7q0:iamcore:::user/johndoe"}
         responses.add(responses.GET, expected_url, json=irn_response, status=200)
 
         auth_headers = {"Authorization": "Bearer token"}

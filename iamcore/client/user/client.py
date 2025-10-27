@@ -36,7 +36,7 @@ class Client(HTTPClientWithTimeout):
     @err_chain(IAMUserException)
     def get_irn(self, auth_headers: dict[str, str]) -> IRN:
         response = self._get("users/me/irn", headers=auth_headers)
-        return IamIRNResponse(response.json()).data
+        return IamIRNResponse(**response.json()).data
 
     @err_chain(IAMUserException)
     def update_user(self, auth_headers: dict[str, str], irn: IRN, params: UpdateUser) -> None:

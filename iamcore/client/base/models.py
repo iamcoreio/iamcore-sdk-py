@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import re
-from abc import ABC, abstractmethod
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Callable, Generic, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Generic, Optional, Protocol, TypeVar, Union
 
 from iamcore.irn import IRN
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
-from typing_extensions import Self, override
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
+from typing_extensions import Self
 
 from iamcore.client.exceptions import IAMException
 
@@ -64,60 +63,42 @@ class SortOrder(Enum):
     desc = 2
 
 
+class IamIRNResponse(IAMCoreBaseModel):
+    data: IRN
+
+    @field_validator("data", mode="before")
+    @classmethod
+    def validate_irn_field(cls, v: Any) -> IRN:
+        if isinstance(v, str):
+            return IRN.of(v)
+        return v
+
+
+class IamIRNsResponse(IAMCoreBaseModel):
+    data: list[IRN]
+    count: int
+    page: int
+    page_size: int = Field(alias="pageSize")
+
+    @field_validator("data", mode="before")
+    @classmethod
+    def validate_irn_field(cls, v: Any) -> list[IRN]:
+        if isinstance(v, list):
+            return [IRN.of(s) for s in v if isinstance(s, str)]
+        return v
+
+
+SEARCH_ALL_PAGE_SIZE = 1_000
+
+
 T = TypeVar("T")
-JSON_obj = dict[str, Any]
-JSON_List = Union[list[dict[str, Any]], list[str]]
 
 
-class IamEntityResponse(ABC, Generic[T]):
-    data: T
-
-    def __init__(self, item: JSON_obj) -> None:
-        self.data = self.converter(item)
-        super().__init__()
-
-    @abstractmethod
-    def converter(self, item: JSON_obj) -> T:
-        pass
-
-
-class IamEntitiesResponse(ABC, Generic[T]):
+class IamEntitiesResponse(Protocol, Generic[T]):
     data: list[T]
     count: int
     page: int
     page_size: int
-
-    def __init__(self, data: JSON_List, count: int, page: int, page_size: int) -> None:
-        self.data = self.converter(data)
-        self.count = count
-        self.page = page
-        self.page_size = page_size
-        super().__init__()
-
-    @abstractmethod
-    def converter(self, item: JSON_List) -> list[T]: ...
-
-
-class IamIRNResponse(IamEntityResponse[IRN]):
-    data: IRN
-
-    @override
-    def converter(self, item: JSON_obj) -> IRN:
-        return IRN.of(item["irn"])
-
-
-class IamIRNsResponse(IamEntitiesResponse[IRN]):
-    data: list[IRN]
-    count: int
-    page: int
-    page_size: int
-
-    @override
-    def converter(self, item: JSON_List) -> list[IRN]:
-        return [IRN.of(item) for item in item]
-
-
-SEARCH_ALL_PAGE_SIZE = 1_000
 
 
 _SearchFunc = Callable[[dict[str, str], PaginatedSearchFilter], IamEntitiesResponse[T]]

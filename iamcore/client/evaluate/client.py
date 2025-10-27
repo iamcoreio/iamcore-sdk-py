@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from iamcore.irn import IRN
 
@@ -110,14 +110,13 @@ class Client(HTTPClientWithTimeout):
         action: str,
         resource_type: str,
     ) -> Generator[IRN, None, None]:
-        return generic_search_all(
-            auth_headers,
-            lambda headers, search_filter: self.evaluate_resources(
+        def search_func(headers: dict[str, str], search_filter: PaginatedSearchFilter) -> IamIRNsResponse:
+            return self.evaluate_resources(
                 headers,
                 application=application,
                 action=action,
                 resource_type=resource_type,
                 search_filter=search_filter,
-            ),
-            None,
-        )
+            )
+
+        return generic_search_all(auth_headers, search_func, None)
