@@ -20,7 +20,7 @@ class Client:
         # Client configuration
         self.config = config
         # Authentication client
-        self.auth = AuthClient(self.config.iamcore_issuer_url_str, self.config.iamcore_client_timeout)
+        self.auth = AuthClient(self.config.get_iamcore_issuer_url, self.config.iamcore_client_timeout)
         # Resource clients
         self.api_key = ApiKeyClient(self.config.iamcore_url_str, self.config.iamcore_client_timeout)
         self.application = AppClient(self.config.iamcore_url_str, self.config.iamcore_client_timeout)
