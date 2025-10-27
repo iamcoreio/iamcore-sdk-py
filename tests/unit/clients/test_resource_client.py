@@ -303,7 +303,7 @@ class TestResourceClient:
         auth_headers = {"Authorization": "Bearer token"}
         search_filter = ResourceSearchFilter(resourceType="device")
 
-        result = self.client.search_resource(auth_headers, search_filter)
+        result = self.client.search_resources(auth_headers, search_filter)
 
         assert isinstance(result, IamResourcesResponse)
         assert result.count == 1
@@ -331,7 +331,7 @@ class TestResourceClient:
 
         auth_headers = {"Authorization": "Bearer token"}
 
-        result = self.client.search_resource(auth_headers)
+        result = self.client.search_resources(auth_headers)
 
         assert isinstance(result, IamResourcesResponse)
         assert result.count == 0
@@ -601,7 +601,7 @@ class TestResourceClient:
         auth_headers = {"Authorization": "Bearer invalid_token"}
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.search_resource(auth_headers)
+            self.client.search_resources(auth_headers)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -617,7 +617,7 @@ class TestResourceClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.search_resource(auth_headers)
+            self.client.search_resources(auth_headers)
 
         assert excinfo.value.status_code == 403
         assert "Insufficient permissions" in str(excinfo.value)
@@ -631,7 +631,7 @@ class TestResourceClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.search_resource(auth_headers)
+            self.client.search_resources(auth_headers)
 
         assert excinfo.value.status_code == 500
         assert "Internal server error" in str(excinfo.value)

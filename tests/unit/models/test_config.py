@@ -31,25 +31,6 @@ class TestBaseConfig:
 
         assert config.iamcore_client_timeout == 30
 
-    def test_config_manual_set(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """Test manual configuration setting."""
-        monkeypatch.setenv("IAMCORE_URL", "https://api.example.com")
-        monkeypatch.setenv("IAMCORE_ISSUER_URL", "https://auth.example.com")
-        monkeypatch.setenv("SYSTEM_BACKEND_CLIENT_ID", "test-client-id")
-
-        config = BaseConfig()
-
-        # Override with manual config
-        config.set_iamcore_config(
-            iamcore_url="https://manual.example.com",
-            iamcore_issuer_url="https://manual-auth.example.com",
-            client_id="manual-client-id",
-        )
-
-        assert str(config.iamcore_url) == "https://manual.example.com/"
-        assert str(config.iamcore_issuer_url) == "https://manual-auth.example.com/"
-        assert config.system_backend_client_id == "manual-client-id"
-
     def test_config_invalid_url(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test configuration with invalid URL."""
         monkeypatch.setenv("IAMCORE_URL", "not-a-url")

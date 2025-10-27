@@ -17,14 +17,6 @@ class BaseConfig(BaseSettings):
     system_backend_client_id: str = Field(description="System Backend Client ID")
     iamcore_client_timeout: int = Field(description="IAM Core Client Timeout", default=30, ge=1, le=300)
 
-    def set_iamcore_config(self, iamcore_url: str, iamcore_issuer_url: str, client_id: str) -> None:
-        """Manually set configuration values."""
-        url_adapter = TypeAdapter(HttpUrl)
-        # Create a new instance with updated values
-        object.__setattr__(self, "iamcore_url", url_adapter.validate_python(iamcore_url))
-        object.__setattr__(self, "iamcore_issuer_url", url_adapter.validate_python(iamcore_issuer_url))
-        object.__setattr__(self, "system_backend_client_id", client_id)
-
     @property
     def iamcore_url_str(self) -> str:
         """Get IAM Core URL as string."""

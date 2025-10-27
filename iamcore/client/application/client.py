@@ -51,7 +51,7 @@ class Client(HTTPClientWithTimeout):
         self.post(path, data=json.dumps(payload), headers=auth_headers)
 
     @err_chain(IAMException)
-    def search_application(
+    def search_applications(
         self,
         headers: dict[str, str],
         application_filter: Optional[ApplicationSearchFilter] = None,
@@ -66,4 +66,4 @@ class Client(HTTPClientWithTimeout):
         auth_headers: dict[str, str],
         application_filter: Optional[ApplicationSearchFilter] = None,
     ) -> Generator[Application, None, None]:
-        return generic_search_all(auth_headers, self.search_application, application_filter)
+        return generic_search_all(auth_headers, self.search_applications, application_filter)

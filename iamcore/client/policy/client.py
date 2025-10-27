@@ -45,7 +45,7 @@ class Client(HTTPClientWithTimeout):
         self.put(path, data=data, headers=auth_headers)
 
     @err_chain(IAMPolicyException)
-    def search_policy(
+    def search_policies(
         self,
         headers: dict[str, str],
         policy_filter: Optional[PolicySearchFilter] = None,
@@ -60,4 +60,4 @@ class Client(HTTPClientWithTimeout):
         auth_headers: dict[str, str],
         policy_filter: Optional[PolicySearchFilter] = None,
     ) -> Generator[Policy, None, None]:
-        return generic_search_all(auth_headers, self.search_policy, policy_filter)
+        return generic_search_all(auth_headers, self.search_policies, policy_filter)

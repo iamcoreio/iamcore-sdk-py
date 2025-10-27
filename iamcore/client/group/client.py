@@ -45,7 +45,7 @@ class Client(HTTPClientWithTimeout):
         self.post(path, data=json.dumps(payload), headers=auth_headers)
 
     @err_chain(IAMGroupException)
-    def search_group(
+    def search_groups(
         self,
         headers: dict[str, str],
         group_filter: Optional[GroupSearchFilter] = None,
@@ -60,4 +60,4 @@ class Client(HTTPClientWithTimeout):
         auth_headers: dict[str, str],
         group_filter: Optional[GroupSearchFilter] = None,
     ) -> Generator[Group, None, None]:
-        return generic_search_all(auth_headers, self.search_group, group_filter)
+        return generic_search_all(auth_headers, self.search_groups, group_filter)

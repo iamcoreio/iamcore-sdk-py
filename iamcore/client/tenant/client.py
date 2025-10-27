@@ -58,7 +58,7 @@ class Client(HTTPClientWithTimeout):
         return IamTenantIssuersResponse(**response.json()).data.pop()
 
     @err_chain(IAMTenantException)
-    def search_tenant(
+    def search_tenants(
         self,
         headers: dict[str, str],
         tenant_filter: Optional[GetTenantsFilter] = None,
@@ -73,4 +73,4 @@ class Client(HTTPClientWithTimeout):
         auth_headers: dict[str, str],
         tenant_filter: Optional[GetTenantsFilter] = None,
     ) -> Generator[Tenant, None, None]:
-        return generic_search_all(auth_headers, self.search_tenant, tenant_filter)
+        return generic_search_all(auth_headers, self.search_tenants, tenant_filter)

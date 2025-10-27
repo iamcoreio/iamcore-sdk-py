@@ -43,10 +43,11 @@ from iamcore.client.config import BaseConfig
 config = BaseConfig()
 
 # Option 2: Manual configuration
-config.set_iamcore_config(
+config = BaseConfig(
     iamcore_url="https://your-iam-core-instance.com",
     iamcore_issuer_url="https://your-issuer.com",
-    client_id="your-client-id"
+    system_backend_client_id="your-client-id",
+    iamcore_client_timeout=30
 )
 ```
 
@@ -64,19 +65,21 @@ iam_client = Client(config)
 Authenticate to get access tokens:
 
 ```python
-# Authenticate and get tokens
-auth_response = iam_client.auth.authenticate(
+# Authenticate and get tokens using password grant
+token = iam_client.auth.get_token_with_password(
+    realm="your-tenant-realm",
     client_id="your-client-id",
-    client_secret="your-client-secret"
+    username="your-username",
+    password="your-password"
 )
 
 # Use the access token for subsequent requests
-headers = {"Authorization": f"Bearer {auth_response.access_token}"}
+headers = token.access_headers
 ```
 
 ### 4. Use the API
 
-Now you can interact with IAM Core resources:
+Now you can interact with IAM Core API:
 
 ```python
 # Get current user information
@@ -206,8 +209,8 @@ new_app = iam_client.application.create_application(headers, app_data)
 # Search applications
 from iamcore.client.application.dto import ApplicationSearchFilter
 
-app_filter = ApplicationSearchFilter(name="my-app")
-apps = iam_client.application.search_application(headers, app_filter)
+application_filter = ApplicationSearchFilter(name="my-app")
+apps = iam_client.application.search_application(headers, application_filter)
 
 # Attach policies to application
 iam_client.application.application_attach_policies(
@@ -247,13 +250,13 @@ cd iamcore-sdk-py
 uv sync --dev
 
 # Run tests
-uc run pytest
+uv run pytest
 
 # Run linting
 ruff check . --fix
 
 # Run type checking
-basedpyright .
+pyright .
 ```
 
 ### Running Tests
@@ -277,6 +280,6 @@ uv run pytest -k "test_create"
 This project uses:
 
 - **ruff** for linting and formatting
-- **basedpyright** for type checking
+- **pyright** for type checking
 - **pytest** for testing
 - **pre-commit** hooks for quality gates

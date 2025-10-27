@@ -230,7 +230,7 @@ class TestGroupClient:
         auth_headers = {"Authorization": "Bearer token"}
         search_filter = GroupSearchFilter(name="java")
 
-        result = self.client.search_group(auth_headers, search_filter)
+        result = self.client.search_groups(auth_headers, search_filter)
 
         assert isinstance(result, IamGroupsResponse)
         assert result.count == 1
@@ -258,7 +258,7 @@ class TestGroupClient:
 
         auth_headers = {"Authorization": "Bearer token"}
 
-        result = self.client.search_group(auth_headers)
+        result = self.client.search_groups(auth_headers)
 
         assert isinstance(result, IamGroupsResponse)
         assert result.count == 0
@@ -507,7 +507,7 @@ class TestGroupClient:
         auth_headers = {"Authorization": "Bearer invalid_token"}
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.search_group(auth_headers)
+            self.client.search_groups(auth_headers)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -523,7 +523,7 @@ class TestGroupClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.search_group(auth_headers)
+            self.client.search_groups(auth_headers)
 
         assert excinfo.value.status_code == 403
         assert "Insufficient permissions" in str(excinfo.value)
@@ -537,7 +537,7 @@ class TestGroupClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.search_group(auth_headers)
+            self.client.search_groups(auth_headers)
 
         assert excinfo.value.status_code == 500
         assert "Internal server error" in str(excinfo.value)

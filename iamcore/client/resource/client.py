@@ -51,7 +51,7 @@ class Client(HTTPClientWithTimeout):
         self.post("resources/delete", data=json.dumps(payload), headers=auth_headers)
 
     @err_chain(IAMResourceException)
-    def search_resource(
+    def search_resources(
         self,
         auth_headers: dict[str, str],
         resource_filter: Optional[ResourceSearchFilter] = None,
@@ -66,4 +66,4 @@ class Client(HTTPClientWithTimeout):
         auth_headers: dict[str, str],
         resource_filter: Optional[ResourceSearchFilter] = None,
     ) -> Generator[Resource, None, None]:
-        return generic_search_all(auth_headers, self.search_resource, resource_filter)
+        return generic_search_all(auth_headers, self.search_resources, resource_filter)
