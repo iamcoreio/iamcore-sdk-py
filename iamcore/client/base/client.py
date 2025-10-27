@@ -33,10 +33,11 @@ class HTTPClientWithTimeout:
         self,
         base_url: str,
         timeout: int = 30,
-        api_version: APIVersion = APIVersion.V1,
+        api_version: Optional[APIVersion] = APIVersion.V1,
     ) -> None:
         self.base_url: str = base_url if base_url.endswith("/") else base_url + "/"
-        self.base_url = self.base_url + api_version.value + "/"
+        if api_version:
+            self.base_url = self.base_url + api_version.value + "/"
         self.timeout: int = timeout
 
     def request(

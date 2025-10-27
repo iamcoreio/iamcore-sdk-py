@@ -9,6 +9,7 @@ class BaseConfig(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
+        extra="allow",
     )
 
     iamcore_url: HttpUrl = Field(description="IAM Core URL")

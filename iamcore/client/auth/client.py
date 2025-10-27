@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import http.client
+import logging
 from typing import TYPE_CHECKING
 
 from iamcore.client.base.client import HTTPClientWithTimeout
@@ -12,6 +13,9 @@ if TYPE_CHECKING:
     from requests import Response
 
 
+logger = logging.getLogger(__name__)
+
+
 def get_api_key_auth_headers(api_key: str) -> dict[str, str]:
     return {"X-iamcore-API-Key": api_key}
 
@@ -20,10 +24,11 @@ class Client(HTTPClientWithTimeout):
     """IAMCore auth client."""
 
     def __init__(self, base_url: str, timeout: int = 30) -> None:
-        super().__init__(base_url=base_url, timeout=timeout)
+        super().__init__(base_url=base_url, timeout=timeout, api_version=None)
 
     def _extract_token(self, response: Response) -> TokenResponse:
         if response.status_code == http.client.OK:
+            logger.debug("Token response: %s", response.json())
             return TokenResponse(**response.json())
 
         msg = (
@@ -42,6 +47,18 @@ class Client(HTTPClientWithTimeout):
         username: str,
         password: str,
     ) -> TokenResponse:
+        """
+        Retrieves an OAuth2 token using the password grant type.
+
+        Args:
+            realm: The realm name (tenant ID).
+            client_id: The client ID.
+            username: The username.
+            password: The password.
+
+        Returns:
+            The OAuth2 token.
+        """
         url = f"realms/{realm}/protocol/openid-connect/token"
         payload = f"grant_type=password&client_id={client_id}&username={username}&password={password}"
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
