@@ -34,23 +34,23 @@ class Client(HTTPClientWithTimeout):
     def create_tenant(self, auth_headers: dict[str, str], params: CreateTenant) -> Tenant:
         path = "tenants/issuer-types/iamcore"
         payload = params.model_dump_json(by_alias=True, exclude_none=True)
-        response = self.post(path, data=payload, headers=auth_headers)
+        response = self._post(path, data=payload, headers=auth_headers)
         return IamTenantResponse(**response.json()).data
 
     @err_chain(IAMTenantException)
     def update_tenant(self, auth_headers: dict[str, str], irn: IRN, display_name: str) -> None:
         path = f"tenants/{irn.to_base64()}"
         payload = {"displayName": display_name}
-        self.put(path, data=json.dumps(payload), headers=auth_headers)
+        self._put(path, data=json.dumps(payload), headers=auth_headers)
 
     @err_chain(IAMTenantException)
     def delete_tenant(self, auth_headers: dict[str, str], irn: IRN) -> None:
         path = f"tenants/{irn.to_base64()}"
-        self.delete(path, headers=auth_headers)
+        self._delete(path, headers=auth_headers)
 
     @err_chain(IAMTenantException)
     def get_issuer(self, headers: dict[str, str], params: GetTenantIssuer) -> TenantIssuer:
-        response = self.get(
+        response = self._get(
             "tenants/issuers",
             headers=headers,
             params=params.model_dump(by_alias=True),
@@ -64,7 +64,7 @@ class Client(HTTPClientWithTimeout):
         tenant_filter: Optional[GetTenantsFilter] = None,
     ) -> IamTenantsResponse:
         query = tenant_filter.model_dump(by_alias=True, exclude_none=True) if tenant_filter else None
-        response = self.get("tenants", headers=headers, params=query)
+        response = self._get("tenants", headers=headers, params=query)
         return IamTenantsResponse(**response.json())
 
     @err_chain(IAMException)

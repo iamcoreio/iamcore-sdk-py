@@ -34,7 +34,7 @@ class Client(HTTPClientWithTimeout):
     ) -> ApplicationResourceType:
         path = f"applications/{application_irn.to_base64()}/resource-types"
         payload = params.model_dump_json(by_alias=True, exclude_none=True)
-        response = self.post(path, data=payload, headers=auth_headers)
+        response = self._post(path, data=payload, headers=auth_headers)
         return IamApplicationResourceTypeResponse(**response.json()).data
 
     @err_chain(IAMException)
@@ -45,7 +45,7 @@ class Client(HTTPClientWithTimeout):
         type_irn: IRN,
     ) -> ApplicationResourceType:
         path = f"applications/{application_irn.to_base64()}/resource-types/{type_irn.to_base64()}"
-        response = self.get(path, headers=auth_headers)
+        response = self._get(path, headers=auth_headers)
         return IamApplicationResourceTypeResponse(**response.json()).data
 
     @err_chain(IAMException)
@@ -57,7 +57,7 @@ class Client(HTTPClientWithTimeout):
     ) -> IamApplicationResourceTypesResponse:
         path = f"applications/{application_irn.to_base64()}/resource-types"
         query = resource_type_filter.model_dump(by_alias=True, exclude_none=True) if resource_type_filter else None
-        response = self.get(path, headers=headers, params=query)
+        response = self._get(path, headers=headers, params=query)
         return IamApplicationResourceTypesResponse(**response.json())
 
     @err_chain(IAMException)

@@ -62,5 +62,5 @@ class Client(HTTPClientWithTimeout):
         url = f"realms/{realm}/protocol/openid-connect/token"
         payload = f"grant_type=password&client_id={client_id}&username={username}&password={password}"
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
-        response = self.post(url, data=payload, headers=headers)
+        response = self._post(url, data=payload, headers=headers)
         return self._extract_token(response)

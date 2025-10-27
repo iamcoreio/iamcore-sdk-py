@@ -75,12 +75,12 @@ class Client(HTTPClientWithTimeout):
     def evaluate(self, auth_headers: dict[str, str], action: str, resources: list[IRN]) -> None:
         payload = {"action": action, "resources": [str(r) for r in resources if r]}
         logger.debug("Going to evaluate resources: json=%s", payload)
-        self.post("evaluate", data=json.dumps(payload), headers=auth_headers)
+        self._post("evaluate", data=json.dumps(payload), headers=auth_headers)
 
     def evaluate_actions(self, auth_headers: dict[str, str], actions: list[str], irns: list[IRN]) -> dict[str, Any]:
         payload = {"actions": actions, "irns": [str(r) for r in irns if r]}
         logger.debug("Going to evaluate resources: json=%s", payload)
-        response = self.post("evaluate/actions", data=json.dumps(payload), headers=auth_headers)
+        response = self._post("evaluate/actions", data=json.dumps(payload), headers=auth_headers)
         return response.json()
 
     def evaluate_resources(
@@ -94,7 +94,7 @@ class Client(HTTPClientWithTimeout):
     ) -> IamIRNsResponse:
         payload = {"application": application, "action": action, "resourceType": resource_type}
         logger.debug("Going to evaluate resource type: json=%s", payload)
-        response = self.post(
+        response = self._post(
             "evaluate/resources",
             data=json.dumps(payload),
             headers=auth_headers,

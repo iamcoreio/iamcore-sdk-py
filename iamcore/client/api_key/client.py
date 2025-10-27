@@ -22,7 +22,7 @@ class Client(HTTPClientWithTimeout):
     def create_application_api_key(self, auth_headers: dict[str, str], principal_id: str) -> None:
         path = f"principals/{principal_id}/api-keys"
         headers = {"Content-Type": "application/json", **auth_headers}
-        self.post(path, headers=headers)
+        self._post(path, headers=headers)
 
     @err_chain(IAMException)
     def get_application_api_keys(
@@ -33,7 +33,7 @@ class Client(HTTPClientWithTimeout):
     ) -> IamApiKeysResponse:
         query = search_filter.model_dump(by_alias=True, exclude_none=True) if search_filter else None
         path = f"principals/{principal_id}/api-keys"
-        response = self.get(path, headers=headers, params=query)
+        response = self._get(path, headers=headers, params=query)
         return IamApiKeysResponse(**response.json())
 
     @err_chain(IAMException)

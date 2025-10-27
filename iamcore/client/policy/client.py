@@ -30,19 +30,19 @@ class Client(HTTPClientWithTimeout):
     def create_policy(self, auth_headers: dict[str, str], params: CreatePolicy) -> Policy:
         payload_dict = params.model_dump_json(by_alias=True, exclude_none=True)
 
-        response: Response = self.post("policies", data=payload_dict, headers=auth_headers)
+        response: Response = self._post("policies", data=payload_dict, headers=auth_headers)
         return IamPolicyResponse(**response.json()).data
 
     @err_chain(IAMPolicyException)
     def delete_policy(self, auth_headers: dict[str, str], policy_id: str) -> None:
         path = "policies/" + IRN.of(policy_id).to_base64()
-        self.delete(path, headers=auth_headers)
+        self._delete(path, headers=auth_headers)
 
     @err_chain(IAMPolicyException)
     def update_policy(self, auth_headers: dict[str, str], policy_id: str, params: UpdatePolicy) -> None:
         path = "policies/" + policy_id
         data = params.model_dump_json(by_alias=True, exclude_none=True)
-        self.put(path, data=data, headers=auth_headers)
+        self._put(path, data=data, headers=auth_headers)
 
     @err_chain(IAMPolicyException)
     def search_policies(
@@ -51,7 +51,7 @@ class Client(HTTPClientWithTimeout):
         policy_filter: Optional[PolicySearchFilter] = None,
     ) -> IamPoliciesResponse:
         query = policy_filter.model_dump(by_alias=True, exclude_none=True) if policy_filter else None
-        response = self.get("policies", headers=headers, params=query)
+        response = self._get("policies", headers=headers, params=query)
         return IamPoliciesResponse(**response.json())
 
     @err_chain(IAMException)

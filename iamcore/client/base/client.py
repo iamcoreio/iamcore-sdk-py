@@ -40,7 +40,7 @@ class HTTPClientWithTimeout:
             self.base_url = self.base_url + api_version.value + "/"
         self.timeout: int = timeout
 
-    def request(
+    def _request(
         self,
         method: HTTPMethod,
         path: str,
@@ -68,7 +68,7 @@ class HTTPClientWithTimeout:
         )
         return ResponseHandler.handle_response(resp)
 
-    def get(
+    def _get(
         self,
         path: str,
         *,
@@ -77,9 +77,9 @@ class HTTPClientWithTimeout:
         params: Optional[Union[str, dict[str, Union[str, int, bool]]]] = None,
     ) -> requests.Response:
         """Make a GET request to the HTTP server."""
-        return self.request(HTTPMethod.GET, path, data=data, headers=headers, params=params)
+        return self._request(HTTPMethod.GET, path, data=data, headers=headers, params=params)
 
-    def post(
+    def _post(
         self,
         path: str,
         *,
@@ -88,9 +88,9 @@ class HTTPClientWithTimeout:
         params: Optional[Union[str, dict[str, Union[str, int, bool]]]] = None,
     ) -> requests.Response:
         """Make a POST request to the HTTP server."""
-        return self.request(HTTPMethod.POST, path, data=data, headers=headers, params=params)
+        return self._request(HTTPMethod.POST, path, data=data, headers=headers, params=params)
 
-    def put(
+    def _put(
         self,
         path: str,
         *,
@@ -99,9 +99,9 @@ class HTTPClientWithTimeout:
         params: Optional[Union[str, dict[str, Union[str, int, bool]]]] = None,
     ) -> requests.Response:
         """Make a PUT request to the HTTP server."""
-        return self.request(HTTPMethod.PUT, path, data=data, headers=headers, params=params)
+        return self._request(HTTPMethod.PUT, path, data=data, headers=headers, params=params)
 
-    def patch(
+    def _patch(
         self,
         path: str,
         *,
@@ -110,9 +110,9 @@ class HTTPClientWithTimeout:
         params: Optional[Union[str, dict[str, Union[str, int, bool]]]] = None,
     ) -> requests.Response:
         """Make a PATCH request to the HTTP server."""
-        return self.request(HTTPMethod.PATCH, path, data=data, headers=headers, params=params)
+        return self._request(HTTPMethod.PATCH, path, data=data, headers=headers, params=params)
 
-    def delete(
+    def _delete(
         self,
         path: str,
         *,
@@ -121,4 +121,4 @@ class HTTPClientWithTimeout:
         params: Optional[Union[str, dict[str, Union[str, int, bool]]]] = None,
     ) -> requests.Response:
         """Make a DELETE request to the HTTP server."""
-        return self.request(HTTPMethod.DELETE, path, data=data, headers=headers, params=params)
+        return self._request(HTTPMethod.DELETE, path, data=data, headers=headers, params=params)

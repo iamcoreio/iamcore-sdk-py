@@ -38,7 +38,7 @@ class TestHTTPClient:
     def test_http_client_request_missing_headers_raises_exception(self) -> None:
         """Test that request method raises IAMUnauthorizedException if headers are missing."""
         with pytest.raises(IAMUnauthorizedException, match="Missing authorization headers"):
-            self.client.request(HTTPMethod.GET, "/test")
+            self.client._request(HTTPMethod.GET, "/test")
 
     @responses.activate
     def test_http_client_request_adds_content_type_header(self) -> None:
@@ -47,7 +47,7 @@ class TestHTTPClient:
         responses.add(responses.GET, expected_url, json={"message": "success"}, status=200)
 
         headers = {"Authorization": "Bearer token"}
-        self.client.request(HTTPMethod.GET, "/test", headers=headers)
+        self.client._request(HTTPMethod.GET, "/test", headers=headers)
 
         assert responses.calls[0].request.headers["Content-Type"] == "application/json"
 
@@ -58,7 +58,7 @@ class TestHTTPClient:
         responses.add(responses.GET, expected_url, json={"message": "success"}, status=200)
 
         headers = {"Authorization": "Bearer token", "Content-Type": "application/xml"}
-        self.client.request(HTTPMethod.GET, "/test", headers=headers)
+        self.client._request(HTTPMethod.GET, "/test", headers=headers)
 
         assert responses.calls[0].request.headers["Content-Type"] == "application/xml"
 
@@ -69,7 +69,7 @@ class TestHTTPClient:
         responses.add(responses.GET, expected_url, json={"users": []}, status=200)
 
         headers = {"Authorization": "Bearer token"}
-        response = self.client.get("/users", headers=headers)
+        response = self.client._get("/users", headers=headers)
 
         assert response.status_code == 200
         assert response.json() == {"users": []}
@@ -84,7 +84,7 @@ class TestHTTPClient:
 
         headers = {"Authorization": "Bearer token"}
         data = json.dumps({"name": "test"})
-        response = self.client.post("/users", headers=headers, data=data)
+        response = self.client._post("/users", headers=headers, data=data)
 
         assert response.status_code == 201
         assert response.json() == {"id": "123"}
@@ -100,7 +100,7 @@ class TestHTTPClient:
 
         headers = {"Authorization": "Bearer token"}
         data = json.dumps({"name": "updated_test"})
-        response = self.client.put("/users/123", headers=headers, data=data)
+        response = self.client._put("/users/123", headers=headers, data=data)
 
         assert response.status_code == 200
         assert response.json() == {"message": "updated"}
@@ -116,7 +116,7 @@ class TestHTTPClient:
 
         headers = {"Authorization": "Bearer token"}
         data = json.dumps({"name": "patched_test"})
-        response = self.client.patch("/users/123", headers=headers, data=data)
+        response = self.client._patch("/users/123", headers=headers, data=data)
 
         assert response.status_code == 200
         assert response.json() == {"message": "patched"}
@@ -131,7 +131,7 @@ class TestHTTPClient:
         responses.add(responses.DELETE, expected_url, status=204)
 
         headers = {"Authorization": "Bearer token"}
-        response = self.client.delete("/users/123", headers=headers)
+        response = self.client._delete("/users/123", headers=headers)
 
         assert response.status_code == 204
         assert responses.calls[0].request.method == "DELETE"
@@ -145,7 +145,7 @@ class TestHTTPClient:
 
         headers = {"Authorization": "Bearer token"}
         params = {"query": "test", "limit": 10}
-        response = self.client.get("/search", headers=headers, params=params)
+        response = self.client._get("/search", headers=headers, params=params)
 
         assert response.status_code == 200
         assert response.json() == {"results": []}
@@ -159,7 +159,7 @@ class TestHTTPClient:
         responses.add(responses.GET, expected_url, json={"message": "success"}, status=200)
 
         headers = {"Authorization": "Bearer token"}
-        response = client.get("/long_request", headers=headers)
+        response = client._get("/long_request", headers=headers)
 
         assert response.status_code == 200
 
@@ -173,7 +173,7 @@ class TestHTTPClient:
         data = json.dumps({"invalid": "data"})
 
         with pytest.raises(IAMBedRequestException) as excinfo:
-            self.client.post("/bad_request", headers=headers, data=data)
+            self.client._post("/bad_request", headers=headers, data=data)
 
         assert excinfo.value.status_code == 400
         assert "Bad request error" in str(excinfo.value)
@@ -187,7 +187,7 @@ class TestHTTPClient:
         headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.get("/unauthorized", headers=headers)
+            self.client._get("/unauthorized", headers=headers)
 
         assert excinfo.value.status_code == 401
         assert "Unauthorized access" in str(excinfo.value)
@@ -201,7 +201,7 @@ class TestHTTPClient:
         headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.get("/forbidden", headers=headers)
+            self.client._get("/forbidden", headers=headers)
 
         assert excinfo.value.status_code == 403
         assert "Access forbidden" in str(excinfo.value)
@@ -216,7 +216,7 @@ class TestHTTPClient:
         data = json.dumps({"name": "duplicate"})
 
         with pytest.raises(IAMConflictException) as excinfo:
-            self.client.post("/conflict", headers=headers, data=data)
+            self.client._post("/conflict", headers=headers, data=data)
 
         assert excinfo.value.status_code == 409
         assert "Resource already exists" in str(excinfo.value)
@@ -230,7 +230,7 @@ class TestHTTPClient:
         headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.get("/not_found", headers=headers)
+            self.client._get("/not_found", headers=headers)
 
         assert excinfo.value.status_code == 404
         assert "Resource not found" in str(excinfo.value)
@@ -250,7 +250,7 @@ class TestHTTPClient:
         data = json.dumps({"invalid_field": "value"})
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.post("/unprocessable", headers=headers, data=data)
+            self.client._post("/unprocessable", headers=headers, data=data)
 
         assert excinfo.value.status_code == 422
         assert "Validation failed" in str(excinfo.value)
@@ -264,7 +264,7 @@ class TestHTTPClient:
         headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.get("/teapot", headers=headers)
+            self.client._get("/teapot", headers=headers)
 
         assert excinfo.value.status_code == 418
         assert "I'm a teapot" in str(excinfo.value)
