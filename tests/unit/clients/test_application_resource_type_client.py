@@ -3,7 +3,6 @@ from typing import Any, cast
 
 import pytest
 import responses
-from iamcore.client.base.models import PaginatedSearchFilter
 from iamcore.irn import IRN
 
 from iamcore.client.application_resource_type.client import Client
@@ -12,6 +11,7 @@ from iamcore.client.application_resource_type.dto import (
     CreateApplicationResourceType,
     IamApplicationResourceTypesResponse,
 )
+from iamcore.client.base.models import PaginatedSearchFilter
 from iamcore.client.exceptions import (
     IAMBedRequestException,
     IAMConflictException,
@@ -30,7 +30,7 @@ class TestApplicationResourceTypeClient:
     def setup_class(cls) -> None:
         """Set up the test class with a client instance."""
         cls.client = Client(base_url=BASE_URL)
-        cls.expected_base_url: str = f"{BASE_URL}/api/v1/"
+        cls.expected_base_url: str = f"{BASE_URL}/api/v1/{cls.client.BASE_PATH}"
 
     def test_application_resource_type_client_initialization(self) -> None:
         """Test Application Resource Type Client initialization."""
@@ -42,7 +42,7 @@ class TestApplicationResourceTypeClient:
     def test_create_resource_type_success(self) -> None:
         """Test successful resource type creation."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
-        expected_url = f"{self.expected_base_url}applications/{application_irn.to_base64()}/resource-types"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types"
         resource_type_response: dict[str, Any] = {
             "data": {
                 "id": "aXJuOnJjNzNkYmg3cTA6bXlhcHA6OjpyZXNvdXJjZS10eXBlL2RvY3VtZW50",
@@ -94,7 +94,7 @@ class TestApplicationResourceTypeClient:
     def test_create_resource_type_minimal_params(self) -> None:
         """Test resource type creation with minimal parameters."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
-        expected_url = f"{self.expected_base_url}applications/{application_irn.to_base64()}/resource-types"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types"
         resource_type_response = {
             "data": {
                 "id": "aXJuOnJjNzNkYmg3cTA6bXlhcHA6OjpyZXNvdXJjZS10eXBlL2RvY3VtZW50",
@@ -131,9 +131,7 @@ class TestApplicationResourceTypeClient:
         """Test successful resource type retrieval."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
         type_irn = IRN.of("irn:rc73dbh7q0:myapp:::resource-type/document")
-        expected_url = (
-            f"{self.expected_base_url}applications/{application_irn.to_base64()}/resource-types/{type_irn.to_base64()}"
-        )
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types/{type_irn.to_base64()}"
         resource_type_response: dict[str, Any] = {
             "data": {
                 "id": "aXJuOnJjNzNkYmg3cTA6bXlhcHA6OjpyZXNvdXJjZS10eXBlL2RvY3VtZW50",
@@ -170,7 +168,7 @@ class TestApplicationResourceTypeClient:
     def test_search_application_resource_types_success(self) -> None:
         """Test successful application resource types search."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
-        expected_url = f"{self.expected_base_url}applications/{application_irn.to_base64()}/resource-types"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types"
         resource_types_response: dict[str, Any] = {
             "data": [
                 {
@@ -215,7 +213,7 @@ class TestApplicationResourceTypeClient:
     def test_search_application_resource_types_with_filter(self) -> None:
         """Test application resource types search with pagination filter."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
-        expected_url = f"{self.expected_base_url}applications/{application_irn.to_base64()}/resource-types"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types"
         resource_types_response: dict[str, Any] = {"data": [], "count": 0, "page": 2, "pageSize": 5}
         responses.add(responses.GET, expected_url, json=resource_types_response, status=200)
 
@@ -238,7 +236,7 @@ class TestApplicationResourceTypeClient:
     def test_search_all_application_resource_types_success(self) -> None:
         """Test successful search of all application resource types with pagination."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
-        expected_url = f"{self.expected_base_url}applications/{application_irn.to_base64()}/resource-types"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types"
         # First page response
         first_page_response = {
             "data": [
@@ -276,7 +274,7 @@ class TestApplicationResourceTypeClient:
     def test_create_resource_type_bad_request_error(self) -> None:
         """Test create_resource_type raises IAMBedRequestException for 400 Bad Request."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
-        expected_url = f"{self.expected_base_url}applications/{application_irn.to_base64()}/resource-types"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types"
         responses.add(
             responses.POST,
             expected_url,
@@ -297,7 +295,7 @@ class TestApplicationResourceTypeClient:
     def test_create_resource_type_unauthorized_error(self) -> None:
         """Test create_resource_type raises IAMUnauthorizedException for 401 Unauthorized."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
-        expected_url = f"{self.expected_base_url}applications/{application_irn.to_base64()}/resource-types"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types"
         responses.add(responses.POST, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -313,7 +311,7 @@ class TestApplicationResourceTypeClient:
     def test_create_resource_type_forbidden_error(self) -> None:
         """Test create_resource_type raises IAMForbiddenException for 403 Forbidden."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
-        expected_url = f"{self.expected_base_url}applications/{application_irn.to_base64()}/resource-types"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types"
         responses.add(
             responses.POST,
             expected_url,
@@ -334,7 +332,7 @@ class TestApplicationResourceTypeClient:
     def test_create_resource_type_conflict_error(self) -> None:
         """Test create_resource_type raises IAMConflictException for 409 Conflict."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
-        expected_url = f"{self.expected_base_url}applications/{application_irn.to_base64()}/resource-types"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types"
         responses.add(
             responses.POST, expected_url, json={"message": "Resource type with this name already exists"}, status=409
         )
@@ -353,9 +351,7 @@ class TestApplicationResourceTypeClient:
         """Test get_resource_type raises IAMException for 404 Not Found."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
         type_irn = IRN.of("irn:rc73dbh7q0:myapp:::resource-type/nonexistent")
-        expected_url = (
-            f"{self.expected_base_url}applications/{application_irn.to_base64()}/resource-types/{type_irn.to_base64()}"
-        )
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types/{type_irn.to_base64()}"
         responses.add(responses.GET, expected_url, json={"message": "Resource type not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -371,9 +367,7 @@ class TestApplicationResourceTypeClient:
         """Test get_resource_type raises IAMUnauthorizedException for 401 Unauthorized."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
         type_irn = IRN.of("irn:rc73dbh7q0:myapp:::resource-type/document")
-        expected_url = (
-            f"{self.expected_base_url}applications/{application_irn.to_base64()}/resource-types/{type_irn.to_base64()}"
-        )
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types/{type_irn.to_base64()}"
         responses.add(responses.GET, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -389,9 +383,7 @@ class TestApplicationResourceTypeClient:
         """Test get_resource_type raises IAMForbiddenException for 403 Forbidden."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
         type_irn = IRN.of("irn:rc73dbh7q0:myapp:::resource-type/restricted")
-        expected_url = (
-            f"{self.expected_base_url}applications/{application_irn.to_base64()}/resource-types/{type_irn.to_base64()}"
-        )
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types/{type_irn.to_base64()}"
         responses.add(responses.GET, expected_url, json={"message": "Access denied to this resource type"}, status=403)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -406,7 +398,7 @@ class TestApplicationResourceTypeClient:
     def test_search_application_resource_types_unauthorized_error(self) -> None:
         """Test search_application_resource_types raises IAMUnauthorizedException for 401 Unauthorized."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
-        expected_url = f"{self.expected_base_url}applications/{application_irn.to_base64()}/resource-types"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types"
         responses.add(responses.GET, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -421,7 +413,7 @@ class TestApplicationResourceTypeClient:
     def test_search_application_resource_types_forbidden_error(self) -> None:
         """Test search_application_resource_types raises IAMForbiddenException for 403 Forbidden."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
-        expected_url = f"{self.expected_base_url}applications/{application_irn.to_base64()}/resource-types"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types"
         responses.add(
             responses.GET,
             expected_url,
@@ -441,7 +433,7 @@ class TestApplicationResourceTypeClient:
     def test_search_application_resource_types_server_error(self) -> None:
         """Test search_application_resource_types raises IAMException for 500 Internal Server Error."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
-        expected_url = f"{self.expected_base_url}applications/{application_irn.to_base64()}/resource-types"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types"
         responses.add(responses.GET, expected_url, json={"message": "Internal server error occurred"}, status=500)
 
         auth_headers = {"Authorization": "Bearer token"}

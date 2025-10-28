@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Optional
 
 from iamcore.irn import IRN
 
-from iamcore.client.base.client import HTTPClientWithTimeout
+from iamcore.client.base.client import HTTPClientWithTimeout, append_path_to_url
 from iamcore.client.base.models import generic_search_all
 from iamcore.client.exceptions import IAMException, IAMPolicyException, err_chain
 
@@ -23,26 +23,27 @@ logger = logging.getLogger(__name__)
 class Client(HTTPClientWithTimeout):
     """Client for IAM Core Policy API."""
 
+    BASE_PATH = "policies"
+
     def __init__(self, base_url: str, timeout: int = 30) -> None:
         super().__init__(base_url=base_url, timeout=timeout)
+        self.base_url = append_path_to_url(self.base_url, self.BASE_PATH)
 
     @err_chain(IAMPolicyException)
     def create_policy(self, auth_headers: dict[str, str], params: CreatePolicy) -> Policy:
         payload_dict = params.model_dump_json(by_alias=True, exclude_none=True)
 
-        response: Response = self._post("policies", data=payload_dict, headers=auth_headers)
+        response: Response = self._post(data=payload_dict, headers=auth_headers)
         return IamPolicyResponse(**response.json()).data
 
     @err_chain(IAMPolicyException)
     def delete_policy(self, auth_headers: dict[str, str], policy_id: str) -> None:
-        path = "policies/" + IRN.of(policy_id).to_base64()
-        self._delete(path, headers=auth_headers)
+        self._delete(IRN.of(policy_id).to_base64(), headers=auth_headers)
 
     @err_chain(IAMPolicyException)
     def update_policy(self, auth_headers: dict[str, str], policy_id: str, params: UpdatePolicy) -> None:
-        path = "policies/" + policy_id
         data = params.model_dump_json(by_alias=True, exclude_none=True)
-        self._put(path, data=data, headers=auth_headers)
+        self._put(policy_id, data=data, headers=auth_headers)
 
     @err_chain(IAMPolicyException)
     def search_policies(
@@ -51,7 +52,7 @@ class Client(HTTPClientWithTimeout):
         policy_filter: Optional[PolicySearchFilter] = None,
     ) -> IamPoliciesResponse:
         query = policy_filter.model_dump(by_alias=True, exclude_none=True) if policy_filter else None
-        response = self._get("policies", headers=headers, params=query)
+        response = self._get(headers=headers, params=query)
         return IamPoliciesResponse(**response.json())
 
     @err_chain(IAMException)

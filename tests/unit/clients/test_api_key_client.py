@@ -23,7 +23,7 @@ class TestApiKeyClient:
     def setup_class(cls) -> None:
         """Set up the test class with a client instance."""
         cls.client = Client(base_url=BASE_URL)
-        cls.expected_base_url: str = f"{BASE_URL}/api/v1/"
+        cls.expected_base_url: str = f"{BASE_URL}/api/v1/principals"
 
     def test_api_key_client_initialization(self) -> None:
         """Test API Key Client initialization."""
@@ -35,7 +35,7 @@ class TestApiKeyClient:
     def test_create_application_api_key_success(self) -> None:
         """Test successful API key creation."""
         principal_id = "principal123"
-        expected_url = f"{self.expected_base_url}principals/{principal_id}/api-keys"
+        expected_url = f"{self.expected_base_url}/{principal_id}/api-keys"
         responses.add(responses.POST, expected_url, status=201)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -54,7 +54,7 @@ class TestApiKeyClient:
     def test_get_application_api_keys_success(self) -> None:
         """Test successful API keys retrieval."""
         principal_id = "principal123"
-        expected_url = f"{self.expected_base_url}principals/{principal_id}/api-keys"
+        expected_url = f"{self.expected_base_url}/{principal_id}/api-keys"
         api_keys_response: dict[str, Any] = {
             "data": [
                 {
@@ -112,7 +112,7 @@ class TestApiKeyClient:
     def test_get_application_api_keys_with_filter(self) -> None:
         """Test API keys retrieval with search filter."""
         principal_id = "principal123"
-        expected_url = f"{self.expected_base_url}principals/{principal_id}/api-keys"
+        expected_url = f"{self.expected_base_url}/{principal_id}/api-keys"
         api_keys_response: dict[str, Any] = {
             "data": [
                 {
@@ -148,7 +148,7 @@ class TestApiKeyClient:
     def test_get_application_api_keys_without_filter(self) -> None:
         """Test API keys retrieval without filter parameters."""
         principal_id = "principal123"
-        expected_url = f"{self.expected_base_url}principals/{principal_id}/api-keys"
+        expected_url = f"{self.expected_base_url}/{principal_id}/api-keys"
         api_keys_response: dict[str, Any] = {"data": [], "count": 0, "page": 1, "pageSize": 10}
         responses.add(responses.GET, expected_url, json=api_keys_response, status=200)
 
@@ -168,7 +168,7 @@ class TestApiKeyClient:
     def test_get_all_applications_api_keys_success(self) -> None:
         """Test successful retrieval of all API keys with pagination."""
         principal_id = "principal123"
-        expected_url = f"{self.expected_base_url}principals/{principal_id}/api-keys"
+        expected_url = f"{self.expected_base_url}/{principal_id}/api-keys"
         # First page response
         first_page_response = {
             "data": [
@@ -203,7 +203,7 @@ class TestApiKeyClient:
     def test_create_application_api_key_bad_request_error(self) -> None:
         """Test create_application_api_key raises IAMBedRequestException for 400 Bad Request."""
         principal_id = "principal123"
-        expected_url = f"{self.expected_base_url}principals/{principal_id}/api-keys"
+        expected_url = f"{self.expected_base_url}/{principal_id}/api-keys"
         responses.add(
             responses.POST,
             expected_url,
@@ -223,7 +223,7 @@ class TestApiKeyClient:
     def test_create_application_api_key_unauthorized_error(self) -> None:
         """Test create_application_api_key raises IAMUnauthorizedException for 401 Unauthorized."""
         principal_id = "principal123"
-        expected_url = f"{self.expected_base_url}principals/{principal_id}/api-keys"
+        expected_url = f"{self.expected_base_url}/{principal_id}/api-keys"
         responses.add(responses.POST, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -238,7 +238,7 @@ class TestApiKeyClient:
     def test_create_application_api_key_forbidden_error(self) -> None:
         """Test create_application_api_key raises IAMForbiddenException for 403 Forbidden."""
         principal_id = "principal123"
-        expected_url = f"{self.expected_base_url}principals/{principal_id}/api-keys"
+        expected_url = f"{self.expected_base_url}/{principal_id}/api-keys"
         responses.add(
             responses.POST,
             expected_url,
@@ -258,7 +258,7 @@ class TestApiKeyClient:
     def test_get_application_api_keys_not_found_error(self) -> None:
         """Test get_application_api_keys raises IAMException for 404 Not Found."""
         principal_id = "nonexistent"
-        expected_url = f"{self.expected_base_url}principals/{principal_id}/api-keys"
+        expected_url = f"{self.expected_base_url}/{principal_id}/api-keys"
         responses.add(responses.GET, expected_url, json={"message": "Principal not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -273,7 +273,7 @@ class TestApiKeyClient:
     def test_get_application_api_keys_unauthorized_error(self) -> None:
         """Test get_application_api_keys raises IAMUnauthorizedException for 401 Unauthorized."""
         principal_id = "principal123"
-        expected_url = f"{self.expected_base_url}principals/{principal_id}/api-keys"
+        expected_url = f"{self.expected_base_url}/{principal_id}/api-keys"
         responses.add(responses.GET, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -288,7 +288,7 @@ class TestApiKeyClient:
     def test_get_application_api_keys_forbidden_error(self) -> None:
         """Test get_application_api_keys raises IAMForbiddenException for 403 Forbidden."""
         principal_id = "principal123"
-        expected_url = f"{self.expected_base_url}principals/{principal_id}/api-keys"
+        expected_url = f"{self.expected_base_url}/{principal_id}/api-keys"
         responses.add(
             responses.GET, expected_url, json={"message": "Access denied to this principal's API keys"}, status=403
         )
@@ -305,7 +305,7 @@ class TestApiKeyClient:
     def test_get_application_api_keys_server_error(self) -> None:
         """Test get_application_api_keys raises IAMException for 500 Internal Server Error."""
         principal_id = "principal123"
-        expected_url = f"{self.expected_base_url}principals/{principal_id}/api-keys"
+        expected_url = f"{self.expected_base_url}/{principal_id}/api-keys"
         responses.add(responses.GET, expected_url, json={"message": "Internal server error occurred"}, status=500)
 
         auth_headers = {"Authorization": "Bearer token"}

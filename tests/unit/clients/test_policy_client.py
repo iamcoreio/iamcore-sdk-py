@@ -32,7 +32,7 @@ class TestPolicyClient:
     def setup_class(cls) -> None:
         """Set up the test class with a client instance."""
         cls.client = Client(base_url=BASE_URL)
-        cls.expected_base_url: str = f"{BASE_URL}/api/v1/"
+        cls.expected_base_url: str = f"{BASE_URL}/api/v1/policies"
 
     def test_policy_client_initialization(self) -> None:
         """Test Policy Client initialization."""
@@ -43,7 +43,7 @@ class TestPolicyClient:
     @responses.activate
     def test_create_policy_success(self) -> None:
         """Test successful policy creation."""
-        expected_url = f"{self.expected_base_url}policies"
+        expected_url = f"{self.expected_base_url}"
         policy_response = {
             "data": {
                 "id": "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0YXRjaWNuaXNnOjpwb2xpY3kvYWxsb3ctYWxsLWFjdGlvbnMtb24tamVycnk=",
@@ -113,7 +113,7 @@ class TestPolicyClient:
     @responses.activate
     def test_create_policy_minimal_params(self) -> None:
         """Test policy creation with minimal parameters."""
-        expected_url = f"{self.expected_base_url}policies"
+        expected_url = f"{self.expected_base_url}"
         policy_response: dict[str, Any] = {
             "data": {
                 "id": "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0YXRjaWNuaXNnOjpwb2xpY3kvYWxsb3ctYWxsLWFjdGlvbnMtb24tamVycnk=",
@@ -148,7 +148,7 @@ class TestPolicyClient:
     def test_delete_policy_success(self) -> None:
         """Test successful policy deletion."""
         policy_id = "irn:rc73dbh7q0:iamcore:4atcicnisg::policy/allow-all-actions-on-jerry"
-        expected_url = f"{self.expected_base_url}policies/{IRN.of(policy_id).to_base64()}"
+        expected_url = f"{self.expected_base_url}/{IRN.of(policy_id).to_base64()}"
         responses.add(responses.DELETE, expected_url, status=204)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -166,7 +166,7 @@ class TestPolicyClient:
     def test_update_policy_success(self) -> None:
         """Test successful policy update."""
         policy_id = "allow-all-actions-on-jerry"
-        expected_url = f"{self.expected_base_url}policies/{policy_id}"
+        expected_url = f"{self.expected_base_url}/{policy_id}"
         responses.add(responses.PUT, expected_url, status=204)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -201,7 +201,7 @@ class TestPolicyClient:
     @responses.activate
     def test_search_policy_success(self) -> None:
         """Test successful policy search."""
-        expected_url = f"{self.expected_base_url}policies"
+        expected_url = f"{self.expected_base_url}"
         policies_response: dict[str, Any] = {
             "data": [
                 {
@@ -253,7 +253,7 @@ class TestPolicyClient:
     @responses.activate
     def test_search_policy_without_filter(self) -> None:
         """Test policy search without filter parameters."""
-        expected_url = f"{self.expected_base_url}policies"
+        expected_url = f"{self.expected_base_url}"
         policies_response: dict[str, Any] = {"data": [], "count": 0, "page": 1, "pageSize": 10}
         responses.add(responses.GET, expected_url, json=policies_response, status=200)
 
@@ -272,7 +272,7 @@ class TestPolicyClient:
     @responses.activate
     def test_search_all_policies_success(self) -> None:
         """Test successful search of all policies with pagination."""
-        expected_url = f"{self.expected_base_url}policies"
+        expected_url = f"{self.expected_base_url}"
         # First page response
         first_page_response = {
             "data": [
@@ -316,7 +316,7 @@ class TestPolicyClient:
     @responses.activate
     def test_create_policy_bad_request_error(self) -> None:
         """Test create_policy raises IAMBedRequestException for 400 Bad Request."""
-        expected_url = f"{self.expected_base_url}policies"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.POST,
             expected_url,
@@ -336,7 +336,7 @@ class TestPolicyClient:
     @responses.activate
     def test_create_policy_unauthorized_error(self) -> None:
         """Test create_policy raises IAMUnauthorizedException for 401 Unauthorized."""
-        expected_url = f"{self.expected_base_url}policies"
+        expected_url = f"{self.expected_base_url}"
         responses.add(responses.POST, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -351,7 +351,7 @@ class TestPolicyClient:
     @responses.activate
     def test_create_policy_forbidden_error(self) -> None:
         """Test create_policy raises IAMForbiddenException for 403 Forbidden."""
-        expected_url = f"{self.expected_base_url}policies"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.POST,
             expected_url,
@@ -371,7 +371,7 @@ class TestPolicyClient:
     @responses.activate
     def test_create_policy_conflict_error(self) -> None:
         """Test create_policy raises IAMConflictException for 409 Conflict."""
-        expected_url = f"{self.expected_base_url}policies"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.POST, expected_url, json={"message": "Policy with this name already exists"}, status=409
         )
@@ -389,7 +389,7 @@ class TestPolicyClient:
     def test_delete_policy_not_found_error(self) -> None:
         """Test delete_policy raises IAMException for 404 Not Found."""
         policy_id = "irn:rc73dbh7q0:iamcore:4atcicnisg::policy/nonexistent"
-        expected_url = f"{self.expected_base_url}policies/{IRN.of(policy_id).to_base64()}"
+        expected_url = f"{self.expected_base_url}/{IRN.of(policy_id).to_base64()}"
         responses.add(responses.DELETE, expected_url, json={"message": "Policy not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -404,7 +404,7 @@ class TestPolicyClient:
     def test_delete_policy_unauthorized_error(self) -> None:
         """Test delete_policy raises IAMUnauthorizedException for 401 Unauthorized."""
         policy_id = "irn:rc73dbh7q0:iamcore:4atcicnisg::policy/test-policy"
-        expected_url = f"{self.expected_base_url}policies/{IRN.of(policy_id).to_base64()}"
+        expected_url = f"{self.expected_base_url}/{IRN.of(policy_id).to_base64()}"
         responses.add(responses.DELETE, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -419,7 +419,7 @@ class TestPolicyClient:
     def test_delete_policy_forbidden_error(self) -> None:
         """Test delete_policy raises IAMForbiddenException for 403 Forbidden."""
         policy_id = "irn:rc73dbh7q0:iamcore:4atcicnisg::policy/restricted"
-        expected_url = f"{self.expected_base_url}policies/{IRN.of(policy_id).to_base64()}"
+        expected_url = f"{self.expected_base_url}/{IRN.of(policy_id).to_base64()}"
         responses.add(
             responses.DELETE, expected_url, json={"message": "Access denied to delete this policy"}, status=403
         )
@@ -436,7 +436,7 @@ class TestPolicyClient:
     def test_update_policy_bad_request_error(self) -> None:
         """Test update_policy raises IAMBedRequestException for 400 Bad Request."""
         policy_id = "test-policy"
-        expected_url = f"{self.expected_base_url}policies/{policy_id}"
+        expected_url = f"{self.expected_base_url}/{policy_id}"
         responses.add(
             responses.PUT,
             expected_url,
@@ -457,7 +457,7 @@ class TestPolicyClient:
     def test_update_policy_not_found_error(self) -> None:
         """Test update_policy raises IAMException for 404 Not Found."""
         policy_id = "nonexistent-policy"
-        expected_url = f"{self.expected_base_url}policies/{policy_id}"
+        expected_url = f"{self.expected_base_url}/{policy_id}"
         responses.add(responses.PUT, expected_url, json={"message": "Policy not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -472,7 +472,7 @@ class TestPolicyClient:
     @responses.activate
     def test_search_policy_unauthorized_error(self) -> None:
         """Test search_policy raises IAMUnauthorizedException for 401 Unauthorized."""
-        expected_url = f"{self.expected_base_url}policies"
+        expected_url = f"{self.expected_base_url}"
         responses.add(responses.GET, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -486,7 +486,7 @@ class TestPolicyClient:
     @responses.activate
     def test_search_policy_forbidden_error(self) -> None:
         """Test search_policy raises IAMForbiddenException for 403 Forbidden."""
-        expected_url = f"{self.expected_base_url}policies"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.GET, expected_url, json={"message": "Insufficient permissions to search policies"}, status=403
         )
@@ -502,7 +502,7 @@ class TestPolicyClient:
     @responses.activate
     def test_search_policy_server_error(self) -> None:
         """Test search_policy raises IAMException for 500 Internal Server Error."""
-        expected_url = f"{self.expected_base_url}policies"
+        expected_url = f"{self.expected_base_url}"
         responses.add(responses.GET, expected_url, json={"message": "Internal server error occurred"}, status=500)
 
         auth_headers = {"Authorization": "Bearer token"}

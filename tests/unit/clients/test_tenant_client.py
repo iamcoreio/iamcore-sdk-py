@@ -32,7 +32,7 @@ class TestTenantClient:
     def setup_class(cls) -> None:
         """Set up the test class with a client instance."""
         cls.client = Client(base_url=BASE_URL)
-        cls.expected_base_url: str = f"{BASE_URL}/api/v1/"
+        cls.expected_base_url: str = f"{BASE_URL}/api/v1/tenants"
 
     def test_tenant_client_initialization(self) -> None:
         """Test Tenant Client initialization."""
@@ -43,7 +43,7 @@ class TestTenantClient:
     @responses.activate
     def test_create_tenant_success(self) -> None:
         """Test successful tenant creation."""
-        expected_url = f"{self.expected_base_url}tenants/issuer-types/iamcore"
+        expected_url = f"{self.expected_base_url}/issuer-types/iamcore"
         tenant_response = {
             "data": {
                 "resourceID": "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0N2c1bDJpamMwOjp0ZW5hbnQvNDdnNWwyaWpjMA==",
@@ -102,7 +102,7 @@ class TestTenantClient:
     @responses.activate
     def test_create_tenant_minimal_params(self) -> None:
         """Test tenant creation with minimal parameters."""
-        expected_url = f"{self.expected_base_url}tenants/issuer-types/iamcore"
+        expected_url = f"{self.expected_base_url}/issuer-types/iamcore"
         tenant_response = {
             "data": {
                 "resourceID": "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0N2c1bDJpamMwOjp0ZW5hbnQvNDdnNWwyaWpjMA==",
@@ -143,7 +143,7 @@ class TestTenantClient:
     def test_update_tenant_success(self) -> None:
         """Test successful tenant update."""
         tenant_irn = IRN.of("irn:rc73dbh7q0:iamcore:47g5l2ijc0::tenant/47g5l2ijc0")
-        expected_url = f"{self.expected_base_url}tenants/{tenant_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{tenant_irn.to_base64()}"
         responses.add(responses.PUT, expected_url, status=204)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -168,7 +168,7 @@ class TestTenantClient:
     def test_delete_tenant_success(self) -> None:
         """Test successful tenant deletion."""
         tenant_irn = IRN.of("irn:rc73dbh7q0:iamcore:47g5l2ijc0::tenant/47g5l2ijc0")
-        expected_url = f"{self.expected_base_url}tenants/{tenant_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{tenant_irn.to_base64()}"
         responses.add(responses.DELETE, expected_url, status=204)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -185,7 +185,7 @@ class TestTenantClient:
     @responses.activate
     def test_get_issuer_success(self) -> None:
         """Test successful tenant issuer retrieval."""
-        expected_url = f"{self.expected_base_url}tenants/issuers"
+        expected_url = f"{self.expected_base_url}/issuers"
         issuer_response = {
             "data": [
                 {
@@ -227,7 +227,7 @@ class TestTenantClient:
     @responses.activate
     def test_search_tenant_success(self) -> None:
         """Test successful tenant search."""
-        expected_url = f"{self.expected_base_url}tenants"
+        expected_url = f"{self.expected_base_url}"
         tenants_response: dict[str, Any] = {
             "data": [
                 {
@@ -274,7 +274,7 @@ class TestTenantClient:
     @responses.activate
     def test_search_tenant_without_filter(self) -> None:
         """Test tenant search without filter parameters."""
-        expected_url = f"{self.expected_base_url}tenants"
+        expected_url = f"{self.expected_base_url}"
         tenants_response: dict[str, Any] = {"data": [], "count": 0, "page": 1, "pageSize": 10}
         responses.add(responses.GET, expected_url, json=tenants_response, status=200)
 
@@ -293,7 +293,7 @@ class TestTenantClient:
     @responses.activate
     def test_search_all_tenants_success(self) -> None:
         """Test successful search of all tenants with pagination."""
-        expected_url = f"{self.expected_base_url}tenants"
+        expected_url = f"{self.expected_base_url}"
         # First page response
         first_page_response = {
             "data": [
@@ -332,7 +332,7 @@ class TestTenantClient:
     @responses.activate
     def test_create_tenant_bad_request_error(self) -> None:
         """Test create_tenant raises IAMBedRequestException for 400 Bad Request."""
-        expected_url = f"{self.expected_base_url}tenants/issuer-types/iamcore"
+        expected_url = f"{self.expected_base_url}/issuer-types/iamcore"
         responses.add(
             responses.POST,
             expected_url,
@@ -352,7 +352,7 @@ class TestTenantClient:
     @responses.activate
     def test_create_tenant_unauthorized_error(self) -> None:
         """Test create_tenant raises IAMUnauthorizedException for 401 Unauthorized."""
-        expected_url = f"{self.expected_base_url}tenants/issuer-types/iamcore"
+        expected_url = f"{self.expected_base_url}/issuer-types/iamcore"
         responses.add(responses.POST, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -367,7 +367,7 @@ class TestTenantClient:
     @responses.activate
     def test_create_tenant_forbidden_error(self) -> None:
         """Test create_tenant raises IAMForbiddenException for 403 Forbidden."""
-        expected_url = f"{self.expected_base_url}tenants/issuer-types/iamcore"
+        expected_url = f"{self.expected_base_url}/issuer-types/iamcore"
         responses.add(
             responses.POST,
             expected_url,
@@ -387,7 +387,7 @@ class TestTenantClient:
     @responses.activate
     def test_create_tenant_conflict_error(self) -> None:
         """Test create_tenant raises IAMConflictException for 409 Conflict."""
-        expected_url = f"{self.expected_base_url}tenants/issuer-types/iamcore"
+        expected_url = f"{self.expected_base_url}/issuer-types/iamcore"
         responses.add(
             responses.POST, expected_url, json={"message": "Tenant with this name already exists"}, status=409
         )
@@ -405,7 +405,7 @@ class TestTenantClient:
     def test_update_tenant_not_found_error(self) -> None:
         """Test update_tenant raises IAMException for 404 Not Found."""
         tenant_irn = IRN.of("irn:rc73dbh7q0:iamcore:47g5l2ijc0::tenant/nonexistent")
-        expected_url = f"{self.expected_base_url}tenants/{tenant_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{tenant_irn.to_base64()}"
         responses.add(responses.PUT, expected_url, json={"message": "Tenant not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -421,7 +421,7 @@ class TestTenantClient:
     def test_update_tenant_unauthorized_error(self) -> None:
         """Test update_tenant raises IAMUnauthorizedException for 401 Unauthorized."""
         tenant_irn = IRN.of("irn:rc73dbh7q0:iamcore:47g5l2ijc0::tenant/47g5l2ijc0")
-        expected_url = f"{self.expected_base_url}tenants/{tenant_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{tenant_irn.to_base64()}"
         responses.add(responses.PUT, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -437,7 +437,7 @@ class TestTenantClient:
     def test_update_tenant_forbidden_error(self) -> None:
         """Test update_tenant raises IAMForbiddenException for 403 Forbidden."""
         tenant_irn = IRN.of("irn:rc73dbh7q0:iamcore:47g5l2ijc0::tenant/restricted")
-        expected_url = f"{self.expected_base_url}tenants/{tenant_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{tenant_irn.to_base64()}"
         responses.add(responses.PUT, expected_url, json={"message": "Access denied to update this tenant"}, status=403)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -453,7 +453,7 @@ class TestTenantClient:
     def test_delete_tenant_not_found_error(self) -> None:
         """Test delete_tenant raises IAMException for 404 Not Found."""
         tenant_irn = IRN.of("irn:rc73dbh7q0:iamcore:47g5l2ijc0::tenant/nonexistent")
-        expected_url = f"{self.expected_base_url}tenants/{tenant_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{tenant_irn.to_base64()}"
         responses.add(responses.DELETE, expected_url, json={"message": "Tenant not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -468,7 +468,7 @@ class TestTenantClient:
     def test_delete_tenant_unauthorized_error(self) -> None:
         """Test delete_tenant raises IAMUnauthorizedException for 401 Unauthorized."""
         tenant_irn = IRN.of("irn:rc73dbh7q0:iamcore:47g5l2ijc0::tenant/47g5l2ijc0")
-        expected_url = f"{self.expected_base_url}tenants/{tenant_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{tenant_irn.to_base64()}"
         responses.add(responses.DELETE, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -483,7 +483,7 @@ class TestTenantClient:
     def test_delete_tenant_forbidden_error(self) -> None:
         """Test delete_tenant raises IAMForbiddenException for 403 Forbidden."""
         tenant_irn = IRN.of("irn:rc73dbh7q0:iamcore:47g5l2ijc0::tenant/restricted")
-        expected_url = f"{self.expected_base_url}tenants/{tenant_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{tenant_irn.to_base64()}"
         responses.add(
             responses.DELETE, expected_url, json={"message": "Access denied to delete this tenant"}, status=403
         )
@@ -499,7 +499,7 @@ class TestTenantClient:
     @responses.activate
     def test_get_issuer_not_found_error(self) -> None:
         """Test get_issuer raises IAMException for 404 Not Found."""
-        expected_url = f"{self.expected_base_url}tenants/issuers"
+        expected_url = f"{self.expected_base_url}/issuers"
         responses.add(responses.GET, expected_url, json={"message": "Issuer not found"}, status=404)
 
         headers = {"Authorization": "Bearer token"}
@@ -514,7 +514,7 @@ class TestTenantClient:
     @responses.activate
     def test_get_issuer_unauthorized_error(self) -> None:
         """Test get_issuer raises IAMUnauthorizedException for 401 Unauthorized."""
-        expected_url = f"{self.expected_base_url}tenants/issuers"
+        expected_url = f"{self.expected_base_url}/issuers"
         responses.add(responses.GET, expected_url, json={"message": "Authentication required"}, status=401)
 
         headers = {"Authorization": "Bearer invalid_token"}
@@ -529,7 +529,7 @@ class TestTenantClient:
     @responses.activate
     def test_get_issuer_forbidden_error(self) -> None:
         """Test get_issuer raises IAMForbiddenException for 403 Forbidden."""
-        expected_url = f"{self.expected_base_url}tenants/issuers"
+        expected_url = f"{self.expected_base_url}/issuers"
         responses.add(responses.GET, expected_url, json={"message": "Access denied to issuer information"}, status=403)
 
         headers = {"Authorization": "Bearer token"}
@@ -544,7 +544,7 @@ class TestTenantClient:
     @responses.activate
     def test_search_tenant_unauthorized_error(self) -> None:
         """Test search_tenant raises IAMUnauthorizedException for 401 Unauthorized."""
-        expected_url = f"{self.expected_base_url}tenants"
+        expected_url = f"{self.expected_base_url}"
         responses.add(responses.GET, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -558,7 +558,7 @@ class TestTenantClient:
     @responses.activate
     def test_search_tenant_forbidden_error(self) -> None:
         """Test search_tenant raises IAMForbiddenException for 403 Forbidden."""
-        expected_url = f"{self.expected_base_url}tenants"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.GET, expected_url, json={"message": "Insufficient permissions to search tenants"}, status=403
         )
@@ -574,7 +574,7 @@ class TestTenantClient:
     @responses.activate
     def test_search_tenant_server_error(self) -> None:
         """Test search_tenant raises IAMException for 500 Internal Server Error."""
-        expected_url = f"{self.expected_base_url}tenants"
+        expected_url = f"{self.expected_base_url}"
         responses.add(responses.GET, expected_url, json={"message": "Internal server error occurred"}, status=500)
 
         auth_headers = {"Authorization": "Bearer token"}

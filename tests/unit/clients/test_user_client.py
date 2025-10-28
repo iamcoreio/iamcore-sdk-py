@@ -31,7 +31,7 @@ class TestUserClient:
     def setup_class(cls) -> None:
         """Set up the test class with a client instance."""
         cls.client = Client(base_url=BASE_URL)
-        cls.expected_base_url: str = f"{BASE_URL}/api/v1/"
+        cls.expected_base_url: str = f"{BASE_URL}/api/v1/users"
 
     def test_user_client_initialization(self) -> None:
         """Test User Client initialization."""
@@ -42,7 +42,7 @@ class TestUserClient:
     @responses.activate
     def test_create_user_success(self) -> None:
         """Test successful user creation."""
-        expected_url = f"{self.expected_base_url}users"
+        expected_url = f"{self.expected_base_url}"
         user_response = {
             "data": {
                 "id": "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo6OmFwcGxpY2F0aW9uL215YXBw",
@@ -117,7 +117,7 @@ class TestUserClient:
     @responses.activate
     def test_create_user_minimal_params(self) -> None:
         """Test user creation with minimal parameters."""
-        expected_url = f"{self.expected_base_url}users"
+        expected_url = f"{self.expected_base_url}"
         user_response = {
             "data": {
                 "id": "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo6OmFwcGxpY2F0aW9uL215YXBw",
@@ -168,7 +168,7 @@ class TestUserClient:
     @responses.activate
     def test_get_user_me_success(self) -> None:
         """Test successful retrieval of current user."""
-        expected_url = f"{self.expected_base_url}users/me"
+        expected_url = f"{self.expected_base_url}/me"
         user_response = {
             "data": {
                 "id": "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo6OmFwcGxpY2F0aW9uL215YXBw",
@@ -209,7 +209,7 @@ class TestUserClient:
     @responses.activate
     def test_get_irn_success(self) -> None:
         """Test successful retrieval of current user IRN."""
-        expected_url = f"{self.expected_base_url}users/me/irn"
+        expected_url = f"{self.expected_base_url}/me/irn"
         irn_response = {"data": "irn:rc73dbh7q0:iamcore:::user/johndoe"}
         responses.add(responses.GET, expected_url, json=irn_response, status=200)
 
@@ -230,7 +230,7 @@ class TestUserClient:
     def test_update_user_success(self) -> None:
         """Test successful user update."""
         user_irn = IRN.of("irn:rc73dbh7q0:iamcore:::user/johndoe")
-        expected_url = f"{self.expected_base_url}users/{user_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{user_irn.to_base64()}"
         responses.add(responses.PATCH, expected_url, status=204)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -263,7 +263,7 @@ class TestUserClient:
     def test_delete_user_success(self) -> None:
         """Test successful user deletion."""
         user_irn = IRN.of("irn:rc73dbh7q0:iamcore:::user/johndoe")
-        expected_url = f"{self.expected_base_url}users/{user_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{user_irn.to_base64()}"
         responses.add(responses.DELETE, expected_url, status=204)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -281,7 +281,7 @@ class TestUserClient:
     def test_user_attach_policies_success(self) -> None:
         """Test successful policy attachment to user."""
         user_irn = IRN.of("irn:rc73dbh7q0:iamcore:::user/johndoe")
-        expected_url = f"{self.expected_base_url}users/{user_irn.to_base64()}/policies/attach"
+        expected_url = f"{self.expected_base_url}/{user_irn.to_base64()}/policies/attach"
         responses.add(responses.PUT, expected_url, status=204)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -306,7 +306,7 @@ class TestUserClient:
     def test_user_add_groups_success(self) -> None:
         """Test successful group addition to user."""
         user_irn = IRN.of("irn:rc73dbh7q0:iamcore:::user/johndoe")
-        expected_url = f"{self.expected_base_url}users/{user_irn.to_base64()}/groups/add"
+        expected_url = f"{self.expected_base_url}/{user_irn.to_base64()}/groups/add"
         responses.add(responses.POST, expected_url, status=204)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -330,7 +330,7 @@ class TestUserClient:
     @responses.activate
     def test_search_users_success(self) -> None:
         """Test successful user search."""
-        expected_url = f"{self.expected_base_url}users"
+        expected_url = f"{self.expected_base_url}"
         users_response: dict[str, Any] = {
             "data": [
                 {
@@ -386,7 +386,7 @@ class TestUserClient:
     @responses.activate
     def test_search_users_without_filter(self) -> None:
         """Test user search without filter parameters."""
-        expected_url = f"{self.expected_base_url}users"
+        expected_url = f"{self.expected_base_url}"
         users_response: dict[str, Any] = {"data": [], "count": 0, "page": 1, "pageSize": 10}
         responses.add(responses.GET, expected_url, json=users_response, status=200)
 
@@ -405,7 +405,7 @@ class TestUserClient:
     @responses.activate
     def test_search_all_users_success(self) -> None:
         """Test successful search of all users with pagination."""
-        expected_url = f"{self.expected_base_url}users"
+        expected_url = f"{self.expected_base_url}"
         # First page response
         first_page_response = {
             "data": [
@@ -449,7 +449,7 @@ class TestUserClient:
     @responses.activate
     def test_create_user_bad_request_error(self) -> None:
         """Test create_user raises IAMBedRequestException for 400 Bad Request."""
-        expected_url = f"{self.expected_base_url}users"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.POST,
             expected_url,
@@ -474,7 +474,7 @@ class TestUserClient:
     @responses.activate
     def test_create_user_unauthorized_error(self) -> None:
         """Test create_user raises IAMUnauthorizedException for 401 Unauthorized."""
-        expected_url = f"{self.expected_base_url}users"
+        expected_url = f"{self.expected_base_url}"
         responses.add(responses.POST, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -494,7 +494,7 @@ class TestUserClient:
     @responses.activate
     def test_create_user_forbidden_error(self) -> None:
         """Test create_user raises IAMForbiddenException for 403 Forbidden."""
-        expected_url = f"{self.expected_base_url}users"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.POST,
             expected_url,
@@ -519,7 +519,7 @@ class TestUserClient:
     @responses.activate
     def test_create_user_conflict_error(self) -> None:
         """Test create_user raises IAMConflictException for 409 Conflict."""
-        expected_url = f"{self.expected_base_url}users"
+        expected_url = f"{self.expected_base_url}"
         responses.add(responses.POST, expected_url, json={"message": "User with this email already exists"}, status=409)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -539,7 +539,7 @@ class TestUserClient:
     @responses.activate
     def test_get_user_me_unauthorized_error(self) -> None:
         """Test get_user_me raises IAMUnauthorizedException for 401 Unauthorized."""
-        expected_url = f"{self.expected_base_url}users/me"
+        expected_url = f"{self.expected_base_url}/me"
         responses.add(responses.GET, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -554,7 +554,7 @@ class TestUserClient:
     def test_update_user_not_found_error(self) -> None:
         """Test update_user raises IAMException for 404 Not Found."""
         user_irn = IRN.of("irn:rc73dbh7q0:iamcore:::user/nonexistent")
-        expected_url = f"{self.expected_base_url}users/{user_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{user_irn.to_base64()}"
         responses.add(responses.PATCH, expected_url, json={"message": "User not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -570,7 +570,7 @@ class TestUserClient:
     def test_delete_user_not_found_error(self) -> None:
         """Test delete_user raises IAMException for 404 Not Found."""
         user_irn = IRN.of("irn:rc73dbh7q0:iamcore:::user/nonexistent")
-        expected_url = f"{self.expected_base_url}users/{user_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{user_irn.to_base64()}"
         responses.add(responses.DELETE, expected_url, json={"message": "User not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -585,7 +585,7 @@ class TestUserClient:
     def test_user_attach_policies_bad_request_error(self) -> None:
         """Test user_attach_policies raises IAMBedRequestException for 400 Bad Request."""
         user_irn = IRN.of("irn:rc73dbh7q0:iamcore:::user/johndoe")
-        expected_url = f"{self.expected_base_url}users/{user_irn.to_base64()}/policies/attach"
+        expected_url = f"{self.expected_base_url}/{user_irn.to_base64()}/policies/attach"
         responses.add(
             responses.PUT,
             expected_url,
@@ -606,7 +606,7 @@ class TestUserClient:
     def test_user_add_groups_not_found_error(self) -> None:
         """Test user_add_groups raises IAMException for 404 Not Found."""
         user_irn = IRN.of("irn:rc73dbh7q0:iamcore:::user/nonexistent")
-        expected_url = f"{self.expected_base_url}users/{user_irn.to_base64()}/groups/add"
+        expected_url = f"{self.expected_base_url}/{user_irn.to_base64()}/groups/add"
         responses.add(responses.POST, expected_url, json={"message": "User not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -621,7 +621,7 @@ class TestUserClient:
     @responses.activate
     def test_search_users_unauthorized_error(self) -> None:
         """Test search_users raises IAMUnauthorizedException for 401 Unauthorized."""
-        expected_url = f"{self.expected_base_url}users"
+        expected_url = f"{self.expected_base_url}"
         responses.add(responses.GET, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -635,7 +635,7 @@ class TestUserClient:
     @responses.activate
     def test_search_users_forbidden_error(self) -> None:
         """Test search_users raises IAMForbiddenException for 403 Forbidden."""
-        expected_url = f"{self.expected_base_url}users"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.GET, expected_url, json={"message": "Insufficient permissions to search users"}, status=403
         )

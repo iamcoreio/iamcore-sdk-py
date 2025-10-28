@@ -30,7 +30,7 @@ class TestGroupClient:
     def setup_class(cls) -> None:
         """Set up the test class with a client instance."""
         cls.client = Client(base_url=BASE_URL)
-        cls.expected_base_url: str = f"{BASE_URL}/api/v1/"
+        cls.expected_base_url: str = f"{BASE_URL}/api/v1/groups"
 
     def test_group_client_initialization(self) -> None:
         """Test Group Client initialization."""
@@ -41,7 +41,7 @@ class TestGroupClient:
     @responses.activate
     def test_create_group_success(self) -> None:
         """Test successful group creation."""
-        expected_url = f"{self.expected_base_url}groups"
+        expected_url = f"{self.expected_base_url}"
         group_response = {
             "data": {
                 "id": "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0YXRjaWNuaXNnOjpncm91cC9kZXYvamF2YQ==",
@@ -100,7 +100,7 @@ class TestGroupClient:
     @responses.activate
     def test_create_group_minimal_params(self) -> None:
         """Test group creation with minimal parameters."""
-        expected_url = f"{self.expected_base_url}groups"
+        expected_url = f"{self.expected_base_url}"
         group_response = {
             "data": {
                 "id": "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0YXRjaWNuaXNnOjpncm91cC9kZXYvamF2YQ==",
@@ -138,7 +138,7 @@ class TestGroupClient:
     def test_delete_group_success(self) -> None:
         """Test successful group deletion."""
         group_irn = IRN.of("irn:rc73dbh7q0:iamcore:4atcicnisg::group/dev/java")
-        expected_url = f"{self.expected_base_url}groups/{group_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{group_irn.to_base64()}"
         responses.add(responses.DELETE, expected_url, status=204)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -156,7 +156,7 @@ class TestGroupClient:
     def test_group_attach_policies_success(self) -> None:
         """Test successful policy attachment to group."""
         group_irn = IRN.of("irn:rc73dbh7q0:iamcore:4atcicnisg::group/dev/java")
-        expected_url = f"{self.expected_base_url}groups/{group_irn.to_base64()}/policies/attach"
+        expected_url = f"{self.expected_base_url}/{group_irn.to_base64()}/policies/attach"
         responses.add(responses.PUT, expected_url, status=204)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -181,7 +181,7 @@ class TestGroupClient:
     def test_group_add_members_success(self) -> None:
         """Test successful member addition to group."""
         group_irn = IRN.of("irn:rc73dbh7q0:iamcore:4atcicnisg::group/dev/java")
-        expected_url = f"{self.expected_base_url}groups/{group_irn.to_base64()}/members/add"
+        expected_url = f"{self.expected_base_url}/{group_irn.to_base64()}/members/add"
         responses.add(responses.POST, expected_url, status=204)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -205,7 +205,7 @@ class TestGroupClient:
     @responses.activate
     def test_search_group_success(self) -> None:
         """Test successful group search."""
-        expected_url = f"{self.expected_base_url}groups"
+        expected_url = f"{self.expected_base_url}"
         groups_response: dict[str, Any] = {
             "data": [
                 {
@@ -252,7 +252,7 @@ class TestGroupClient:
     @responses.activate
     def test_search_group_without_filter(self) -> None:
         """Test group search without filter parameters."""
-        expected_url = f"{self.expected_base_url}groups"
+        expected_url = f"{self.expected_base_url}"
         groups_response: dict[str, Any] = {"data": [], "count": 0, "page": 1, "pageSize": 10}
         responses.add(responses.GET, expected_url, json=groups_response, status=200)
 
@@ -271,7 +271,7 @@ class TestGroupClient:
     @responses.activate
     def test_search_all_groups_success(self) -> None:
         """Test successful search of all groups with pagination."""
-        expected_url = f"{self.expected_base_url}groups"
+        expected_url = f"{self.expected_base_url}"
         # First page response
         first_page_response = {
             "data": [
@@ -310,7 +310,7 @@ class TestGroupClient:
     @responses.activate
     def test_create_group_bad_request_error(self) -> None:
         """Test create_group raises IAMBedRequestException for 400 Bad Request."""
-        expected_url = f"{self.expected_base_url}groups"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.POST,
             expected_url,
@@ -330,7 +330,7 @@ class TestGroupClient:
     @responses.activate
     def test_create_group_unauthorized_error(self) -> None:
         """Test create_group raises IAMUnauthorizedException for 401 Unauthorized."""
-        expected_url = f"{self.expected_base_url}groups"
+        expected_url = f"{self.expected_base_url}"
         responses.add(responses.POST, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -345,7 +345,7 @@ class TestGroupClient:
     @responses.activate
     def test_create_group_forbidden_error(self) -> None:
         """Test create_group raises IAMForbiddenException for 403 Forbidden."""
-        expected_url = f"{self.expected_base_url}groups"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.POST,
             expected_url,
@@ -365,7 +365,7 @@ class TestGroupClient:
     @responses.activate
     def test_create_group_conflict_error(self) -> None:
         """Test create_group raises IAMConflictException for 409 Conflict."""
-        expected_url = f"{self.expected_base_url}groups"
+        expected_url = f"{self.expected_base_url}"
         responses.add(responses.POST, expected_url, json={"message": "Group with this name already exists"}, status=409)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -381,7 +381,7 @@ class TestGroupClient:
     def test_delete_group_not_found_error(self) -> None:
         """Test delete_group raises IAMException for 404 Not Found."""
         group_irn = IRN.of("irn:rc73dbh7q0:iamcore:4atcicnisg::group/nonexistent")
-        expected_url = f"{self.expected_base_url}groups/{group_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{group_irn.to_base64()}"
         responses.add(responses.DELETE, expected_url, json={"message": "Group not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -396,7 +396,7 @@ class TestGroupClient:
     def test_delete_group_unauthorized_error(self) -> None:
         """Test delete_group raises IAMUnauthorizedException for 401 Unauthorized."""
         group_irn = IRN.of("irn:rc73dbh7q0:iamcore:4atcicnisg::group/dev/java")
-        expected_url = f"{self.expected_base_url}groups/{group_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{group_irn.to_base64()}"
         responses.add(responses.DELETE, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -411,7 +411,7 @@ class TestGroupClient:
     def test_delete_group_forbidden_error(self) -> None:
         """Test delete_group raises IAMForbiddenException for 403 Forbidden."""
         group_irn = IRN.of("irn:rc73dbh7q0:iamcore:4atcicnisg::group/restricted")
-        expected_url = f"{self.expected_base_url}groups/{group_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{group_irn.to_base64()}"
         responses.add(
             responses.DELETE, expected_url, json={"message": "Access denied to delete this group"}, status=403
         )
@@ -428,7 +428,7 @@ class TestGroupClient:
     def test_group_attach_policies_bad_request_error(self) -> None:
         """Test group_attach_policies raises IAMBedRequestException for 400 Bad Request."""
         group_irn = IRN.of("irn:rc73dbh7q0:iamcore:4atcicnisg::group/dev/java")
-        expected_url = f"{self.expected_base_url}groups/{group_irn.to_base64()}/policies/attach"
+        expected_url = f"{self.expected_base_url}/{group_irn.to_base64()}/policies/attach"
         responses.add(
             responses.PUT,
             expected_url,
@@ -449,7 +449,7 @@ class TestGroupClient:
     def test_group_attach_policies_not_found_error(self) -> None:
         """Test group_attach_policies raises IAMException for 404 Not Found."""
         group_irn = IRN.of("irn:rc73dbh7q0:iamcore:4atcicnisg::group/nonexistent")
-        expected_url = f"{self.expected_base_url}groups/{group_irn.to_base64()}/policies/attach"
+        expected_url = f"{self.expected_base_url}/{group_irn.to_base64()}/policies/attach"
         responses.add(responses.PUT, expected_url, json={"message": "Group not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -465,7 +465,7 @@ class TestGroupClient:
     def test_group_add_members_bad_request_error(self) -> None:
         """Test group_add_members raises IAMBedRequestException for 400 Bad Request."""
         group_irn = IRN.of("irn:rc73dbh7q0:iamcore:4atcicnisg::group/dev/java")
-        expected_url = f"{self.expected_base_url}groups/{group_irn.to_base64()}/members/add"
+        expected_url = f"{self.expected_base_url}/{group_irn.to_base64()}/members/add"
         responses.add(
             responses.POST,
             expected_url,
@@ -486,7 +486,7 @@ class TestGroupClient:
     def test_group_add_members_not_found_error(self) -> None:
         """Test group_add_members raises IAMException for 404 Not Found."""
         group_irn = IRN.of("irn:rc73dbh7q0:iamcore:4atcicnisg::group/nonexistent")
-        expected_url = f"{self.expected_base_url}groups/{group_irn.to_base64()}/members/add"
+        expected_url = f"{self.expected_base_url}/{group_irn.to_base64()}/members/add"
         responses.add(responses.POST, expected_url, json={"message": "Group not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -501,7 +501,7 @@ class TestGroupClient:
     @responses.activate
     def test_search_group_unauthorized_error(self) -> None:
         """Test search_group raises IAMUnauthorizedException for 401 Unauthorized."""
-        expected_url = f"{self.expected_base_url}groups"
+        expected_url = f"{self.expected_base_url}"
         responses.add(responses.GET, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -515,7 +515,7 @@ class TestGroupClient:
     @responses.activate
     def test_search_group_forbidden_error(self) -> None:
         """Test search_group raises IAMForbiddenException for 403 Forbidden."""
-        expected_url = f"{self.expected_base_url}groups"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.GET, expected_url, json={"message": "Insufficient permissions to search groups"}, status=403
         )
@@ -531,7 +531,7 @@ class TestGroupClient:
     @responses.activate
     def test_search_group_server_error(self) -> None:
         """Test search_group raises IAMException for 500 Internal Server Error."""
-        expected_url = f"{self.expected_base_url}groups"
+        expected_url = f"{self.expected_base_url}"
         responses.add(responses.GET, expected_url, json={"message": "Internal server error occurred"}, status=500)
 
         auth_headers = {"Authorization": "Bearer token"}

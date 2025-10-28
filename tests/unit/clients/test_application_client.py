@@ -30,7 +30,7 @@ class TestApplicationClient:
     def setup_class(cls) -> None:
         """Set up the test class with a client instance."""
         cls.client = Client(base_url=BASE_URL)
-        cls.expected_base_url: str = f"{BASE_URL}/api/v1/"
+        cls.expected_base_url: str = f"{BASE_URL}/api/v1/{cls.client.BASE_PATH}"
 
     def test_application_client_initialization(self) -> None:
         """Test Application Client initialization."""
@@ -41,7 +41,7 @@ class TestApplicationClient:
     @responses.activate
     def test_create_application_success(self) -> None:
         """Test successful application creation."""
-        expected_url = f"{self.expected_base_url}applications"
+        expected_url = f"{self.expected_base_url}"
         application_response = {
             "data": {
                 "id": "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo6OmFwcGxpY2F0aW9uL215YXBw",
@@ -83,7 +83,7 @@ class TestApplicationClient:
     @responses.activate
     def test_create_application_minimal_params(self) -> None:
         """Test application creation with minimal parameters."""
-        expected_url = f"{self.expected_base_url}applications"
+        expected_url = f"{self.expected_base_url}"
         application_response = {
             "data": {
                 "id": "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo6OmFwcGxpY2F0aW9uL215YXBw",
@@ -114,7 +114,7 @@ class TestApplicationClient:
     def test_get_application_success(self) -> None:
         """Test successful application retrieval."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
-        expected_url = f"{self.expected_base_url}applications/{application_irn!s}"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}"
         application_response = {
             "data": {
                 "id": "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo6OmFwcGxpY2F0aW9uL215YXBw",
@@ -147,7 +147,7 @@ class TestApplicationClient:
     def test_application_attach_policies_success(self) -> None:
         """Test successful policy attachment to application."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
-        expected_url = f"{self.expected_base_url}applications/{application_irn.to_base64()}/policies/attach"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/policies/attach"
         responses.add(responses.POST, expected_url, status=204)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -171,7 +171,7 @@ class TestApplicationClient:
     @responses.activate
     def test_search_application_success(self) -> None:
         """Test successful application search."""
-        expected_url = f"{self.expected_base_url}applications"
+        expected_url = f"{self.expected_base_url}"
         applications_response: dict[str, Any] = {
             "data": [
                 {
@@ -214,7 +214,7 @@ class TestApplicationClient:
     @responses.activate
     def test_search_application_without_filter(self) -> None:
         """Test application search without filter parameters."""
-        expected_url = f"{self.expected_base_url}applications"
+        expected_url = f"{self.expected_base_url}"
         applications_response: dict[str, Any] = {"data": [], "count": 0, "page": 1, "pageSize": 10}
         responses.add(responses.GET, expected_url, json=applications_response, status=200)
 
@@ -233,7 +233,7 @@ class TestApplicationClient:
     @responses.activate
     def test_search_all_applications_success(self) -> None:
         """Test successful search of all applications with pagination."""
-        expected_url = f"{self.expected_base_url}applications"
+        expected_url = f"{self.expected_base_url}"
         # First page response
         first_page_response = {
             "data": [
@@ -268,7 +268,7 @@ class TestApplicationClient:
     @responses.activate
     def test_create_application_bad_request_error(self) -> None:
         """Test create_application raises IAMBedRequestException for 400 Bad Request."""
-        expected_url = f"{self.expected_base_url}applications"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.POST,
             expected_url,
@@ -288,7 +288,7 @@ class TestApplicationClient:
     @responses.activate
     def test_create_application_unauthorized_error(self) -> None:
         """Test create_application raises IAMUnauthorizedException for 401 Unauthorized."""
-        expected_url = f"{self.expected_base_url}applications"
+        expected_url = f"{self.expected_base_url}"
         responses.add(responses.POST, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -303,7 +303,7 @@ class TestApplicationClient:
     @responses.activate
     def test_create_application_forbidden_error(self) -> None:
         """Test create_application raises IAMForbiddenException for 403 Forbidden."""
-        expected_url = f"{self.expected_base_url}applications"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.POST,
             expected_url,
@@ -323,7 +323,7 @@ class TestApplicationClient:
     @responses.activate
     def test_create_application_conflict_error(self) -> None:
         """Test create_application raises IAMConflictException for 409 Conflict."""
-        expected_url = f"{self.expected_base_url}applications"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.POST, expected_url, json={"message": "Application with this name already exists"}, status=409
         )
@@ -340,7 +340,7 @@ class TestApplicationClient:
     @responses.activate
     def test_create_application_validation_error(self) -> None:
         """Test create_application raises IAMException for 400 Bad Request."""
-        expected_url = f"{self.expected_base_url}applications"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.POST,
             expected_url,
@@ -361,7 +361,7 @@ class TestApplicationClient:
     def test_get_application_not_found_error(self) -> None:
         """Test get_application raises IAMException for 404 Not Found."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/nonexistent")
-        expected_url = f"{self.expected_base_url}applications/{application_irn!s}"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}"
         responses.add(responses.GET, expected_url, json={"message": "Application not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -376,7 +376,7 @@ class TestApplicationClient:
     def test_get_application_unauthorized_error(self) -> None:
         """Test get_application raises IAMUnauthorizedException for 401 Unauthorized."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
-        expected_url = f"{self.expected_base_url}applications/{application_irn!s}"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}"
         responses.add(responses.GET, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -391,7 +391,7 @@ class TestApplicationClient:
     def test_get_application_forbidden_error(self) -> None:
         """Test get_application raises IAMForbiddenException for 403 Forbidden."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/restricted")
-        expected_url = f"{self.expected_base_url}applications/{application_irn!s}"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}"
         responses.add(responses.GET, expected_url, json={"message": "Access denied to this application"}, status=403)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -406,7 +406,7 @@ class TestApplicationClient:
     def test_application_attach_policies_bad_request_error(self) -> None:
         """Test application_attach_policies raises IAMBedRequestException for 400 Bad Request."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
-        expected_url = f"{self.expected_base_url}applications/{application_irn.to_base64()}/policies/attach"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/policies/attach"
         responses.add(
             responses.POST,
             expected_url,
@@ -427,7 +427,7 @@ class TestApplicationClient:
     def test_application_attach_policies_not_found_error(self) -> None:
         """Test application_attach_policies raises IAMException for 404 Not Found."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/nonexistent")
-        expected_url = f"{self.expected_base_url}applications/{application_irn.to_base64()}/policies/attach"
+        expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/policies/attach"
         responses.add(responses.POST, expected_url, json={"message": "Application not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -442,7 +442,7 @@ class TestApplicationClient:
     @responses.activate
     def test_search_application_unauthorized_error(self) -> None:
         """Test search_application raises IAMUnauthorizedException for 401 Unauthorized."""
-        expected_url = f"{self.expected_base_url}applications"
+        expected_url = f"{self.expected_base_url}"
         responses.add(responses.GET, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -456,7 +456,7 @@ class TestApplicationClient:
     @responses.activate
     def test_search_application_forbidden_error(self) -> None:
         """Test search_application raises IAMForbiddenException for 403 Forbidden."""
-        expected_url = f"{self.expected_base_url}applications"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.GET, expected_url, json={"message": "Insufficient permissions to search applications"}, status=403
         )
@@ -472,7 +472,7 @@ class TestApplicationClient:
     @responses.activate
     def test_search_application_server_error(self) -> None:
         """Test search_application raises IAMException for 500 Internal Server Error."""
-        expected_url = f"{self.expected_base_url}applications"
+        expected_url = f"{self.expected_base_url}"
         responses.add(responses.GET, expected_url, json={"message": "Internal server error occurred"}, status=500)
 
         auth_headers = {"Authorization": "Bearer token"}

@@ -31,7 +31,7 @@ class TestResourceClient:
     def setup_class(cls) -> None:
         """Set up the test class with a client instance."""
         cls.client = Client(base_url=BASE_URL)
-        cls.expected_base_url: str = f"{BASE_URL}/api/v1/"
+        cls.expected_base_url: str = f"{BASE_URL}/api/v1/resources"
 
     def test_resource_client_initialization(self) -> None:
         """Test Resource Client initialization."""
@@ -42,7 +42,7 @@ class TestResourceClient:
     @responses.activate
     def test_create_resource_success(self) -> None:
         """Test successful resource creation."""
-        expected_url = f"{self.expected_base_url}resources"
+        expected_url = f"{self.expected_base_url}"
         resource_response = {
             "data": {
                 "id": "aXJuOnJjNzNkYmg3cTA6bXlhcHA6NGF0Y2ljbmlzZzo6ZGV2aWNlL2Rldi83ZTFlZGFkNS03ODQxLTRkMzgtYmRmMS1iZGM1NzViMGU5ODk=",
@@ -122,7 +122,7 @@ class TestResourceClient:
     @responses.activate
     def test_create_resource_minimal_params(self) -> None:
         """Test resource creation with minimal parameters."""
-        expected_url = f"{self.expected_base_url}resources"
+        expected_url = f"{self.expected_base_url}"
         resource_response: dict[str, Any] = {
             "data": {
                 "id": "aXJuOnJjNzNkYmg3cTA6bXlhcHA6NGF0Y2ljbmlzZzo6ZGV2aWNlL2Rldi83ZTFlZGFkNS03ODQxLTRkMzgtYmRmMS1iZGM1NzViMGU5ODk=",
@@ -172,7 +172,7 @@ class TestResourceClient:
     def test_update_resource_success(self) -> None:
         """Test successful resource update."""
         resource_irn = IRN.of("irn:rc73dbh7q0:myapp:4atcicnisg::device/dev/7e1edad5-7841-4d38-bdf1-bdc575b0e989")
-        expected_url = f"{self.expected_base_url}resources/{resource_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{resource_irn.to_base64()}"
         responses.add(responses.PATCH, expected_url, status=204)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -207,7 +207,7 @@ class TestResourceClient:
     def test_update_resource_minimal_params(self) -> None:
         """Test resource update with minimal parameters."""
         resource_irn = IRN.of("irn:rc73dbh7q0:myapp:4atcicnisg::device/dev/7e1edad5-7841-4d38-bdf1-bdc575b0e989")
-        expected_url = f"{self.expected_base_url}resources/{resource_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{resource_irn.to_base64()}"
         responses.add(responses.PATCH, expected_url, status=204)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -229,7 +229,7 @@ class TestResourceClient:
     def test_delete_resource_success(self) -> None:
         """Test successful resource deletion."""
         resource_irn = IRN.of("irn:rc73dbh7q0:myapp:4atcicnisg::device/dev/7e1edad5-7841-4d38-bdf1-bdc575b0e989")
-        expected_url = f"{self.expected_base_url}resources/{resource_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{resource_irn.to_base64()}"
         responses.add(responses.DELETE, expected_url, status=204)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -246,7 +246,7 @@ class TestResourceClient:
     @responses.activate
     def test_delete_resources_success(self) -> None:
         """Test successful bulk resource deletion."""
-        expected_url = f"{self.expected_base_url}resources/delete"
+        expected_url = f"{self.expected_base_url}/delete"
         responses.add(responses.POST, expected_url, status=204)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -274,7 +274,7 @@ class TestResourceClient:
     @responses.activate
     def test_search_resource_success(self) -> None:
         """Test successful resource search."""
-        expected_url = f"{self.expected_base_url}resources"
+        expected_url = f"{self.expected_base_url}"
         resources_response: dict[str, Any] = {
             "data": [
                 {
@@ -325,7 +325,7 @@ class TestResourceClient:
     @responses.activate
     def test_search_resource_without_filter(self) -> None:
         """Test resource search without filter parameters."""
-        expected_url = f"{self.expected_base_url}resources"
+        expected_url = f"{self.expected_base_url}"
         resources_response: dict[str, Any] = {"data": [], "count": 0, "page": 1, "pageSize": 10}
         responses.add(responses.GET, expected_url, json=resources_response, status=200)
 
@@ -344,7 +344,7 @@ class TestResourceClient:
     @responses.activate
     def test_search_all_resources_success(self) -> None:
         """Test successful search of all resources with pagination."""
-        expected_url = f"{self.expected_base_url}resources"
+        expected_url = f"{self.expected_base_url}"
         # First page response
         first_page_response = {
             "data": [
@@ -387,7 +387,7 @@ class TestResourceClient:
     @responses.activate
     def test_create_resource_bad_request_error(self) -> None:
         """Test create_resource raises IAMBedRequestException for 400 Bad Request."""
-        expected_url = f"{self.expected_base_url}resources"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.POST,
             expected_url,
@@ -409,7 +409,7 @@ class TestResourceClient:
     @responses.activate
     def test_create_resource_unauthorized_error(self) -> None:
         """Test create_resource raises IAMUnauthorizedException for 401 Unauthorized."""
-        expected_url = f"{self.expected_base_url}resources"
+        expected_url = f"{self.expected_base_url}"
         responses.add(responses.POST, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -424,7 +424,7 @@ class TestResourceClient:
     @responses.activate
     def test_create_resource_forbidden_error(self) -> None:
         """Test create_resource raises IAMForbiddenException for 403 Forbidden."""
-        expected_url = f"{self.expected_base_url}resources"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.POST,
             expected_url,
@@ -444,7 +444,7 @@ class TestResourceClient:
     @responses.activate
     def test_create_resource_conflict_error(self) -> None:
         """Test create_resource raises IAMConflictException for 409 Conflict."""
-        expected_url = f"{self.expected_base_url}resources"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.POST, expected_url, json={"message": "Resource with this name already exists"}, status=409
         )
@@ -464,7 +464,7 @@ class TestResourceClient:
     def test_update_resource_not_found_error(self) -> None:
         """Test update_resource raises IAMException for 404 Not Found."""
         resource_irn = IRN.of("irn:rc73dbh7q0:myapp:4atcicnisg::device/dev/nonexistent")
-        expected_url = f"{self.expected_base_url}resources/{resource_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{resource_irn.to_base64()}"
         responses.add(responses.PATCH, expected_url, json={"message": "Resource not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -480,7 +480,7 @@ class TestResourceClient:
     def test_update_resource_unauthorized_error(self) -> None:
         """Test update_resource raises IAMUnauthorizedException for 401 Unauthorized."""
         resource_irn = IRN.of("irn:rc73dbh7q0:myapp:4atcicnisg::device/dev/test")
-        expected_url = f"{self.expected_base_url}resources/{resource_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{resource_irn.to_base64()}"
         responses.add(responses.PATCH, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -496,7 +496,7 @@ class TestResourceClient:
     def test_update_resource_forbidden_error(self) -> None:
         """Test update_resource raises IAMForbiddenException for 403 Forbidden."""
         resource_irn = IRN.of("irn:rc73dbh7q0:myapp:4atcicnisg::device/dev/restricted")
-        expected_url = f"{self.expected_base_url}resources/{resource_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{resource_irn.to_base64()}"
         responses.add(
             responses.PATCH, expected_url, json={"message": "Access denied to update this resource"}, status=403
         )
@@ -514,7 +514,7 @@ class TestResourceClient:
     def test_delete_resource_not_found_error(self) -> None:
         """Test delete_resource raises IAMException for 404 Not Found."""
         resource_irn = IRN.of("irn:rc73dbh7q0:myapp:4atcicnisg::device/dev/nonexistent")
-        expected_url = f"{self.expected_base_url}resources/{resource_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{resource_irn.to_base64()}"
         responses.add(responses.DELETE, expected_url, json={"message": "Resource not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -529,7 +529,7 @@ class TestResourceClient:
     def test_delete_resource_unauthorized_error(self) -> None:
         """Test delete_resource raises IAMUnauthorizedException for 401 Unauthorized."""
         resource_irn = IRN.of("irn:rc73dbh7q0:myapp:4atcicnisg::device/dev/test")
-        expected_url = f"{self.expected_base_url}resources/{resource_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{resource_irn.to_base64()}"
         responses.add(responses.DELETE, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -544,7 +544,7 @@ class TestResourceClient:
     def test_delete_resource_forbidden_error(self) -> None:
         """Test delete_resource raises IAMForbiddenException for 403 Forbidden."""
         resource_irn = IRN.of("irn:rc73dbh7q0:myapp:4atcicnisg::device/dev/restricted")
-        expected_url = f"{self.expected_base_url}resources/{resource_irn.to_base64()}"
+        expected_url = f"{self.expected_base_url}/{resource_irn.to_base64()}"
         responses.add(
             responses.DELETE, expected_url, json={"message": "Access denied to delete this resource"}, status=403
         )
@@ -560,7 +560,7 @@ class TestResourceClient:
     @responses.activate
     def test_delete_resources_bad_request_error(self) -> None:
         """Test delete_resources raises IAMBedRequestException for 400 Bad Request."""
-        expected_url = f"{self.expected_base_url}resources/delete"
+        expected_url = f"{self.expected_base_url}/delete"
         responses.add(
             responses.POST,
             expected_url,
@@ -580,7 +580,7 @@ class TestResourceClient:
     @responses.activate
     def test_delete_resources_not_found_error(self) -> None:
         """Test delete_resources raises IAMException for 404 Not Found."""
-        expected_url = f"{self.expected_base_url}resources/delete"
+        expected_url = f"{self.expected_base_url}/delete"
         responses.add(responses.POST, expected_url, json={"message": "Some resources not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
@@ -595,7 +595,7 @@ class TestResourceClient:
     @responses.activate
     def test_search_resource_unauthorized_error(self) -> None:
         """Test search_resource raises IAMUnauthorizedException for 401 Unauthorized."""
-        expected_url = f"{self.expected_base_url}resources"
+        expected_url = f"{self.expected_base_url}"
         responses.add(responses.GET, expected_url, json={"message": "Authentication required"}, status=401)
 
         auth_headers = {"Authorization": "Bearer invalid_token"}
@@ -609,7 +609,7 @@ class TestResourceClient:
     @responses.activate
     def test_search_resource_forbidden_error(self) -> None:
         """Test search_resource raises IAMForbiddenException for 403 Forbidden."""
-        expected_url = f"{self.expected_base_url}resources"
+        expected_url = f"{self.expected_base_url}"
         responses.add(
             responses.GET, expected_url, json={"message": "Insufficient permissions to search resources"}, status=403
         )
@@ -625,7 +625,7 @@ class TestResourceClient:
     @responses.activate
     def test_search_resource_server_error(self) -> None:
         """Test search_resource raises IAMException for 500 Internal Server Error."""
-        expected_url = f"{self.expected_base_url}resources"
+        expected_url = f"{self.expected_base_url}"
         responses.add(responses.GET, expected_url, json={"message": "Internal server error occurred"}, status=500)
 
         auth_headers = {"Authorization": "Bearer token"}
