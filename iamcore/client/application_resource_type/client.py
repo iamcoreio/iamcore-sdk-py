@@ -29,7 +29,7 @@ class Client(HTTPClientWithTimeout):
         self.base_url = append_path_to_url(self.base_url, self.BASE_PATH)
 
     @err_chain(IAMException)
-    def create_resource_type(
+    def create(
         self,
         auth_headers: dict[str, str],
         application_irn: IRN,
@@ -41,7 +41,7 @@ class Client(HTTPClientWithTimeout):
         return IamApplicationResourceTypeResponse(**response.json()).data
 
     @err_chain(IAMException)
-    def get_resource_type(
+    def get(
         self,
         auth_headers: dict[str, str],
         application_irn: IRN,
@@ -52,7 +52,7 @@ class Client(HTTPClientWithTimeout):
         return IamApplicationResourceTypeResponse(**response.json()).data
 
     @err_chain(IAMException)
-    def search_application_resource_types(
+    def search(
         self,
         headers: dict[str, str],
         application_irn: IRN,
@@ -64,7 +64,7 @@ class Client(HTTPClientWithTimeout):
         return IamApplicationResourceTypesResponse(**response.json())
 
     @err_chain(IAMException)
-    def search_all_application_resource_types(
+    def search_all(
         self,
         auth_headers: dict[str, str],
         application_irn: IRN,
@@ -72,7 +72,7 @@ class Client(HTTPClientWithTimeout):
     ) -> Generator[ApplicationResourceType, None, None]:
         return generic_search_all(
             auth_headers,
-            lambda headers, search_filter: self.search_application_resource_types(
+            lambda headers, search_filter: self.search(
                 headers,
                 application_irn,
                 search_filter,

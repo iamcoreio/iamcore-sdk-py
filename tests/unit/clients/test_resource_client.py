@@ -77,7 +77,7 @@ class TestResourceClient:
             poolIDs=["aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0YXRjaWNuaXNnOjpwb29sL2Rldg=="],
         )
 
-        result = self.client.create_resource(auth_headers, create_params)
+        result = self.client.create(auth_headers, create_params)
 
         assert isinstance(result, Resource)
         assert (
@@ -151,7 +151,7 @@ class TestResourceClient:
             resourceType="device",
         )  # Only required fields
 
-        result = self.client.create_resource(auth_headers, create_params)
+        result = self.client.create(auth_headers, create_params)
 
         assert isinstance(result, Resource)
         assert result.name == "7e1edad5-7841-4d38-bdf1-bdc575b0e989"
@@ -185,7 +185,7 @@ class TestResourceClient:
         )
 
         # Should not raise an exception
-        self.client.update_resource(auth_headers, resource_irn, update_params)
+        self.client.update(auth_headers, resource_irn, update_params)
 
         # Verify the request
         assert len(responses.calls) == 1
@@ -214,7 +214,7 @@ class TestResourceClient:
         update_params = UpdateResource(displayName="Updated Name")  # Only one field
 
         # Should not raise an exception
-        self.client.update_resource(auth_headers, resource_irn, update_params)
+        self.client.update(auth_headers, resource_irn, update_params)
 
         # Verify the request payload excludes None values
         assert responses.calls[0].request.body is not None
@@ -235,7 +235,7 @@ class TestResourceClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         # Should not raise an exception
-        self.client.delete_resource(auth_headers, resource_irn)
+        self.client.delete(auth_headers, resource_irn)
 
         # Verify the request
         assert len(responses.calls) == 1
@@ -256,7 +256,7 @@ class TestResourceClient:
         ]
 
         # Should not raise an exception
-        self.client.delete_resources(auth_headers, resource_irns)
+        self.client.delete(auth_headers, resource_irns)
 
         # Verify the request
         assert len(responses.calls) == 1
@@ -303,7 +303,7 @@ class TestResourceClient:
         auth_headers = {"Authorization": "Bearer token"}
         search_filter = ResourceSearchFilter(resourceType="device")
 
-        result = self.client.search_resources(auth_headers, search_filter)
+        result = self.client.search(auth_headers, search_filter)
 
         assert isinstance(result, IamResourcesResponse)
         assert result.count == 1
@@ -331,7 +331,7 @@ class TestResourceClient:
 
         auth_headers = {"Authorization": "Bearer token"}
 
-        result = self.client.search_resources(auth_headers)
+        result = self.client.search(auth_headers)
 
         assert isinstance(result, IamResourcesResponse)
         assert result.count == 0
@@ -373,7 +373,7 @@ class TestResourceClient:
 
         auth_headers = {"Authorization": "Bearer token"}
 
-        results = list(self.client.search_all_resources(auth_headers))
+        results = list(self.client.search_all(auth_headers))
 
         assert len(results) == 1
         assert isinstance(results[0], Resource)
@@ -401,7 +401,7 @@ class TestResourceClient:
         )  # Invalid: empty name
 
         with pytest.raises(IAMBedRequestException) as excinfo:
-            self.client.create_resource(auth_headers, create_params)
+            self.client.create(auth_headers, create_params)
 
         assert excinfo.value.status_code == 400
         assert "Invalid resource data" in str(excinfo.value)
@@ -416,7 +416,7 @@ class TestResourceClient:
         create_params = CreateResource(name="test", application="myapp", path="/dev", resourceType="device")
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.create_resource(auth_headers, create_params)
+            self.client.create(auth_headers, create_params)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -436,7 +436,7 @@ class TestResourceClient:
         create_params = CreateResource(name="test", application="myapp", path="/dev", resourceType="device")
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.create_resource(auth_headers, create_params)
+            self.client.create(auth_headers, create_params)
 
         assert excinfo.value.status_code == 403
         assert "Insufficient permissions" in str(excinfo.value)
@@ -455,7 +455,7 @@ class TestResourceClient:
         )
 
         with pytest.raises(IAMConflictException) as excinfo:
-            self.client.create_resource(auth_headers, create_params)
+            self.client.create(auth_headers, create_params)
 
         assert excinfo.value.status_code == 409
         assert "already exists" in str(excinfo.value)
@@ -471,7 +471,7 @@ class TestResourceClient:
         update_params = UpdateResource(displayName="Updated Name")
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.update_resource(auth_headers, resource_irn, update_params)
+            self.client.update(auth_headers, resource_irn, update_params)
 
         assert excinfo.value.status_code == 404
         assert "not found" in str(excinfo.value)
@@ -487,7 +487,7 @@ class TestResourceClient:
         update_params = UpdateResource(displayName="Updated Name")
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.update_resource(auth_headers, resource_irn, update_params)
+            self.client.update(auth_headers, resource_irn, update_params)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -505,7 +505,7 @@ class TestResourceClient:
         update_params = UpdateResource(displayName="Updated Name")
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.update_resource(auth_headers, resource_irn, update_params)
+            self.client.update(auth_headers, resource_irn, update_params)
 
         assert excinfo.value.status_code == 403
         assert "Access denied" in str(excinfo.value)
@@ -520,7 +520,7 @@ class TestResourceClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.delete_resource(auth_headers, resource_irn)
+            self.client.delete(auth_headers, resource_irn)
 
         assert excinfo.value.status_code == 404
         assert "not found" in str(excinfo.value)
@@ -535,7 +535,7 @@ class TestResourceClient:
         auth_headers = {"Authorization": "Bearer invalid_token"}
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.delete_resource(auth_headers, resource_irn)
+            self.client.delete(auth_headers, resource_irn)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -552,7 +552,7 @@ class TestResourceClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.delete_resource(auth_headers, resource_irn)
+            self.client.delete(auth_headers, resource_irn)
 
         assert excinfo.value.status_code == 403
         assert "Access denied" in str(excinfo.value)
@@ -572,7 +572,7 @@ class TestResourceClient:
         resource_irns = [IRN.of("irn:rc73dbh7q0:myapp:4atcicnisg::device/dev/resource1")]
 
         with pytest.raises(IAMBedRequestException) as excinfo:
-            self.client.delete_resources(auth_headers, resource_irns)
+            self.client.delete(auth_headers, resource_irns)
 
         assert excinfo.value.status_code == 400
         assert "Invalid request data" in str(excinfo.value)
@@ -587,7 +587,7 @@ class TestResourceClient:
         resource_irns = [IRN.of("irn:rc73dbh7q0:myapp:4atcicnisg::device/dev/nonexistent")]
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.delete_resources(auth_headers, resource_irns)
+            self.client.delete(auth_headers, resource_irns)
 
         assert excinfo.value.status_code == 404
         assert "not found" in str(excinfo.value)
@@ -601,7 +601,7 @@ class TestResourceClient:
         auth_headers = {"Authorization": "Bearer invalid_token"}
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.search_resources(auth_headers)
+            self.client.search(auth_headers)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -617,7 +617,7 @@ class TestResourceClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.search_resources(auth_headers)
+            self.client.search(auth_headers)
 
         assert excinfo.value.status_code == 403
         assert "Insufficient permissions" in str(excinfo.value)
@@ -631,7 +631,7 @@ class TestResourceClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.search_resources(auth_headers)
+            self.client.search(auth_headers)
 
         assert excinfo.value.status_code == 500
         assert "Internal server error" in str(excinfo.value)

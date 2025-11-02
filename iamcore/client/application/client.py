@@ -31,18 +31,18 @@ class Client(HTTPClientWithTimeout):
         self.base_url = append_path_to_url(self.base_url, self.BASE_PATH)
 
     @err_chain(IAMException)
-    def create_application(self, auth_headers: dict[str, str], params: CreateApplication) -> Application:
+    def create(self, auth_headers: dict[str, str], params: CreateApplication) -> Application:
         payload = params.model_dump_json(by_alias=True, exclude_none=True)
         response = self._post(data=payload, headers=auth_headers)
         return IamApplicationResponse(**response.json()).data
 
     @err_chain(IAMException)
-    def get_application(self, auth_headers: dict[str, str], irn: IRN) -> Application:
+    def get(self, auth_headers: dict[str, str], irn: IRN) -> Application:
         response = self._get(irn.to_base64(), headers=auth_headers)
         return IamApplicationResponse(**response.json()).data
 
     @err_chain(IAMException)
-    def application_attach_policies(
+    def attach_policies(
         self,
         auth_headers: dict[str, str],
         application_irn: IRN,
@@ -53,7 +53,7 @@ class Client(HTTPClientWithTimeout):
         self._post(path, data=json.dumps(payload), headers=auth_headers)
 
     @err_chain(IAMException)
-    def search_applications(
+    def search(
         self,
         headers: dict[str, str],
         application_filter: Optional[ApplicationSearchFilter] = None,
@@ -63,9 +63,9 @@ class Client(HTTPClientWithTimeout):
         return IamApplicationsResponse(**response.json())
 
     @err_chain(IAMException)
-    def search_all_applications(
+    def search_all(
         self,
         auth_headers: dict[str, str],
         application_filter: Optional[ApplicationSearchFilter] = None,
     ) -> Generator[Application, None, None]:
-        return generic_search_all(auth_headers, self.search_applications, application_filter)
+        return generic_search_all(auth_headers, self.search, application_filter)

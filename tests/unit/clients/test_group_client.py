@@ -67,7 +67,7 @@ class TestGroupClient:
             poolIDs=["aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0YXRjaWNuaXNnOjpwb29sL2Rldg=="],
         )
 
-        result = self.client.create_group(auth_headers, create_params)
+        result = self.client.create(auth_headers, create_params)
 
         assert isinstance(result, Group)
         assert result.id == "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0YXRjaWNuaXNnOjpncm91cC9kZXYvamF2YQ=="
@@ -120,7 +120,7 @@ class TestGroupClient:
         auth_headers = {"Authorization": "Bearer token"}
         create_params = CreateGroup(name="java")  # Only required field
 
-        result = self.client.create_group(auth_headers, create_params)
+        result = self.client.create(auth_headers, create_params)
 
         assert isinstance(result, Group)
         assert result.name == "java"
@@ -144,7 +144,7 @@ class TestGroupClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         # Should not raise an exception
-        self.client.delete_group(auth_headers, group_irn)
+        self.client.delete(auth_headers, group_irn)
 
         # Verify the request
         assert len(responses.calls) == 1
@@ -163,7 +163,7 @@ class TestGroupClient:
         policy_ids = ["policy1", "policy2"]
 
         # Should not raise an exception
-        self.client.group_attach_policies(auth_headers, group_irn, policy_ids)
+        self.client.attach_policies(auth_headers, group_irn, policy_ids)
 
         # Verify the request
         assert len(responses.calls) == 1
@@ -188,7 +188,7 @@ class TestGroupClient:
         member_ids = ["user1", "user2"]
 
         # Should not raise an exception
-        self.client.group_add_members(auth_headers, group_irn, member_ids)
+        self.client.add_members(auth_headers, group_irn, member_ids)
 
         # Verify the request
         assert len(responses.calls) == 1
@@ -230,7 +230,7 @@ class TestGroupClient:
         auth_headers = {"Authorization": "Bearer token"}
         search_filter = GroupSearchFilter(name="java")
 
-        result = self.client.search_groups(auth_headers, search_filter)
+        result = self.client.search(auth_headers, search_filter)
 
         assert isinstance(result, IamGroupsResponse)
         assert result.count == 1
@@ -258,7 +258,7 @@ class TestGroupClient:
 
         auth_headers = {"Authorization": "Bearer token"}
 
-        result = self.client.search_groups(auth_headers)
+        result = self.client.search(auth_headers)
 
         assert isinstance(result, IamGroupsResponse)
         assert result.count == 0
@@ -296,7 +296,7 @@ class TestGroupClient:
 
         auth_headers = {"Authorization": "Bearer token"}
 
-        results = list(self.client.search_all_groups(auth_headers))
+        results = list(self.client.search_all(auth_headers))
 
         assert len(results) == 1
         assert isinstance(results[0], Group)
@@ -322,7 +322,7 @@ class TestGroupClient:
         create_params = CreateGroup(name="")  # Invalid: empty name
 
         with pytest.raises(IAMBedRequestException) as excinfo:
-            self.client.create_group(auth_headers, create_params)
+            self.client.create(auth_headers, create_params)
 
         assert excinfo.value.status_code == 400
         assert "Invalid group data" in str(excinfo.value)
@@ -337,7 +337,7 @@ class TestGroupClient:
         create_params = CreateGroup(name="java")
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.create_group(auth_headers, create_params)
+            self.client.create(auth_headers, create_params)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -357,7 +357,7 @@ class TestGroupClient:
         create_params = CreateGroup(name="java")
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.create_group(auth_headers, create_params)
+            self.client.create(auth_headers, create_params)
 
         assert excinfo.value.status_code == 403
         assert "Insufficient permissions" in str(excinfo.value)
@@ -372,7 +372,7 @@ class TestGroupClient:
         create_params = CreateGroup(name="existing_group")
 
         with pytest.raises(IAMConflictException) as excinfo:
-            self.client.create_group(auth_headers, create_params)
+            self.client.create(auth_headers, create_params)
 
         assert excinfo.value.status_code == 409
         assert "already exists" in str(excinfo.value)
@@ -387,7 +387,7 @@ class TestGroupClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.delete_group(auth_headers, group_irn)
+            self.client.delete(auth_headers, group_irn)
 
         assert excinfo.value.status_code == 404
         assert "not found" in str(excinfo.value)
@@ -402,7 +402,7 @@ class TestGroupClient:
         auth_headers = {"Authorization": "Bearer invalid_token"}
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.delete_group(auth_headers, group_irn)
+            self.client.delete(auth_headers, group_irn)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -419,7 +419,7 @@ class TestGroupClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.delete_group(auth_headers, group_irn)
+            self.client.delete(auth_headers, group_irn)
 
         assert excinfo.value.status_code == 403
         assert "Access denied" in str(excinfo.value)
@@ -440,7 +440,7 @@ class TestGroupClient:
         policy_ids = ["invalid@policy@id"]
 
         with pytest.raises(IAMBedRequestException) as excinfo:
-            self.client.group_attach_policies(auth_headers, group_irn, policy_ids)
+            self.client.attach_policies(auth_headers, group_irn, policy_ids)
 
         assert excinfo.value.status_code == 400
         assert "Invalid policy IDs" in str(excinfo.value)
@@ -456,7 +456,7 @@ class TestGroupClient:
         policy_ids = ["policy1", "policy2"]
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.group_attach_policies(auth_headers, group_irn, policy_ids)
+            self.client.attach_policies(auth_headers, group_irn, policy_ids)
 
         assert excinfo.value.status_code == 404
         assert "not found" in str(excinfo.value)
@@ -477,7 +477,7 @@ class TestGroupClient:
         member_ids = ["invalid@user@id"]
 
         with pytest.raises(IAMBedRequestException) as excinfo:
-            self.client.group_add_members(auth_headers, group_irn, member_ids)
+            self.client.add_members(auth_headers, group_irn, member_ids)
 
         assert excinfo.value.status_code == 400
         assert "Invalid user IDs" in str(excinfo.value)
@@ -493,7 +493,7 @@ class TestGroupClient:
         member_ids = ["user1", "user2"]
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.group_add_members(auth_headers, group_irn, member_ids)
+            self.client.add_members(auth_headers, group_irn, member_ids)
 
         assert excinfo.value.status_code == 404
         assert "not found" in str(excinfo.value)
@@ -507,7 +507,7 @@ class TestGroupClient:
         auth_headers = {"Authorization": "Bearer invalid_token"}
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.search_groups(auth_headers)
+            self.client.search(auth_headers)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -523,7 +523,7 @@ class TestGroupClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.search_groups(auth_headers)
+            self.client.search(auth_headers)
 
         assert excinfo.value.status_code == 403
         assert "Insufficient permissions" in str(excinfo.value)
@@ -537,7 +537,7 @@ class TestGroupClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.search_groups(auth_headers)
+            self.client.search(auth_headers)
 
         assert excinfo.value.status_code == 500
         assert "Internal server error" in str(excinfo.value)

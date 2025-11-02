@@ -25,29 +25,29 @@ class Client(HTTPClientWithTimeout):
         self.base_url = append_path_to_url(self.base_url, self.BASE_PATH)
 
     @err_chain(IAMGroupException)
-    def create_group(self, auth_headers: dict[str, str], create_group: CreateGroup) -> Group:
+    def create(self, auth_headers: dict[str, str], create_group: CreateGroup) -> Group:
         payload = create_group.model_dump_json(by_alias=True, exclude_none=True)
         response = self._post(data=payload, headers=auth_headers)
         return IamGroupResponse(**response.json()).data
 
     @err_chain(IAMGroupException)
-    def delete_group(self, auth_headers: dict[str, str], group_irn: IRN) -> None:
+    def delete(self, auth_headers: dict[str, str], group_irn: IRN) -> None:
         self._delete(group_irn.to_base64(), headers=auth_headers)
 
     @err_chain(IAMGroupException)
-    def group_attach_policies(self, auth_headers: dict[str, str], group_irn: IRN, policies_ids: list[str]) -> None:
+    def attach_policies(self, auth_headers: dict[str, str], group_irn: IRN, policies_ids: list[str]) -> None:
         path = f"{group_irn.to_base64()}/policies/attach"
         payload = {"policyIDs": policies_ids}
         self._put(path, data=json.dumps(payload), headers=auth_headers)
 
     @err_chain(IAMGroupException)
-    def group_add_members(self, auth_headers: dict[str, str], group_irn: IRN, members_ids: list[str]) -> None:
+    def add_members(self, auth_headers: dict[str, str], group_irn: IRN, members_ids: list[str]) -> None:
         path = f"{group_irn.to_base64()}/members/add"
         payload = {"userIDs": members_ids}
         self._post(path, data=json.dumps(payload), headers=auth_headers)
 
     @err_chain(IAMGroupException)
-    def search_groups(
+    def search(
         self,
         headers: dict[str, str],
         group_filter: Optional[GroupSearchFilter] = None,
@@ -57,9 +57,9 @@ class Client(HTTPClientWithTimeout):
         return IamGroupsResponse(**response.json())
 
     @err_chain(IAMException)
-    def search_all_groups(
+    def search_all(
         self,
         auth_headers: dict[str, str],
         group_filter: Optional[GroupSearchFilter] = None,
     ) -> Generator[Group, None, None]:
-        return generic_search_all(auth_headers, self.search_groups, group_filter)
+        return generic_search_all(auth_headers, self.search, group_filter)

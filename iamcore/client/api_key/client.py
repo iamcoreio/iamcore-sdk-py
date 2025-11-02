@@ -22,13 +22,13 @@ class Client(HTTPClientWithTimeout):
         self.base_url = append_path_to_url(self.base_url, self.BASE_PATH)
 
     @err_chain(IAMException)
-    def create_application_api_key(self, auth_headers: dict[str, str], principal_id: str) -> None:
+    def create(self, auth_headers: dict[str, str], principal_id: str) -> None:
         path = f"{principal_id}/api-keys"
         headers = {"Content-Type": "application/json", **auth_headers}
         self._post(path, headers=headers)
 
     @err_chain(IAMException)
-    def get_application_api_keys(
+    def search(
         self,
         headers: dict[str, str],
         principal_id: str,
@@ -40,14 +40,14 @@ class Client(HTTPClientWithTimeout):
         return IamApiKeysResponse(**response.json())
 
     @err_chain(IAMException)
-    def get_all_applications_api_keys(
+    def search_all(
         self,
         auth_headers: dict[str, str],
         principal_id: str,
     ) -> Generator[ApiKey, None, None]:
         return generic_search_all(
             auth_headers,
-            lambda headers, search_filter: self.get_application_api_keys(
+            lambda headers, search_filter: self.search(
                 headers,
                 principal_id,
                 search_filter=search_filter,

@@ -65,7 +65,7 @@ class TestApplicationResourceTypeClient:
             operations=["sign", "export"],
         )
 
-        result = self.client.create_resource_type(auth_headers, application_irn, create_params)
+        result = self.client.create(auth_headers, application_irn, create_params)
 
         assert isinstance(result, ApplicationResourceType)
         assert result.id == "aXJuOnJjNzNkYmg3cTA6bXlhcHA6OjpyZXNvdXJjZS10eXBlL2RvY3VtZW50"
@@ -95,7 +95,7 @@ class TestApplicationResourceTypeClient:
         """Test resource type creation with minimal parameters."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
         expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types"
-        resource_type_response = {
+        resource_type_response: dict[str, Any] = {
             "data": {
                 "id": "aXJuOnJjNzNkYmg3cTA6bXlhcHA6OjpyZXNvdXJjZS10eXBlL2RvY3VtZW50",
                 "irn": "irn:rc73dbh7q0:myapp:::resource-type/document",
@@ -110,7 +110,7 @@ class TestApplicationResourceTypeClient:
         auth_headers = {"Authorization": "Bearer token"}
         create_params = CreateApplicationResourceType(type="document")  # Only required field
 
-        result = self.client.create_resource_type(auth_headers, application_irn, create_params)
+        result = self.client.create(auth_headers, application_irn, create_params)
 
         assert isinstance(result, ApplicationResourceType)
         assert result.type == "document"
@@ -148,7 +148,7 @@ class TestApplicationResourceTypeClient:
 
         auth_headers = {"Authorization": "Bearer token"}
 
-        result = self.client.get_resource_type(auth_headers, application_irn, type_irn)
+        result = self.client.get(auth_headers, application_irn, type_irn)
 
         assert isinstance(result, ApplicationResourceType)
         assert result.id == "aXJuOnJjNzNkYmg3cTA6bXlhcHA6OjpyZXNvdXJjZS10eXBlL2RvY3VtZW50"
@@ -190,7 +190,7 @@ class TestApplicationResourceTypeClient:
 
         auth_headers = {"Authorization": "Bearer token"}
 
-        result = self.client.search_application_resource_types(auth_headers, application_irn)
+        result = self.client.search(auth_headers, application_irn)
 
         assert isinstance(result, IamApplicationResourceTypesResponse)
         assert result.count == 1
@@ -220,7 +220,7 @@ class TestApplicationResourceTypeClient:
         auth_headers = {"Authorization": "Bearer token"}
         search_filter = PaginatedSearchFilter(page=2, pageSize=5)
 
-        result = self.client.search_application_resource_types(auth_headers, application_irn, search_filter)
+        result = self.client.search(auth_headers, application_irn, search_filter)
 
         assert isinstance(result, IamApplicationResourceTypesResponse)
         assert result.count == 0
@@ -259,7 +259,7 @@ class TestApplicationResourceTypeClient:
 
         auth_headers = {"Authorization": "Bearer token"}
 
-        results = list(self.client.search_all_application_resource_types(auth_headers, application_irn))
+        results = list(self.client.search_all(auth_headers, application_irn))
 
         assert len(results) == 1
         assert isinstance(results[0], ApplicationResourceType)
@@ -286,7 +286,7 @@ class TestApplicationResourceTypeClient:
         create_params = CreateApplicationResourceType(type="")  # Invalid: empty type
 
         with pytest.raises(IAMBedRequestException) as excinfo:
-            self.client.create_resource_type(auth_headers, application_irn, create_params)
+            self.client.create(auth_headers, application_irn, create_params)
 
         assert excinfo.value.status_code == 400
         assert "Invalid resource type data" in str(excinfo.value)
@@ -302,7 +302,7 @@ class TestApplicationResourceTypeClient:
         create_params = CreateApplicationResourceType(type="document")
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.create_resource_type(auth_headers, application_irn, create_params)
+            self.client.create(auth_headers, application_irn, create_params)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -323,7 +323,7 @@ class TestApplicationResourceTypeClient:
         create_params = CreateApplicationResourceType(type="document")
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.create_resource_type(auth_headers, application_irn, create_params)
+            self.client.create(auth_headers, application_irn, create_params)
 
         assert excinfo.value.status_code == 403
         assert "Insufficient permissions" in str(excinfo.value)
@@ -341,7 +341,7 @@ class TestApplicationResourceTypeClient:
         create_params = CreateApplicationResourceType(type="existing_type")
 
         with pytest.raises(IAMConflictException) as excinfo:
-            self.client.create_resource_type(auth_headers, application_irn, create_params)
+            self.client.create(auth_headers, application_irn, create_params)
 
         assert excinfo.value.status_code == 409
         assert "already exists" in str(excinfo.value)
@@ -357,7 +357,7 @@ class TestApplicationResourceTypeClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.get_resource_type(auth_headers, application_irn, type_irn)
+            self.client.get(auth_headers, application_irn, type_irn)
 
         assert excinfo.value.status_code == 404
         assert "not found" in str(excinfo.value)
@@ -373,7 +373,7 @@ class TestApplicationResourceTypeClient:
         auth_headers = {"Authorization": "Bearer invalid_token"}
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.get_resource_type(auth_headers, application_irn, type_irn)
+            self.client.get(auth_headers, application_irn, type_irn)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -389,7 +389,7 @@ class TestApplicationResourceTypeClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.get_resource_type(auth_headers, application_irn, type_irn)
+            self.client.get(auth_headers, application_irn, type_irn)
 
         assert excinfo.value.status_code == 403
         assert "Access denied" in str(excinfo.value)
@@ -404,7 +404,7 @@ class TestApplicationResourceTypeClient:
         auth_headers = {"Authorization": "Bearer invalid_token"}
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.search_application_resource_types(auth_headers, application_irn)
+            self.client.search(auth_headers, application_irn)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -424,7 +424,7 @@ class TestApplicationResourceTypeClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.search_application_resource_types(auth_headers, application_irn)
+            self.client.search(auth_headers, application_irn)
 
         assert excinfo.value.status_code == 403
         assert "Insufficient permissions" in str(excinfo.value)
@@ -439,7 +439,7 @@ class TestApplicationResourceTypeClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.search_application_resource_types(auth_headers, application_irn)
+            self.client.search(auth_headers, application_irn)
 
         assert excinfo.value.status_code == 500
         assert "Internal server error" in str(excinfo.value)

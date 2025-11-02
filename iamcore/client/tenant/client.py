@@ -34,19 +34,19 @@ class Client(HTTPClientWithTimeout):
         self.base_url = append_path_to_url(self.base_url, self.BASE_PATH)
 
     @err_chain(IAMTenantException)
-    def create_tenant(self, auth_headers: dict[str, str], params: CreateTenant) -> Tenant:
+    def create(self, auth_headers: dict[str, str], params: CreateTenant) -> Tenant:
         path = "issuer-types/iamcore"
         payload = params.model_dump_json(by_alias=True, exclude_none=True)
         response = self._post(path, data=payload, headers=auth_headers)
         return IamTenantResponse(**response.json()).data
 
     @err_chain(IAMTenantException)
-    def update_tenant(self, auth_headers: dict[str, str], irn: IRN, display_name: str) -> None:
+    def update(self, auth_headers: dict[str, str], irn: IRN, display_name: str) -> None:
         payload = {"displayName": display_name}
         self._put(irn.to_base64(), data=json.dumps(payload), headers=auth_headers)
 
     @err_chain(IAMTenantException)
-    def delete_tenant(self, auth_headers: dict[str, str], irn: IRN) -> None:
+    def delete(self, auth_headers: dict[str, str], irn: IRN) -> None:
         self._delete(irn.to_base64(), headers=auth_headers)
 
     @err_chain(IAMTenantException)
@@ -55,7 +55,7 @@ class Client(HTTPClientWithTimeout):
         return IamTenantIssuersResponse(**response.json()).data.pop()
 
     @err_chain(IAMTenantException)
-    def search_tenants(
+    def search(
         self,
         headers: dict[str, str],
         tenant_filter: Optional[GetTenantsFilter] = None,
@@ -65,9 +65,9 @@ class Client(HTTPClientWithTimeout):
         return IamTenantsResponse(**response.json())
 
     @err_chain(IAMException)
-    def search_all_tenants(
+    def search_all(
         self,
         auth_headers: dict[str, str],
         tenant_filter: Optional[GetTenantsFilter] = None,
     ) -> Generator[Tenant, None, None]:
-        return generic_search_all(auth_headers, self.search_tenants, tenant_filter)
+        return generic_search_all(auth_headers, self.search, tenant_filter)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Optional
+from urllib.parse import urljoin
 
 from pydantic import Field, HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -32,4 +33,4 @@ class BaseConfig(BaseSettings):
         """Get IAM Core Issuer URL as string."""
         if iamcore_issuer_url := self.iamcore_issuer_url:
             return str(iamcore_issuer_url)
-        return str(self.iamcore_url) + DEFAULT_IAMCORE_ISSUER_PATH
+        return urljoin(str(self.iamcore_url), DEFAULT_IAMCORE_ISSUER_PATH)

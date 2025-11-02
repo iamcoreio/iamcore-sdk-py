@@ -69,7 +69,7 @@ class TestTenantClient:
             groupMetadataUiSchema={"key": "val"},
         )
 
-        result = self.client.create_tenant(auth_headers, create_params)
+        result = self.client.create(auth_headers, create_params)
 
         assert isinstance(result, Tenant)
         assert result.resource_id == "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0N2c1bDJpamMwOjp0ZW5hbnQvNDdnNWwyaWpjMA=="
@@ -122,7 +122,7 @@ class TestTenantClient:
         auth_headers = {"Authorization": "Bearer token"}
         create_params = CreateTenant(name="my-tenant", displayName="my-tenant")  # Only required fields
 
-        result = self.client.create_tenant(auth_headers, create_params)
+        result = self.client.create(auth_headers, create_params)
 
         assert isinstance(result, Tenant)
         assert result.name == "my-tenant"
@@ -150,7 +150,7 @@ class TestTenantClient:
         display_name = "Updated tenant name"
 
         # Should not raise an exception
-        self.client.update_tenant(auth_headers, tenant_irn, display_name)
+        self.client.update(auth_headers, tenant_irn, display_name)
 
         # Verify the request
         assert len(responses.calls) == 1
@@ -174,7 +174,7 @@ class TestTenantClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         # Should not raise an exception
-        self.client.delete_tenant(auth_headers, tenant_irn)
+        self.client.delete(auth_headers, tenant_irn)
 
         # Verify the request
         assert len(responses.calls) == 1
@@ -252,7 +252,7 @@ class TestTenantClient:
         auth_headers = {"Authorization": "Bearer token"}
         search_filter = GetTenantsFilter(name="my-tenant")
 
-        result = self.client.search_tenants(auth_headers, search_filter)
+        result = self.client.search(auth_headers, search_filter)
 
         assert isinstance(result, IamTenantsResponse)
         assert result.count == 1
@@ -280,7 +280,7 @@ class TestTenantClient:
 
         auth_headers = {"Authorization": "Bearer token"}
 
-        result = self.client.search_tenants(auth_headers)
+        result = self.client.search(auth_headers)
 
         assert isinstance(result, IamTenantsResponse)
         assert result.count == 0
@@ -318,7 +318,7 @@ class TestTenantClient:
 
         auth_headers = {"Authorization": "Bearer token"}
 
-        results = list(self.client.search_all_tenants(auth_headers))
+        results = list(self.client.search_all(auth_headers))
 
         assert len(results) == 1
         assert isinstance(results[0], Tenant)
@@ -344,7 +344,7 @@ class TestTenantClient:
         create_params = CreateTenant(name="", displayName="My tenant")  # Invalid: empty name
 
         with pytest.raises(IAMBedRequestException) as excinfo:
-            self.client.create_tenant(auth_headers, create_params)
+            self.client.create(auth_headers, create_params)
 
         assert excinfo.value.status_code == 400
         assert "Invalid tenant data" in str(excinfo.value)
@@ -359,7 +359,7 @@ class TestTenantClient:
         create_params = CreateTenant(name="my-tenant", displayName="My tenant")
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.create_tenant(auth_headers, create_params)
+            self.client.create(auth_headers, create_params)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -379,7 +379,7 @@ class TestTenantClient:
         create_params = CreateTenant(name="my-tenant", displayName="My tenant")
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.create_tenant(auth_headers, create_params)
+            self.client.create(auth_headers, create_params)
 
         assert excinfo.value.status_code == 403
         assert "Insufficient permissions" in str(excinfo.value)
@@ -396,7 +396,7 @@ class TestTenantClient:
         create_params = CreateTenant(name="existing-tenant", displayName="Existing tenant")
 
         with pytest.raises(IAMConflictException) as excinfo:
-            self.client.create_tenant(auth_headers, create_params)
+            self.client.create(auth_headers, create_params)
 
         assert excinfo.value.status_code == 409
         assert "already exists" in str(excinfo.value)
@@ -412,7 +412,7 @@ class TestTenantClient:
         display_name = "Updated name"
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.update_tenant(auth_headers, tenant_irn, display_name)
+            self.client.update(auth_headers, tenant_irn, display_name)
 
         assert excinfo.value.status_code == 404
         assert "not found" in str(excinfo.value)
@@ -428,7 +428,7 @@ class TestTenantClient:
         display_name = "Updated name"
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.update_tenant(auth_headers, tenant_irn, display_name)
+            self.client.update(auth_headers, tenant_irn, display_name)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -444,7 +444,7 @@ class TestTenantClient:
         display_name = "Updated name"
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.update_tenant(auth_headers, tenant_irn, display_name)
+            self.client.update(auth_headers, tenant_irn, display_name)
 
         assert excinfo.value.status_code == 403
         assert "Access denied" in str(excinfo.value)
@@ -459,7 +459,7 @@ class TestTenantClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.delete_tenant(auth_headers, tenant_irn)
+            self.client.delete(auth_headers, tenant_irn)
 
         assert excinfo.value.status_code == 404
         assert "not found" in str(excinfo.value)
@@ -474,7 +474,7 @@ class TestTenantClient:
         auth_headers = {"Authorization": "Bearer invalid_token"}
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.delete_tenant(auth_headers, tenant_irn)
+            self.client.delete(auth_headers, tenant_irn)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -491,7 +491,7 @@ class TestTenantClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.delete_tenant(auth_headers, tenant_irn)
+            self.client.delete(auth_headers, tenant_irn)
 
         assert excinfo.value.status_code == 403
         assert "Access denied" in str(excinfo.value)
@@ -550,7 +550,7 @@ class TestTenantClient:
         auth_headers = {"Authorization": "Bearer invalid_token"}
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.search_tenants(auth_headers)
+            self.client.search(auth_headers)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -566,7 +566,7 @@ class TestTenantClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.search_tenants(auth_headers)
+            self.client.search(auth_headers)
 
         assert excinfo.value.status_code == 403
         assert "Insufficient permissions" in str(excinfo.value)
@@ -580,7 +580,7 @@ class TestTenantClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.search_tenants(auth_headers)
+            self.client.search(auth_headers)
 
         assert excinfo.value.status_code == 500
         assert "Internal server error" in str(excinfo.value)

@@ -30,23 +30,23 @@ class Client(HTTPClientWithTimeout):
         self.base_url = append_path_to_url(self.base_url, self.BASE_PATH)
 
     @err_chain(IAMPolicyException)
-    def create_policy(self, auth_headers: dict[str, str], params: CreatePolicy) -> Policy:
+    def create(self, auth_headers: dict[str, str], params: CreatePolicy) -> Policy:
         payload_dict = params.model_dump_json(by_alias=True, exclude_none=True)
 
         response: Response = self._post(data=payload_dict, headers=auth_headers)
         return IamPolicyResponse(**response.json()).data
 
     @err_chain(IAMPolicyException)
-    def delete_policy(self, auth_headers: dict[str, str], policy_id: str) -> None:
+    def delete(self, auth_headers: dict[str, str], policy_id: str) -> None:
         self._delete(IRN.of(policy_id).to_base64(), headers=auth_headers)
 
     @err_chain(IAMPolicyException)
-    def update_policy(self, auth_headers: dict[str, str], policy_id: str, params: UpdatePolicy) -> None:
+    def update(self, auth_headers: dict[str, str], policy_id: str, params: UpdatePolicy) -> None:
         data = params.model_dump_json(by_alias=True, exclude_none=True)
         self._put(policy_id, data=data, headers=auth_headers)
 
     @err_chain(IAMPolicyException)
-    def search_policies(
+    def search(
         self,
         headers: dict[str, str],
         policy_filter: Optional[PolicySearchFilter] = None,
@@ -56,9 +56,9 @@ class Client(HTTPClientWithTimeout):
         return IamPoliciesResponse(**response.json())
 
     @err_chain(IAMException)
-    def search_all_policies(
+    def search_all(
         self,
         auth_headers: dict[str, str],
         policy_filter: Optional[PolicySearchFilter] = None,
     ) -> Generator[Policy, None, None]:
-        return generic_search_all(auth_headers, self.search_policies, policy_filter)
+        return generic_search_all(auth_headers, self.search, policy_filter)

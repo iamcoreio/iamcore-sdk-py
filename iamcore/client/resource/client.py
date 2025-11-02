@@ -32,27 +32,27 @@ class Client(HTTPClientWithTimeout):
         self.base_url = append_path_to_url(self.base_url, self.BASE_PATH)
 
     @err_chain(IAMResourceException)
-    def create_resource(self, auth_headers: dict[str, str], params: CreateResource) -> Resource:
+    def create(self, auth_headers: dict[str, str], params: CreateResource) -> Resource:
         payload = params.model_dump_json(by_alias=True, exclude_none=True)
         response = self._post(data=payload, headers=auth_headers)
         return IamResourceResponse(**response.json()).data
 
     @err_chain(IAMResourceException)
-    def update_resource(self, auth_headers: dict[str, str], irn: IRN, params: UpdateResource) -> None:
+    def update(self, auth_headers: dict[str, str], irn: IRN, params: UpdateResource) -> None:
         payload = params.model_dump_json(by_alias=True, exclude_none=True, exclude_unset=True)
         self._patch(irn.to_base64(), data=payload, headers=auth_headers)
 
     @err_chain(IAMResourceException)
-    def delete_resource(self, auth_headers: dict[str, str], resource_irn: IRN) -> None:
+    def delete(self, auth_headers: dict[str, str], resource_irn: IRN) -> None:
         self._delete(resource_irn.to_base64(), headers=auth_headers)
 
     @err_chain(IAMResourceException)
-    def delete_resources(self, auth_headers: dict[str, str], resources_irns: list[IRN]) -> None:
+    def delete_in_batch(self, auth_headers: dict[str, str], resources_irns: list[IRN]) -> None:
         payload = {"resourceIDs": [r.to_base64() for r in resources_irns if r]}
         self._post("delete", data=json.dumps(payload), headers=auth_headers)
 
     @err_chain(IAMResourceException)
-    def search_resources(
+    def search(
         self,
         auth_headers: dict[str, str],
         resource_filter: Optional[ResourceSearchFilter] = None,
@@ -62,9 +62,9 @@ class Client(HTTPClientWithTimeout):
         return IamResourcesResponse(**response.json())
 
     @err_chain(IAMException)
-    def search_all_resources(
+    def search_all(
         self,
         auth_headers: dict[str, str],
         resource_filter: Optional[ResourceSearchFilter] = None,
     ) -> Generator[Resource, None, None]:
-        return generic_search_all(auth_headers, self.search_resources, resource_filter)
+        return generic_search_all(auth_headers, self.search, resource_filter)

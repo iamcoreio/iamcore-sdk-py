@@ -25,45 +25,45 @@ class Client(HTTPClientWithTimeout):
         self.base_url = append_path_to_url(self.base_url, self.BASE_PATH)
 
     @err_chain(IAMUserException)
-    def create_user(self, auth_headers: dict[str, str], params: CreateUser) -> User:
+    def create(self, auth_headers: dict[str, str], params: CreateUser) -> User:
         """Create a new user."""
         data = params.model_dump_json(by_alias=True, exclude_none=True)
         response = self._post(data=data, headers=auth_headers)
         return IamUserResponse(**response.json()).data
 
     @err_chain(IAMUserException)
-    def get_user_me(self, auth_headers: dict[str, str]) -> User:
+    def get_authenticated(self, auth_headers: dict[str, str]) -> User:
         response = self._get("me", headers=auth_headers)
         return IamUserResponse(**response.json()).data
 
     @err_chain(IAMUserException)
-    def get_irn(self, auth_headers: dict[str, str]) -> IRN:
+    def get_authenticated_irn(self, auth_headers: dict[str, str]) -> IRN:
         response = self._get("me/irn", headers=auth_headers)
         return IamIRNResponse(**response.json()).data
 
     @err_chain(IAMUserException)
-    def update_user(self, auth_headers: dict[str, str], irn: IRN, params: UpdateUser) -> None:
+    def update(self, auth_headers: dict[str, str], irn: IRN, params: UpdateUser) -> None:
         payload = params.model_dump_json(by_alias=True, exclude_none=True)
         self._patch(irn.to_base64(), data=payload, headers=auth_headers)
 
     @err_chain(IAMUserException)
-    def delete_user(self, auth_headers: dict[str, str], user_irn: IRN) -> None:
+    def delete(self, auth_headers: dict[str, str], user_irn: IRN) -> None:
         self._delete(user_irn.to_base64(), headers=auth_headers)
 
     @err_chain(IAMUserException)
-    def user_attach_policies(self, auth_headers: dict[str, str], user_irn: IRN, policies_ids: list[str]) -> None:
+    def attach_policies(self, auth_headers: dict[str, str], user_irn: IRN, policies_ids: list[str]) -> None:
         path = f"{user_irn.to_base64()}/policies/attach"
         payload = {"policyIDs": policies_ids}
         self._put(path, data=json.dumps(payload), headers=auth_headers)
 
     @err_chain(IAMUserException)
-    def user_add_groups(self, auth_headers: dict[str, str], user_irn: IRN, group_ids: list[str]) -> None:
+    def add_groups(self, auth_headers: dict[str, str], user_irn: IRN, group_ids: list[str]) -> None:
         path = f"{user_irn.to_base64()}/groups/add"
         payload = {"groupIDs": group_ids}
         self._post(path, data=json.dumps(payload), headers=auth_headers)
 
     @err_chain(IAMUserException)
-    def search_users(
+    def search(
         self,
         auth_headers: dict[str, str],
         user_filter: Optional[UserSearchFilter] = None,
@@ -73,9 +73,9 @@ class Client(HTTPClientWithTimeout):
         return IamUsersResponse(**response.json())
 
     @err_chain(IAMException)
-    def search_all_users(
+    def search_all(
         self,
         auth_headers: dict[str, str],
         user_filter: Optional[UserSearchFilter] = None,
     ) -> Generator[User, None, None]:
-        return generic_search_all(auth_headers, self.search_users, user_filter)
+        return generic_search_all(auth_headers, self.search, user_filter)

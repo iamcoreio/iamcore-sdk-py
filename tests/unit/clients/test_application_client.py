@@ -57,7 +57,7 @@ class TestApplicationClient:
         auth_headers = {"Authorization": "Bearer token"}
         create_params = CreateApplication(name="myapp", displayName="My app name")
 
-        result = self.client.create_application(auth_headers, create_params)
+        result = self.client.create(auth_headers, create_params)
 
         assert isinstance(result, Application)
         assert result.id == "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo6OmFwcGxpY2F0aW9uL215YXBw"
@@ -98,7 +98,7 @@ class TestApplicationClient:
         auth_headers = {"Authorization": "Bearer token"}
         create_params = CreateApplication(name="myapp")  # Only required field
 
-        result = self.client.create_application(auth_headers, create_params)
+        result = self.client.create(auth_headers, create_params)
 
         assert isinstance(result, Application)
         assert result.name == "myapp"
@@ -129,7 +129,7 @@ class TestApplicationClient:
 
         auth_headers = {"Authorization": "Bearer token"}
 
-        result = self.client.get_application(auth_headers, application_irn)
+        result = self.client.get(auth_headers, application_irn)
 
         assert isinstance(result, Application)
         assert result.id == "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo6OmFwcGxpY2F0aW9uL215YXBw"
@@ -154,7 +154,7 @@ class TestApplicationClient:
         policy_ids = ["policy1", "policy2"]
 
         # Should not raise an exception
-        self.client.application_attach_policies(auth_headers, application_irn, policy_ids)
+        self.client.attach_policies(auth_headers, application_irn, policy_ids)
 
         # Verify the request
         assert len(responses.calls) == 1
@@ -192,7 +192,7 @@ class TestApplicationClient:
         auth_headers = {"Authorization": "Bearer token"}
         search_filter = ApplicationSearchFilter(name="myapp")
 
-        result = self.client.search_applications(auth_headers, search_filter)
+        result = self.client.search(auth_headers, search_filter)
 
         assert isinstance(result, IamApplicationsResponse)
         assert result.count == 1
@@ -220,7 +220,7 @@ class TestApplicationClient:
 
         auth_headers = {"Authorization": "Bearer token"}
 
-        result = self.client.search_applications(auth_headers)
+        result = self.client.search(auth_headers)
 
         assert isinstance(result, IamApplicationsResponse)
         assert result.count == 0
@@ -254,7 +254,7 @@ class TestApplicationClient:
 
         auth_headers = {"Authorization": "Bearer token"}
 
-        results = list(self.client.search_all_applications(auth_headers))
+        results = list(self.client.search_all(auth_headers))
 
         assert len(results) == 1
         assert isinstance(results[0], Application)
@@ -280,7 +280,7 @@ class TestApplicationClient:
         create_params = CreateApplication(name="")  # Invalid: empty name
 
         with pytest.raises(IAMBedRequestException) as excinfo:
-            self.client.create_application(auth_headers, create_params)
+            self.client.create(auth_headers, create_params)
 
         assert excinfo.value.status_code == 400
         assert "Invalid application data" in str(excinfo.value)
@@ -295,7 +295,7 @@ class TestApplicationClient:
         create_params = CreateApplication(name="myapp")
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.create_application(auth_headers, create_params)
+            self.client.create(auth_headers, create_params)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -315,7 +315,7 @@ class TestApplicationClient:
         create_params = CreateApplication(name="myapp")
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.create_application(auth_headers, create_params)
+            self.client.create(auth_headers, create_params)
 
         assert excinfo.value.status_code == 403
         assert "Insufficient permissions" in str(excinfo.value)
@@ -332,7 +332,7 @@ class TestApplicationClient:
         create_params = CreateApplication(name="existing_app")
 
         with pytest.raises(IAMConflictException) as excinfo:
-            self.client.create_application(auth_headers, create_params)
+            self.client.create(auth_headers, create_params)
 
         assert excinfo.value.status_code == 409
         assert "already exists" in str(excinfo.value)
@@ -352,7 +352,7 @@ class TestApplicationClient:
         create_params = CreateApplication(name="invalid@name!")
 
         with pytest.raises(IAMBedRequestException) as excinfo:
-            self.client.create_application(auth_headers, create_params)
+            self.client.create(auth_headers, create_params)
 
         assert excinfo.value.status_code == 400
         assert "Validation failed" in str(excinfo.value)
@@ -367,7 +367,7 @@ class TestApplicationClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.get_application(auth_headers, application_irn)
+            self.client.get(auth_headers, application_irn)
 
         assert excinfo.value.status_code == 404
         assert "not found" in str(excinfo.value)
@@ -382,7 +382,7 @@ class TestApplicationClient:
         auth_headers = {"Authorization": "Bearer invalid_token"}
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.get_application(auth_headers, application_irn)
+            self.client.get(auth_headers, application_irn)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -397,7 +397,7 @@ class TestApplicationClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.get_application(auth_headers, application_irn)
+            self.client.get(auth_headers, application_irn)
 
         assert excinfo.value.status_code == 403
         assert "Access denied" in str(excinfo.value)
@@ -418,7 +418,7 @@ class TestApplicationClient:
         policy_ids = ["invalid@policy@id"]
 
         with pytest.raises(IAMBedRequestException) as excinfo:
-            self.client.application_attach_policies(auth_headers, application_irn, policy_ids)
+            self.client.attach_policies(auth_headers, application_irn, policy_ids)
 
         assert excinfo.value.status_code == 400
         assert "Invalid policy IDs" in str(excinfo.value)
@@ -434,7 +434,7 @@ class TestApplicationClient:
         policy_ids = ["policy1", "policy2"]
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.application_attach_policies(auth_headers, application_irn, policy_ids)
+            self.client.attach_policies(auth_headers, application_irn, policy_ids)
 
         assert excinfo.value.status_code == 404
         assert "not found" in str(excinfo.value)
@@ -448,7 +448,7 @@ class TestApplicationClient:
         auth_headers = {"Authorization": "Bearer invalid_token"}
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.search_applications(auth_headers)
+            self.client.search(auth_headers)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -464,7 +464,7 @@ class TestApplicationClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.search_applications(auth_headers)
+            self.client.search(auth_headers)
 
         assert excinfo.value.status_code == 403
         assert "Insufficient permissions" in str(excinfo.value)
@@ -478,7 +478,7 @@ class TestApplicationClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.search_applications(auth_headers)
+            self.client.search(auth_headers)
 
         assert excinfo.value.status_code == 500
         assert "Internal server error" in str(excinfo.value)

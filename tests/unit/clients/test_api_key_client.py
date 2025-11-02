@@ -41,7 +41,7 @@ class TestApiKeyClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         # Should not raise an exception
-        self.client.create_application_api_key(auth_headers, principal_id)
+        self.client.create(auth_headers, principal_id)
 
         # Verify the request
         assert len(responses.calls) == 1
@@ -80,7 +80,7 @@ class TestApiKeyClient:
 
         auth_headers = {"Authorization": "Bearer token"}
 
-        result = self.client.get_application_api_keys(auth_headers, principal_id)
+        result = self.client.search(auth_headers, principal_id)
 
         assert isinstance(result, IamApiKeysResponse)
         assert result.count == 2
@@ -132,7 +132,7 @@ class TestApiKeyClient:
         auth_headers = {"Authorization": "Bearer token"}
         search_filter = PaginatedSearchFilter(page=1, pageSize=10)
 
-        result = self.client.get_application_api_keys(auth_headers, principal_id, search_filter)
+        result = self.client.search(auth_headers, principal_id, search_filter)
 
         assert isinstance(result, IamApiKeysResponse)
         assert result.count == 1
@@ -154,7 +154,7 @@ class TestApiKeyClient:
 
         auth_headers = {"Authorization": "Bearer token"}
 
-        result = self.client.get_application_api_keys(auth_headers, principal_id)
+        result = self.client.search(auth_headers, principal_id)
 
         assert isinstance(result, IamApiKeysResponse)
         assert result.count == 0
@@ -188,7 +188,7 @@ class TestApiKeyClient:
 
         auth_headers = {"Authorization": "Bearer token"}
 
-        results = list(self.client.get_all_applications_api_keys(auth_headers, principal_id))
+        results = list(self.client.search_all(auth_headers, principal_id))
 
         assert len(results) == 1
         assert isinstance(results[0], ApiKey)
@@ -214,7 +214,7 @@ class TestApiKeyClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMBedRequestException) as excinfo:
-            self.client.create_application_api_key(auth_headers, principal_id)
+            self.client.create(auth_headers, principal_id)
 
         assert excinfo.value.status_code == 400
         assert "Invalid principal ID" in str(excinfo.value)
@@ -229,7 +229,7 @@ class TestApiKeyClient:
         auth_headers = {"Authorization": "Bearer invalid_token"}
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.create_application_api_key(auth_headers, principal_id)
+            self.client.create(auth_headers, principal_id)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -249,7 +249,7 @@ class TestApiKeyClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.create_application_api_key(auth_headers, principal_id)
+            self.client.create(auth_headers, principal_id)
 
         assert excinfo.value.status_code == 403
         assert "Insufficient permissions" in str(excinfo.value)
@@ -264,7 +264,7 @@ class TestApiKeyClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.get_application_api_keys(auth_headers, principal_id)
+            self.client.search(auth_headers, principal_id)
 
         assert excinfo.value.status_code == 404
         assert "not found" in str(excinfo.value)
@@ -279,7 +279,7 @@ class TestApiKeyClient:
         auth_headers = {"Authorization": "Bearer invalid_token"}
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
-            self.client.get_application_api_keys(auth_headers, principal_id)
+            self.client.search(auth_headers, principal_id)
 
         assert excinfo.value.status_code == 401
         assert "Authentication required" in str(excinfo.value)
@@ -296,7 +296,7 @@ class TestApiKeyClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMForbiddenException) as excinfo:
-            self.client.get_application_api_keys(auth_headers, principal_id)
+            self.client.search(auth_headers, principal_id)
 
         assert excinfo.value.status_code == 403
         assert "Access denied" in str(excinfo.value)
@@ -311,7 +311,7 @@ class TestApiKeyClient:
         auth_headers = {"Authorization": "Bearer token"}
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.get_application_api_keys(auth_headers, principal_id)
+            self.client.search(auth_headers, principal_id)
 
         assert excinfo.value.status_code == 500
         assert "Internal server error" in str(excinfo.value)
