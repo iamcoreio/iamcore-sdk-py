@@ -163,7 +163,7 @@ class TestGroupClient:
         policy_ids = ["policy1", "policy2"]
 
         # Should not raise an exception
-        self.client.attach_policies(auth_headers, group_irn, policy_ids)
+        self.client.policies_attach(auth_headers, group_irn, policy_ids)
 
         # Verify the request
         assert len(responses.calls) == 1
@@ -188,7 +188,7 @@ class TestGroupClient:
         member_ids = ["user1", "user2"]
 
         # Should not raise an exception
-        self.client.add_members(auth_headers, group_irn, member_ids)
+        self.client.members_add(auth_headers, group_irn, member_ids)
 
         # Verify the request
         assert len(responses.calls) == 1
@@ -440,7 +440,7 @@ class TestGroupClient:
         policy_ids = ["invalid@policy@id"]
 
         with pytest.raises(IAMBedRequestException) as excinfo:
-            self.client.attach_policies(auth_headers, group_irn, policy_ids)
+            self.client.policies_attach(auth_headers, group_irn, policy_ids)
 
         assert excinfo.value.status_code == 400
         assert "Invalid policy IDs" in str(excinfo.value)
@@ -456,7 +456,7 @@ class TestGroupClient:
         policy_ids = ["policy1", "policy2"]
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.attach_policies(auth_headers, group_irn, policy_ids)
+            self.client.policies_attach(auth_headers, group_irn, policy_ids)
 
         assert excinfo.value.status_code == 404
         assert "not found" in str(excinfo.value)
@@ -477,7 +477,7 @@ class TestGroupClient:
         member_ids = ["invalid@user@id"]
 
         with pytest.raises(IAMBedRequestException) as excinfo:
-            self.client.add_members(auth_headers, group_irn, member_ids)
+            self.client.members_add(auth_headers, group_irn, member_ids)
 
         assert excinfo.value.status_code == 400
         assert "Invalid user IDs" in str(excinfo.value)
@@ -493,7 +493,7 @@ class TestGroupClient:
         member_ids = ["user1", "user2"]
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.add_members(auth_headers, group_irn, member_ids)
+            self.client.members_add(auth_headers, group_irn, member_ids)
 
         assert excinfo.value.status_code == 404
         assert "not found" in str(excinfo.value)

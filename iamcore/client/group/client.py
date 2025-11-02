@@ -35,13 +35,13 @@ class Client(HTTPClientWithTimeout):
         self._delete(group_irn.to_base64(), headers=auth_headers)
 
     @err_chain(IAMGroupException)
-    def attach_policies(self, auth_headers: dict[str, str], group_irn: IRN, policies_ids: list[str]) -> None:
+    def policies_attach(self, auth_headers: dict[str, str], group_irn: IRN, policies_ids: list[str]) -> None:
         path = f"{group_irn.to_base64()}/policies/attach"
         payload = {"policyIDs": policies_ids}
         self._put(path, data=json.dumps(payload), headers=auth_headers)
 
     @err_chain(IAMGroupException)
-    def add_members(self, auth_headers: dict[str, str], group_irn: IRN, members_ids: list[str]) -> None:
+    def members_add(self, auth_headers: dict[str, str], group_irn: IRN, members_ids: list[str]) -> None:
         path = f"{group_irn.to_base64()}/members/add"
         payload = {"userIDs": members_ids}
         self._post(path, data=json.dumps(payload), headers=auth_headers)

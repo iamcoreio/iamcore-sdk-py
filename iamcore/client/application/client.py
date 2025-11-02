@@ -42,7 +42,7 @@ class Client(HTTPClientWithTimeout):
         return IamApplicationResponse(**response.json()).data
 
     @err_chain(IAMException)
-    def attach_policies(
+    def policies_attach(
         self,
         auth_headers: dict[str, str],
         application_irn: IRN,

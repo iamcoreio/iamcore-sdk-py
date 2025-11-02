@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Union
 
 from iamcore.client.application.client import json
 from iamcore.client.base.client import HTTPClientWithTimeout, append_path_to_url
@@ -43,13 +43,19 @@ class Client(HTTPClientWithTimeout):
         self._patch(irn.to_base64(), data=payload, headers=auth_headers)
 
     @err_chain(IAMResourceException)
-    def delete(self, auth_headers: dict[str, str], resource_irn: IRN) -> None:
-        self._delete(resource_irn.to_base64(), headers=auth_headers)
+    def delete(self, auth_headers: dict[str, str], resources_irns: Union[list[IRN], IRN]) -> None:
+        if isinstance(resources_irns, list):
+            if len(resources_irns) == 0:
+                return
 
-    @err_chain(IAMResourceException)
-    def delete_in_batch(self, auth_headers: dict[str, str], resources_irns: list[IRN]) -> None:
-        payload = {"resourceIDs": [r.to_base64() for r in resources_irns if r]}
-        self._post("delete", data=json.dumps(payload), headers=auth_headers)
+            if len(resources_irns) > 1:
+                payload = {"resourceIDs": [r.to_base64() for r in resources_irns if r]}
+                self._post("delete", data=json.dumps(payload), headers=auth_headers)
+                return
+
+            resources_irns = resources_irns[0]
+
+        self._delete(resources_irns.to_base64(), headers=auth_headers)
 
     @err_chain(IAMResourceException)
     def search(

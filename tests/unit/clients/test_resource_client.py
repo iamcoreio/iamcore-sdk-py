@@ -569,7 +569,10 @@ class TestResourceClient:
         )
 
         auth_headers = {"Authorization": "Bearer token"}
-        resource_irns = [IRN.of("irn:rc73dbh7q0:myapp:4atcicnisg::device/dev/resource1")]
+        resource_irns = [
+            IRN.of("irn:rc73dbh7q0:myapp:4atcicnisg::device/dev/resource1"),
+            IRN.of("irn:rc73dbh7q0:myapp:4atcicnisg::device/dev/resource2"),
+        ]
 
         with pytest.raises(IAMBedRequestException) as excinfo:
             self.client.delete(auth_headers, resource_irns)
@@ -584,7 +587,10 @@ class TestResourceClient:
         responses.add(responses.POST, expected_url, json={"message": "Some resources not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
-        resource_irns = [IRN.of("irn:rc73dbh7q0:myapp:4atcicnisg::device/dev/nonexistent")]
+        resource_irns = [
+            IRN.of("irn:rc73dbh7q0:myapp:4atcicnisg::device/dev/1"),
+            IRN.of("irn:rc73dbh7q0:myapp:4atcicnisg::device/dev/2"),
+        ]
 
         with pytest.raises(IAMException) as excinfo:
             self.client.delete(auth_headers, resource_irns)

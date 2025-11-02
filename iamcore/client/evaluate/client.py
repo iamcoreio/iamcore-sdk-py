@@ -4,14 +4,13 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any, Optional
 
-from iamcore.irn import IRN
-
 from iamcore.client.base.client import HTTPClientWithTimeout
 from iamcore.client.base.models import IamIRNsResponse, PaginatedSearchFilter, generic_search_all
-from iamcore.client.exceptions import IAMException
 
 if TYPE_CHECKING:
     from collections.abc import Generator
+
+    from iamcore.irn import IRN
 
 
 logger = logging.getLogger(__name__)
@@ -22,55 +21,6 @@ class Client(HTTPClientWithTimeout):
 
     def __init__(self, base_url: str, timeout: int = 30) -> None:
         super().__init__(base_url=base_url, timeout=timeout)
-
-    def authorize(
-        self,
-        auth_headers: dict[str, str],
-        *,
-        principal_irn: IRN,
-        account_id: str,
-        application: str,
-        tenant_id: str,
-        resource_type: str,
-        resource_path: str,
-        action: str,
-        resource_ids: Optional[list[str]] = None,
-    ) -> list[IRN]:
-        if not action:
-            msg = "Action must be defined"
-            raise IAMException(msg)
-
-        tenant_id = tenant_id or principal_irn.tenant_id
-        account_id = account_id or principal_irn.account_id
-        if resource_ids:
-            resources_irn_list = [
-                IRN.create(
-                    account_id=account_id,
-                    application=application,
-                    tenant_id=tenant_id,
-                    resource_type=resource_type,
-                    resource_path=resource_path,
-                    resource_id=resource_id,
-                )
-                for resource_id in resource_ids
-            ]
-            logger.debug(
-                "Going to evaluate %s %s %s",
-                auth_headers,
-                action,
-                resources_irn_list,
-            )
-            self.evaluate(auth_headers, action, resources_irn_list)
-            return resources_irn_list
-        logger.debug("Going to evaluate by type")
-        return list(
-            self.evaluate_all_resources(
-                auth_headers,
-                application=application,
-                action=action,
-                resource_type=resource_type,
-            )
-        )
 
     def evaluate(self, auth_headers: dict[str, str], action: str, resources: list[IRN]) -> None:
         payload = {"action": action, "resources": [str(r) for r in resources if r]}

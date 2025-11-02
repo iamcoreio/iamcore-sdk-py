@@ -154,7 +154,7 @@ class TestApplicationClient:
         policy_ids = ["policy1", "policy2"]
 
         # Should not raise an exception
-        self.client.attach_policies(auth_headers, application_irn, policy_ids)
+        self.client.policies_attach(auth_headers, application_irn, policy_ids)
 
         # Verify the request
         assert len(responses.calls) == 1
@@ -418,7 +418,7 @@ class TestApplicationClient:
         policy_ids = ["invalid@policy@id"]
 
         with pytest.raises(IAMBedRequestException) as excinfo:
-            self.client.attach_policies(auth_headers, application_irn, policy_ids)
+            self.client.policies_attach(auth_headers, application_irn, policy_ids)
 
         assert excinfo.value.status_code == 400
         assert "Invalid policy IDs" in str(excinfo.value)
@@ -434,7 +434,7 @@ class TestApplicationClient:
         policy_ids = ["policy1", "policy2"]
 
         with pytest.raises(IAMException) as excinfo:
-            self.client.attach_policies(auth_headers, application_irn, policy_ids)
+            self.client.policies_attach(auth_headers, application_irn, policy_ids)
 
         assert excinfo.value.status_code == 404
         assert "not found" in str(excinfo.value)
