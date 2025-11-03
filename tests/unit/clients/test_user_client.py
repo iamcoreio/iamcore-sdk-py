@@ -288,7 +288,7 @@ class TestUserClient:
         policy_ids = ["policy1", "policy2"]
 
         # Should not raise an exception
-        self.client.attach_policies(auth_headers, user_irn, policy_ids)
+        self.client.policies_attach(auth_headers, user_irn, policy_ids)
 
         # Verify the request
         assert len(responses.calls) == 1
@@ -597,7 +597,7 @@ class TestUserClient:
         policy_ids = ["invalid@policy@id"]
 
         with pytest.raises(IAMBedRequestException) as excinfo:
-            self.client.attach_policies(auth_headers, user_irn, policy_ids)
+            self.client.policies_attach(auth_headers, user_irn, policy_ids)
 
         assert excinfo.value.status_code == 400
         assert "Invalid policy IDs" in str(excinfo.value)
