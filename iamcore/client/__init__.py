@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pydantic.networks import HttpUrl
+
 from iamcore.client.api_key import Client as ApiKeyClient
 from iamcore.client.application import Client as AppClient
 from iamcore.client.application_resource_type import Client as AppResourceTypeClient
@@ -16,9 +18,13 @@ from iamcore.client.user import Client as UserClient
 class Client:
     """Iamcore client."""
 
-    def __init__(self, config: BaseConfig) -> None:
+    def __init__(self, iamcore_url: str, iamcore_issuer_url: str, iamcore_client_timeout: int = 10) -> None:
         # Client configuration
-        self.config = config
+        self.config = BaseConfig(
+            iamcore_url=HttpUrl(iamcore_url),
+            iamcore_issuer_url=HttpUrl(iamcore_issuer_url),
+            iamcore_client_timeout=iamcore_client_timeout,
+        )
         # Authentication client
         self.auth = AuthClient(self.config.get_iamcore_issuer_url, self.config.iamcore_client_timeout)
         # Resource clients
