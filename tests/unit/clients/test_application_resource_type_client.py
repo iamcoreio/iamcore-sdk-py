@@ -43,19 +43,9 @@ class TestApplicationResourceTypeClient:
         """Test successful resource type creation."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
         expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types"
-        resource_type_response: dict[str, Any] = {
-            "data": {
-                "id": "aXJuOnJjNzNkYmg3cTA6bXlhcHA6OjpyZXNvdXJjZS10eXBlL2RvY3VtZW50",
-                "irn": "irn:rc73dbh7q0:myapp:::resource-type/document",
-                "type": "document",
-                "description": "Representation of the 'document' resource type",
-                "actionPrefix": "document",
-                "operations": ["sign", "export"],
-                "created": "2021-10-18T12:27:15.55267632Z",
-                "updated": "2021-10-18T12:27:15.55267632Z",
-            }
-        }
-        responses.add(responses.POST, expected_url, json=resource_type_response, status=201)
+
+        location = "http://localhost:8080/api/v1/applications/irn:rc73dbh7q0:iamcore:::application/myapp/resource-types/aXJuOnJjNzNkYmg3cTA6bXlhcHA6OjpyZXNvdXJjZS10eXBlL2RvY3VtZW50"
+        responses.add(responses.POST, expected_url, status=201, headers={"Location": location})
 
         auth_headers = {"Authorization": "Bearer token"}
         create_params = CreateApplicationResourceType(
@@ -65,15 +55,9 @@ class TestApplicationResourceTypeClient:
             operations=["sign", "export"],
         )
 
-        result = self.client.create(auth_headers, application_irn, create_params)
+        rt_id = self.client.create(auth_headers, application_irn, create_params)
 
-        assert isinstance(result, ApplicationResourceType)
-        assert result.id == "aXJuOnJjNzNkYmg3cTA6bXlhcHA6OjpyZXNvdXJjZS10eXBlL2RvY3VtZW50"
-        assert str(result.irn) == "irn:rc73dbh7q0:myapp:::resource-type/document"
-        assert result.type == "document"
-        assert result.description == "Representation of the 'document' resource type"
-        assert result.action_prefix == "document"
-        assert result.operations == ["sign", "export"]
+        assert rt_id == "aXJuOnJjNzNkYmg3cTA6bXlhcHA6OjpyZXNvdXJjZS10eXBlL2RvY3VtZW50"
 
         # Verify the request
         assert len(responses.calls) == 1
@@ -95,28 +79,16 @@ class TestApplicationResourceTypeClient:
         """Test resource type creation with minimal parameters."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
         expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/resource-types"
-        resource_type_response: dict[str, Any] = {
-            "data": {
-                "id": "aXJuOnJjNzNkYmg3cTA6bXlhcHA6OjpyZXNvdXJjZS10eXBlL2RvY3VtZW50",
-                "irn": "irn:rc73dbh7q0:myapp:::resource-type/document",
-                "type": "document",
-                "operations": [],
-                "created": "2021-10-18T12:27:15.55267632Z",
-                "updated": "2021-10-18T12:27:15.55267632Z",
-            }
-        }
-        responses.add(responses.POST, expected_url, json=resource_type_response, status=201)
+
+        location = "http://localhost:8080/api/v1/applications/irn:rc73dbh7q0:iamcore:::application/myapp/resource-types/aXJuOnJjNzNkYmg3cTA6bXlhcHA6OjpyZXNvdXJjZS10eXBlL2RvY3VtZW50"
+        responses.add(responses.POST, expected_url, status=201, headers={"Location": location})
 
         auth_headers = {"Authorization": "Bearer token"}
         create_params = CreateApplicationResourceType(type="document")  # Only required field
 
-        result = self.client.create(auth_headers, application_irn, create_params)
+        rt_id = self.client.create(auth_headers, application_irn, create_params)
 
-        assert isinstance(result, ApplicationResourceType)
-        assert result.type == "document"
-        assert result.description is None  # Optional field not provided
-        assert result.action_prefix is None  # Optional field not provided
-        assert result.operations == []  # Optional field not provided
+        assert rt_id == "aXJuOnJjNzNkYmg3cTA6bXlhcHA6OjpyZXNvdXJjZS10eXBlL2RvY3VtZW50"
 
         # Verify the request payload excludes None values
         assert responses.calls[0].request.body is not None

@@ -34,11 +34,16 @@ class Client(HTTPClientWithTimeout):
         auth_headers: dict[str, str],
         application_irn: IRN,
         params: CreateApplicationResourceType,
-    ) -> ApplicationResourceType:
+    ) -> str:
         path = f"{application_irn.to_base64()}/resource-types"
         payload = params.model_dump_json(by_alias=True, exclude_none=True)
         response = self._post(path, data=payload, headers=auth_headers)
-        return IamApplicationResourceTypeResponse(**response.json()).data
+        location = response.headers.get("Location")
+        if not location:
+            msg = "Location header not found in response"
+            raise IAMException(msg)
+
+        return location.split("/")[-1]
 
     @err_chain(IAMException)
     def get(
