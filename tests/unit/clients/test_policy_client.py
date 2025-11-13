@@ -49,7 +49,6 @@ class TestPolicyClient:
                 "id": "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0YXRjaWNuaXNnOjpwb2xpY3kvYWxsb3ctYWxsLWFjdGlvbnMtb24tamVycnk=",
                 "irn": "irn:rc73dbh7q0:iamcore:4atcicnisg::policy/allow-all-actions-on-jerry",
                 "name": "allow-all-actions-on-jerry",
-                "description": "Allow all actions on Jerry",
                 "type": "identity",
                 "origin": "api",
                 "version": "1.0.0",
@@ -88,7 +87,6 @@ class TestPolicyClient:
         )
         assert str(result.irn) == "irn:rc73dbh7q0:iamcore:4atcicnisg::policy/allow-all-actions-on-jerry"
         assert result.name == "allow-all-actions-on-jerry"
-        assert result.description == "Allow all actions on Jerry"
         assert result.type == "identity"
         assert result.origin == "api"
         assert result.version == "1.0.0"
@@ -107,7 +105,6 @@ class TestPolicyClient:
         request_data = json.loads(cast("str", responses.calls[0].request.body))
         assert request_data["name"] == "allow-all-actions-on-jerry"
         assert request_data["level"] == "tenant"
-        assert request_data["description"] == "Allow all actions on Jerry"
         assert len(request_data["statements"]) == 1
 
     @responses.activate
@@ -208,7 +205,6 @@ class TestPolicyClient:
                     "id": "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0YXRjaWNuaXNnOjpwb2xpY3kvYWxsb3ctYWxsLWFjdGlvbnMtb24tamVycnk=",
                     "irn": "irn:rc73dbh7q0:iamcore:4atcicnisg::policy/allow-all-actions-on-jerry",
                     "name": "allow-all-actions-on-jerry",
-                    "description": "Allow all actions on Jerry",
                     "type": "identity",
                     "origin": "api",
                     "version": "1.0.0",
@@ -242,7 +238,6 @@ class TestPolicyClient:
         policy = result.data[0]
         assert isinstance(policy, Policy)
         assert policy.name == "allow-all-actions-on-jerry"
-        assert policy.description == "Allow all actions on Jerry"
 
         # Verify the request
         assert len(responses.calls) == 1
