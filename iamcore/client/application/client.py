@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, Optional
 
+from iamcore.irn import IRN
+
 from iamcore.client.base.client import HTTPClientWithTimeout, append_path_to_url
 from iamcore.client.base.models import generic_search_all
 from iamcore.client.exceptions import IAMException, err_chain
@@ -18,8 +20,6 @@ from .dto import (
 if TYPE_CHECKING:
     from collections.abc import Generator
 
-    from iamcore.irn import IRN
-
 
 class Client(HTTPClientWithTimeout):
     """Client for IAM Core Application API."""
@@ -31,10 +31,15 @@ class Client(HTTPClientWithTimeout):
         self.base_url = append_path_to_url(self.base_url, self.BASE_PATH)
 
     @err_chain(IAMException)
-    def create(self, auth_headers: dict[str, str], params: CreateApplication) -> Application:
+    def create(self, auth_headers: dict[str, str], params: CreateApplication) -> str:
         payload = params.model_dump_json(by_alias=True, exclude_none=True)
-        response = self._post(data=payload, headers=auth_headers)
-        return IamApplicationResponse(**response.json()).data
+        created_response = self._post(data=payload, headers=auth_headers)
+        location = created_response.headers.get("Location")
+        if not location:
+            msg = "Location header is missing"
+            raise IAMException(msg)
+
+        return location.split("/")[-1]
 
     @err_chain(IAMException)
     def get(self, auth_headers: dict[str, str], irn: IRN) -> Application:
