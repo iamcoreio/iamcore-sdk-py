@@ -42,30 +42,15 @@ class TestApplicationClient:
     def test_create_application_success(self) -> None:
         """Test successful application creation."""
         expected_url = f"{self.expected_base_url}"
-        application_response = {
-            "data": {
-                "id": "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo6OmFwcGxpY2F0aW9uL215YXBw",
-                "irn": "irn:rc73dbh7q0:iamcore:::application/myapp",
-                "name": "myapp",
-                "displayName": "My app name",
-                "created": "2021-10-18T12:27:15.55267632Z",
-                "updated": "2021-10-18T12:27:15.55267632Z",
-            }
-        }
-        responses.add(responses.POST, expected_url, json=application_response, status=201)
+        location = f"{self.expected_base_url}/aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo6OmFwcGxpY2F0aW9uL215YXBw"
+        responses.add(responses.POST, expected_url, status=201, headers={"Location": location})
 
         auth_headers = {"Authorization": "Bearer token"}
         create_params = CreateApplication(name="myapp", displayName="My app name")
 
-        result = self.client.create(auth_headers, create_params)
+        app_id = self.client.create(auth_headers, create_params)
 
-        assert isinstance(result, Application)
-        assert result.id == "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo6OmFwcGxpY2F0aW9uL215YXBw"
-        assert str(result.irn) == "irn:rc73dbh7q0:iamcore:::application/myapp"
-        assert result.name == "myapp"
-        assert result.display_name == "My app name"
-        assert result.created == "2021-10-18T12:27:15.55267632Z"
-        assert result.updated == "2021-10-18T12:27:15.55267632Z"
+        assert app_id == "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo6OmFwcGxpY2F0aW9uL215YXBw"
 
         # Verify the request
         assert len(responses.calls) == 1
@@ -84,25 +69,15 @@ class TestApplicationClient:
     def test_create_application_minimal_params(self) -> None:
         """Test application creation with minimal parameters."""
         expected_url = f"{self.expected_base_url}"
-        application_response = {
-            "data": {
-                "id": "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo6OmFwcGxpY2F0aW9uL215YXBw",
-                "irn": "irn:rc73dbh7q0:iamcore:::application/myapp",
-                "name": "myapp",
-                "created": "2021-10-18T12:27:15.55267632Z",
-                "updated": "2021-10-18T12:27:15.55267632Z",
-            }
-        }
-        responses.add(responses.POST, expected_url, json=application_response, status=201)
+        location = f"{self.expected_base_url}/aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo6OmFwcGxpY2F0aW9uL215YXBw"
+        responses.add(responses.POST, expected_url, status=201, headers={"Location": location})
 
         auth_headers = {"Authorization": "Bearer token"}
         create_params = CreateApplication(name="myapp")  # Only required field
 
-        result = self.client.create(auth_headers, create_params)
+        app_id = self.client.create(auth_headers, create_params)
 
-        assert isinstance(result, Application)
-        assert result.name == "myapp"
-        assert result.display_name is None  # Optional field not provided
+        assert app_id == "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo6OmFwcGxpY2F0aW9uL215YXBw"
 
         # Verify the request payload excludes None values
         assert responses.calls[0].request.body is not None
