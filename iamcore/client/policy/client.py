@@ -32,7 +32,6 @@ class Client(HTTPClientWithTimeout):
     @err_chain(IAMPolicyException)
     def create(self, auth_headers: dict[str, str], params: CreatePolicy) -> Policy:
         payload_dict = params.model_dump_json(by_alias=True, exclude_none=True)
-
         response: Response = self._post(data=payload_dict, headers=auth_headers)
         return IamPolicyResponse(**response.json()).data
 

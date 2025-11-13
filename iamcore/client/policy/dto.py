@@ -35,7 +35,6 @@ class Policy(IAMCoreBaseModel):
     id: str
     irn: IRN
     name: str
-    description: str
     type: str
     origin: str
     version: str

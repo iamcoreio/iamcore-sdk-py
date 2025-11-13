@@ -33,7 +33,6 @@ def sample_policy_data() -> dict[str, Any]:
         "id": "aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0YXRjaWNuaXNnOjpwb2xpY3kvYWxsb3ctYWxsLWFjdGlvbnMtb24tamVycnk=",
         "irn": "irn:rc73dbh7q0:iamcore:4atcicnisg::policy/allow-all-actions-on-jerry",
         "name": "allow-all-actions-on-jerry",
-        "description": "Allow all actions on Jerry",
         "type": "identity",
         "origin": "api",
         "version": "1.0.0",
@@ -132,7 +131,6 @@ class TestPolicyModel:
         )
         assert str(policy.irn) == "irn:rc73dbh7q0:iamcore:4atcicnisg::policy/allow-all-actions-on-jerry"
         assert policy.name == "allow-all-actions-on-jerry"
-        assert policy.description == "Allow all actions on Jerry"
         assert policy.type == "identity"
         assert policy.origin == "api"
         assert policy.version == "1.0.0"
@@ -351,7 +349,7 @@ class TestPolicyResponseWrappers:
         Tests that the single-item response wrapper correctly converts a raw dict.
         """
         # ACT
-        response = IamPolicyResponse(**{"data": sample_policy_data})
+        response = IamPolicyResponse(data=sample_policy_data)
 
         # ASSERT
         assert isinstance(response.data, Policy)
