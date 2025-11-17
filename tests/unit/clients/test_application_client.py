@@ -123,7 +123,7 @@ class TestApplicationClient:
         """Test successful policy attachment to application."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
         expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/policies/attach"
-        responses.add(responses.POST, expected_url, status=204)
+        responses.add(responses.PUT, expected_url, status=204)
 
         auth_headers = {"Authorization": "Bearer token"}
         policy_ids = ["policy1", "policy2"]
@@ -133,7 +133,7 @@ class TestApplicationClient:
 
         # Verify the request
         assert len(responses.calls) == 1
-        assert responses.calls[0].request.method == "POST"
+        assert responses.calls[0].request.method == "PUT"
         assert responses.calls[0].request.url == expected_url
         assert responses.calls[0].request.headers["Authorization"] == "Bearer token"
         assert responses.calls[0].request.headers["Content-Type"] == "application/json"
@@ -383,7 +383,7 @@ class TestApplicationClient:
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/myapp")
         expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/policies/attach"
         responses.add(
-            responses.POST,
+            responses.PUT,
             expected_url,
             json={"message": "Invalid policy IDs provided", "errors": ["Policy ID format invalid"]},
             status=400,
@@ -403,7 +403,7 @@ class TestApplicationClient:
         """Test application_attach_policies raises IAMException for 404 Not Found."""
         application_irn = IRN.of("irn:rc73dbh7q0:iamcore:::application/nonexistent")
         expected_url = f"{self.expected_base_url}/{application_irn.to_base64()}/policies/attach"
-        responses.add(responses.POST, expected_url, json={"message": "Application not found"}, status=404)
+        responses.add(responses.PUT, expected_url, json={"message": "Application not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
         policy_ids = ["policy1", "policy2"]
