@@ -48,6 +48,7 @@ def sample_create_user_data() -> dict[str, Any]:
         "username": "tom",
         "password": "YesYkYKpLd6n3dVZ",
         "confirmPassword": "YesYkYKpLd6n3dVZ",
+        "tenantID": "4atcicnisg",
         "path": "/org1",
         "poolIDs": ["aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0YXRjaWNuaXNnOjpwb29sL2Rldg=="],
         "requiredActions": ["VERIFY_EMAIL"],
@@ -161,6 +162,7 @@ class TestCreateUserModel:
         assert create_user.username == "tom"
         assert create_user.password == "YesYkYKpLd6n3dVZ"
         assert create_user.confirm_password == "YesYkYKpLd6n3dVZ"
+        assert create_user.tenant_id == "4atcicnisg"
         assert create_user.enabled is True
         assert create_user.first_name == "Tom"
         assert create_user.last_name == "Jasper"
@@ -183,6 +185,7 @@ class TestCreateUserModel:
         assert create_dict["firstName"] == "Tom"
         assert create_dict["lastName"] == "Jasper"
         assert create_dict["confirmPassword"] == "YesYkYKpLd6n3dVZ"
+        assert create_dict["tenantID"] == "4atcicnisg"
         assert create_dict["poolIDs"] == ["aXJuOnJjNzNkYmg3cTA6aWFtY29yZTo0YXRjaWNuaXNnOjpwb29sL2Rldg=="]
         assert create_dict["requiredActions"] == ["VERIFY_EMAIL"]
         assert "first_name" not in create_dict  # The snake_case attribute name should not be a key
@@ -210,6 +213,19 @@ class TestCreateUserModel:
         """
         # ARRANGE
         del sample_create_user_data["email"]  # 'email' is a required field
+
+        # ACT & ASSERT
+        with pytest.raises(ValidationError) as excinfo:
+            CreateUser.model_validate(sample_create_user_data)
+
+        assert "Field required" in str(excinfo.value)
+
+    def test_raises_validation_error_for_missing_tenant_id(self, sample_create_user_data: dict[str, Any]) -> None:
+        """
+        Tests that Pydantic raises a ValidationError if tenantID is missing.
+        """
+        # ARRANGE
+        del sample_create_user_data["tenantID"]  # 'tenantID' is a required field
 
         # ACT & ASSERT
         with pytest.raises(ValidationError) as excinfo:
