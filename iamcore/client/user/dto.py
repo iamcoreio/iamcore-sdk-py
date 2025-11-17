@@ -45,6 +45,7 @@ class CreateUser(IAMCoreBaseModel):
     email: str
     username: str
     password: str
+    tenant_id: str = Field(alias="tenantID")
     confirm_password: str = Field(alias="confirmPassword")
     enabled: bool = True
     first_name: Optional[str] = Field(default=None, alias="firstName")
