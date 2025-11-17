@@ -55,7 +55,7 @@ class Client(HTTPClientWithTimeout):
     ) -> None:
         path = f"{application_irn.to_base64()}/policies/attach"
         payload = {"policyIDs": policies_ids}
-        self._post(path, data=json.dumps(payload), headers=auth_headers)
+        self._put(path, data=json.dumps(payload), headers=auth_headers)
 
     @err_chain(IAMException)
     def search(
