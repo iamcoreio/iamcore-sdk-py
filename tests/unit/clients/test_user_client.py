@@ -70,6 +70,7 @@ class TestUserClient:
             username="johndoe",
             password="securepassword123",
             confirmPassword="securepassword123",
+            tenantID="tenant123",
             firstName="John",
             lastName="Doe",
             path="/users",
@@ -108,6 +109,7 @@ class TestUserClient:
         assert request_data["username"] == "johndoe"
         assert request_data["password"] == "securepassword123"
         assert request_data["confirmPassword"] == "securepassword123"
+        assert request_data["tenantID"] == "tenant123"
         assert request_data["firstName"] == "John"
         assert request_data["lastName"] == "Doe"
         assert request_data["path"] == "/users"
@@ -145,6 +147,7 @@ class TestUserClient:
             username="johndoe",
             password="securepassword123",
             confirmPassword="securepassword123",
+            tenantID="tenant123",
         )
 
         result = self.client.create(auth_headers, create_params)
@@ -159,6 +162,7 @@ class TestUserClient:
         request_data = json.loads(str(responses.calls[0].request.body))
         assert request_data["email"] == "john.doe@example.com"
         assert request_data["username"] == "johndoe"
+        assert request_data["tenantID"] == "tenant123"
         assert "firstName" not in request_data
         assert "lastName" not in request_data
         assert "path" not in request_data
@@ -463,6 +467,7 @@ class TestUserClient:
             username="johndoe",
             password="password",
             confirmPassword="password",
+            tenantID="tenant123",
         )
 
         with pytest.raises(IAMBedRequestException) as excinfo:
@@ -483,6 +488,7 @@ class TestUserClient:
             username="johndoe",
             password="password",
             confirmPassword="password",
+            tenantID="tenant123",
         )
 
         with pytest.raises(IAMUnauthorizedException) as excinfo:
@@ -508,6 +514,7 @@ class TestUserClient:
             username="johndoe",
             password="password",
             confirmPassword="password",
+            tenantID="tenant123",
         )
 
         with pytest.raises(IAMForbiddenException) as excinfo:
@@ -524,10 +531,11 @@ class TestUserClient:
 
         auth_headers = {"Authorization": "Bearer token"}
         create_params = CreateUser(
-            email="existing@example.com",
+            email="john.doe@example.com",
             username="johndoe",
             password="password",
             confirmPassword="password",
+            tenantID="tenant123",
         )
 
         with pytest.raises(IAMConflictException) as excinfo:
