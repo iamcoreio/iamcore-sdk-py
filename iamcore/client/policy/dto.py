@@ -15,9 +15,9 @@ class PolicyStatement(IAMCoreBaseModel):
     """Policy statement model representing IAM policy statements."""
 
     effect: str
-    description: str
     resources: list[IRN]
     actions: list[str]
+    description: Optional[str] = None
 
     @field_validator("resources", mode="before")
     @classmethod
