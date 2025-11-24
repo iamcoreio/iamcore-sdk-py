@@ -657,3 +657,102 @@ class TestUserClient:
 
         assert excinfo.value.status_code == 403
         assert "Insufficient permissions" in str(excinfo.value)
+
+    @responses.activate
+    def test_user_detach_policies_success(self) -> None:
+        """Test successful policy detachment from user."""
+        user_irn = IRN.of("irn:rc73dbh7q0:iamcore:::user/johndoe")
+        expected_url = f"{self.expected_base_url}/{user_irn.to_base64()}/policies/detach"
+        responses.add(responses.POST, expected_url, status=204)
+
+        auth_headers = {"Authorization": "Bearer token"}
+        policy_ids = ["policy1", "policy2"]
+
+        # Should not raise an exception
+        self.client.policies_detach(auth_headers, user_irn, policy_ids)
+
+        # Verify the request
+        assert len(responses.calls) == 1
+        assert responses.calls[0].request.method == "POST"
+        assert responses.calls[0].request.url == expected_url
+        assert responses.calls[0].request.headers["Authorization"] == "Bearer token"
+        assert responses.calls[0].request.headers["Content-Type"] == "application/json"
+
+        # Verify the request payload
+        assert responses.calls[0].request.body is not None
+        request_data = json.loads(cast("str", responses.calls[0].request.body))
+        assert request_data["policyIDs"] == policy_ids
+
+    @responses.activate
+    def test_user_detach_policies_bad_request_error(self) -> None:
+        """Test user_detach_policies raises IAMBedRequestException for 400 Bad Request."""
+        user_irn = IRN.of("irn:rc73dbh7q0:iamcore:::user/johndoe")
+        expected_url = f"{self.expected_base_url}/{user_irn.to_base64()}/policies/detach"
+        responses.add(
+            responses.POST,
+            expected_url,
+            json={"message": "Invalid policy IDs provided", "errors": ["Policy ID format invalid"]},
+            status=400,
+        )
+
+        auth_headers = {"Authorization": "Bearer token"}
+        policy_ids = ["invalid@policy@id"]
+
+        with pytest.raises(IAMBedRequestException) as excinfo:
+            self.client.policies_detach(auth_headers, user_irn, policy_ids)
+
+        assert excinfo.value.status_code == 400
+        assert "Invalid policy IDs" in str(excinfo.value)
+
+    @responses.activate
+    def test_user_detach_policies_unauthorized_error(self) -> None:
+        """Test user_detach_policies raises IAMUnauthorizedException for 401 Unauthorized."""
+        user_irn = IRN.of("irn:rc73dbh7q0:iamcore:::user/johndoe")
+        expected_url = f"{self.expected_base_url}/{user_irn.to_base64()}/policies/detach"
+        responses.add(responses.POST, expected_url, json={"message": "Authentication required"}, status=401)
+
+        auth_headers = {"Authorization": "Bearer invalid_token"}
+        policy_ids = ["policy1"]
+
+        with pytest.raises(IAMUnauthorizedException) as excinfo:
+            self.client.policies_detach(auth_headers, user_irn, policy_ids)
+
+        assert excinfo.value.status_code == 401
+        assert "Authentication required" in str(excinfo.value)
+
+    @responses.activate
+    def test_user_detach_policies_forbidden_error(self) -> None:
+        """Test user_detach_policies raises IAMForbiddenException for 403 Forbidden."""
+        user_irn = IRN.of("irn:rc73dbh7q0:iamcore:::user/johndoe")
+        expected_url = f"{self.expected_base_url}/{user_irn.to_base64()}/policies/detach"
+        responses.add(
+            responses.POST,
+            expected_url,
+            json={"message": "Insufficient permissions to detach policies"},
+            status=403,
+        )
+
+        auth_headers = {"Authorization": "Bearer token"}
+        policy_ids = ["policy1"]
+
+        with pytest.raises(IAMForbiddenException) as excinfo:
+            self.client.policies_detach(auth_headers, user_irn, policy_ids)
+
+        assert excinfo.value.status_code == 403
+        assert "Insufficient permissions" in str(excinfo.value)
+
+    @responses.activate
+    def test_user_detach_policies_not_found_error(self) -> None:
+        """Test user_detach_policies raises IAMException for 404 Not Found."""
+        user_irn = IRN.of("irn:rc73dbh7q0:iamcore:::user/nonexistent")
+        expected_url = f"{self.expected_base_url}/{user_irn.to_base64()}/policies/detach"
+        responses.add(responses.POST, expected_url, json={"message": "User not found"}, status=404)
+
+        auth_headers = {"Authorization": "Bearer token"}
+        policy_ids = ["policy1"]
+
+        with pytest.raises(IAMException) as excinfo:
+            self.client.policies_detach(auth_headers, user_irn, policy_ids)
+
+        assert excinfo.value.status_code == 404
+        assert "not found" in str(excinfo.value)
