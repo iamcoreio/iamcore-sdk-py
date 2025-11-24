@@ -48,7 +48,8 @@ class Client(HTTPClientWithTimeout):
 
     @err_chain(IAMUserException)
     def delete(self, auth_headers: dict[str, str], user_irn: IRN) -> None:
-        self._delete(user_irn.to_base64(), headers=auth_headers)
+        data = json.dumps({"userIDS": [user_irn.to_base64()]})
+        self._post("delete", data=data, headers=auth_headers)
 
     @err_chain(IAMUserException)
     def policies_attach(self, auth_headers: dict[str, str], user_irn: IRN, policies_ids: list[str]) -> None:

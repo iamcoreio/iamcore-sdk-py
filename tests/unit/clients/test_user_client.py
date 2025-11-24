@@ -267,8 +267,9 @@ class TestUserClient:
     def test_delete_user_success(self) -> None:
         """Test successful user deletion."""
         user_irn = IRN.of("irn:rc73dbh7q0:iamcore:::user/johndoe")
-        expected_url = f"{self.expected_base_url}/{user_irn.to_base64()}"
-        responses.add(responses.DELETE, expected_url, status=204)
+        expected_data = json.dumps({"userIDS": [user_irn.to_base64()]})
+        expected_url = f"{self.expected_base_url}/delete"
+        responses.add(responses.POST, expected_url, status=204)
 
         auth_headers = {"Authorization": "Bearer token"}
 
@@ -277,9 +278,10 @@ class TestUserClient:
 
         # Verify the request
         assert len(responses.calls) == 1
-        assert responses.calls[0].request.method == "DELETE"
+        assert responses.calls[0].request.method == "POST"
         assert responses.calls[0].request.url == expected_url
         assert responses.calls[0].request.headers["Authorization"] == "Bearer token"
+        assert responses.calls[0].request.body == expected_data
 
     @responses.activate
     def test_user_attach_policies_success(self) -> None:
@@ -578,8 +580,8 @@ class TestUserClient:
     def test_delete_user_not_found_error(self) -> None:
         """Test delete_user raises IAMException for 404 Not Found."""
         user_irn = IRN.of("irn:rc73dbh7q0:iamcore:::user/nonexistent")
-        expected_url = f"{self.expected_base_url}/{user_irn.to_base64()}"
-        responses.add(responses.DELETE, expected_url, json={"message": "User not found"}, status=404)
+        expected_url = f"{self.expected_base_url}/delete"
+        responses.add(responses.POST, expected_url, json={"message": "User not found"}, status=404)
 
         auth_headers = {"Authorization": "Bearer token"}
 
