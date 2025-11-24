@@ -58,6 +58,12 @@ class Client(HTTPClientWithTimeout):
         self._put(path, data=json.dumps(payload), headers=auth_headers)
 
     @err_chain(IAMUserException)
+    def policies_detach(self, auth_headers: dict[str, str], user_irn: IRN, policies_ids: list[str]) -> None:
+        path = f"{user_irn.to_base64()}/policies/detach"
+        payload = {"policyIDs": policies_ids}
+        self._post(path, data=json.dumps(payload), headers=auth_headers)
+
+    @err_chain(IAMUserException)
     def add_groups(self, auth_headers: dict[str, str], user_irn: IRN, group_ids: list[str]) -> None:
         path = f"{user_irn.to_base64()}/groups/add"
         payload = {"groupIDs": group_ids}
