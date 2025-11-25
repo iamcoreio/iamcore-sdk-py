@@ -40,7 +40,7 @@ dev = [
 ]
 
 [tool.setuptools.package-data]
-"iamcore.client" = ["py.typed"]
+"*" = ["py.typed"]
 
 [tool.pyright]
 venvPath = "."
